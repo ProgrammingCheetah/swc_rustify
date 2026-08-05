@@ -2065,6 +2065,15 @@ impl<I: Tokens> Parser<I> {
             && !self.input_mut().has_linebreak_between_cur_and_peeked()
         {
             let start = self.input().cur_pos();
+            // zts: an enum lowers to TWO declarations; a single-statement
+            // position (`if (c) enum E {}`) cannot hold it, and letting it
+            // through would panic codegen.
+            if self.input().syntax().zts() && !include_decl {
+                return Err(crate::error::Error::new(
+                    self.input().cur_span(),
+                    SyntaxError::ZtsEnumSingleStatement,
+                ));
+            }
             self.bump();
             return Ok(self.parse_any_enum_decl(start, false)?.into());
         } else if cur == Token::LBrace {

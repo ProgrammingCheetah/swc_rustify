@@ -52,6 +52,12 @@ pub enum SyntaxError {
     ZtsConstEnum,
     /// zts: `declare enum`.
     ZtsDeclareEnum,
+    /// zts: enum in a single-statement position (`if (c) enum E {}`).
+    ZtsEnumSingleStatement,
+    /// zts: `export default enum`.
+    ZtsExportDefaultEnum,
+    /// zts: `=> { a }` arm body, ambiguous with an object literal.
+    ZtsAmbiguousArmBody,
 
     DeclNotAllowed,
 
@@ -650,12 +656,26 @@ impl SyntaxError {
                  members are not supported; zts `enum` lowers to a tagged union + factory functions"
                     .into()
             }
+            SyntaxError::ZtsEnumSingleStatement => "a zts enum lowers to two declarations and \
+                                                    cannot be used in a single-statement \
+                                                    position; wrap it in a block or move it out"
+                .into(),
+            SyntaxError::ZtsExportDefaultEnum => "`export default enum` is not supported in zts \
+                                                  (an enum lowers to a type alias plus a const); \
+                                                  use a named `export enum` instead"
+                .into(),
+            SyntaxError::ZtsAmbiguousArmBody => {
+                "this match arm body is ambiguous between a block and an object literal; write `({ \
+                 a })` for an object literal, or make the block unambiguous with a statement"
+                    .into()
+            }
             SyntaxError::ZtsIfWithoutElse => {
                 "an `if` used as an expression must have an `else`: every path needs a value".into()
             }
             SyntaxError::ZtsBlockWithoutTail => "a block used as an expression must end with an \
                                                  expression (its value); the last statement here \
-                                                 is not an expression"
+                                                 is not an expression (if you meant an object \
+                                                 literal, wrap it in parentheses: `({ ... })`)"
                 .into(),
             SyntaxError::ZtsConstEnum => "`const enum` is not supported in zts; use a plain zts \
                                           `enum` (it lowers to a tagged union + factory functions)"

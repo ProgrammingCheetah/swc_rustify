@@ -19,6 +19,17 @@ use crate::{
     parser::input::Tokens,
 };
 
+/// Is this a bare identifier, or a comma sequence of bare identifiers?
+/// (`{ a }` / `{ a, b }` — the shapes that used to parse as shorthand
+/// object literals in match arm bodies.)
+fn expr_is_bare_idents(e: &Expr) -> bool {
+    match e {
+        Expr::Ident(..) => true,
+        Expr::Seq(seq) => seq.exprs.iter().all(|e| e.is_ident()),
+        _ => false,
+    }
+}
+
 impl<I: Tokens> Parser<I> {
     /// Cheap gate: zts enabled, cursor on the word `match`, `(` next.
     pub(super) fn is_zts_match_keyword(&mut self) -> bool {
@@ -230,6 +241,12 @@ impl<I: Tokens> Parser<I> {
         expect!(self, Token::Arrow);
         let body = if self.input().is(Token::LBrace) {
             let block = self.parse_zts_expr_block()?;
+            // `=> { a }` / `=> { a, b }` parsed as an object literal before
+            // block bodies existed; silently changing its value is the one
+            // thing we never do. Reject the ambiguous shape outright.
+            if block.stmts.is_empty() && expr_is_bare_idents(&block.tail) {
+                return Err(Error::new(block.span, SyntaxError::ZtsAmbiguousArmBody));
+            }
             Box::new(Expr::ZtsExprBlock(block))
         } else {
             self.allow_in_expr(Self::parse_assignment_expr)?
@@ -372,6 +389,44 @@ mod tests {
         let m = e.expect_match_expr();
         let body = m.arms[0].body.as_zts_expr_block().unwrap();
         assert_eq!(body.stmts.len(), 1);
+    }
+
+    #[test]
+    fn arm_bare_ident_block_is_ambiguous_error() {
+        // `=> { a }` used to be a shorthand object literal; silently
+        // returning `a` instead would change program values.
+        let (is_err, had) = parse_module_errs("const r = match (s) { A { a } => { a } };");
+        assert!(is_err || had);
+        let (is_err2, had2) = parse_module_errs("const r = match (s) { A { a, b } => { a, b } };");
+        assert!(is_err2 || had2);
+    }
+
+    #[test]
+    fn arm_non_ident_tail_block_is_fine() {
+        let e = parse_expr("match (s) { A { a } => { f(a) } }");
+        let m = e.expect_match_expr();
+        assert!(m.arms[0].body.is_zts_expr_block());
+    }
+
+    #[test]
+    fn enum_in_single_statement_position_is_an_error() {
+        for src in [
+            "if (c) enum E { A { v: number } }",
+            "while (c) enum E { A { v: number } }",
+            "for (;;) enum E { A { v: number } }",
+            "lbl: enum E { A { v: number } }",
+        ] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let (is_err, had) = parse_module_errs(src);
+            assert!(is_err || had, "expected error for: {src}");
+        }
+    }
+
+    #[test]
+    fn export_default_enum_is_an_error() {
+        let (is_err, had) =
+            parse_module_errs("export default enum Shape { Circle { radius: number } }");
+        assert!(is_err || had);
     }
 
     #[test]

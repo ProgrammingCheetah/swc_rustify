@@ -578,6 +578,14 @@ impl<I: Tokens> Parser<I> {
                 && !self.input_mut().has_linebreak_between_cur_and_peeked()
             {
                 let enum_start = self.cur_pos();
+                // zts: `export default enum` would silently lower into two
+                // NAMED exports (no default binding exists) — reject it.
+                if self.input().syntax().zts() {
+                    return Err(crate::error::Error::new(
+                        self.input().cur_span(),
+                        SyntaxError::ZtsExportDefaultEnum,
+                    ));
+                }
                 self.assert_and_bump(Token::Enum);
                 let decl = self.parse_any_enum_decl(enum_start, false)?;
 
