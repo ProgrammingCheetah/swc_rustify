@@ -230,6 +230,21 @@ impl<I: Tokens> Parser<I> {
     pub(super) fn parse_unary_expr(&mut self) -> PResult<Box<Expr>> {
         trace_cur!(self, parse_unary_expr);
 
+        // zts: `not <unary-expr>` — pure sugar for `!`, same precedence.
+        // Deterministic one-token rule (no speculation): only fires when
+        // the next token could not legally continue after an identifier.
+        #[cfg(feature = "typescript")]
+        if self.is_zts_not_operator() {
+            let start = self.input().cur_pos();
+            self.bump(); // `not`
+            let arg = self.parse_unary_expr()?;
+            return Ok(Box::new(Expr::Unary(UnaryExpr {
+                span: self.span(start),
+                op: op!("!"),
+                arg,
+            })));
+        }
+
         let cur = self.input().cur();
 
         if cur.needs_unary_expr_prefix_parse() {

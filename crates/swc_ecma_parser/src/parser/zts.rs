@@ -31,6 +31,36 @@ fn expr_is_bare_idents(e: &Expr) -> bool {
 }
 
 impl<I: Tokens> Parser<I> {
+    /// `not <operand>` — negation only when unambiguous with vanilla TS:
+    /// the operand token must be one that can NEVER legally follow an
+    /// identifier (a word or literal), on the same line (ASI: `not\nx` is
+    /// two statements). Everything else — `not(x)` calls, `not.foo`,
+    /// `not => x` arrows, `not instanceof F`, `not!` assertions, tagged
+    /// templates — keeps its vanilla meaning. Binary-operator words
+    /// (`in`, `instanceof`, `as`, `satisfies`, `of`) are excluded from
+    /// the operand set for the same reason.
+    pub(super) fn is_zts_not_operator(&mut self) -> bool {
+        if !self.input().syntax().zts() {
+            return false;
+        }
+        if !(self.input().cur().is_word()
+            && self.input().cur().take_word(&self.input) == atom!("not"))
+        {
+            return false;
+        }
+        if self.input_mut().has_linebreak_between_cur_and_peeked() {
+            return false;
+        }
+        match self.input_mut().peek() {
+            Some(Token::In | Token::InstanceOf | Token::As | Token::Satisfies | Token::Of) => false,
+            Some(
+                Token::Num | Token::Str | Token::BigInt | Token::True | Token::False | Token::Null,
+            ) => true,
+            Some(t) => t.is_word(),
+            None => false,
+        }
+    }
+
     /// Cheap gate: zts enabled, cursor on the word `match`, `(` next.
     pub(super) fn is_zts_match_keyword(&mut self) -> bool {
         if !self.input().syntax().zts() {
@@ -432,6 +462,50 @@ mod tests {
         let (is_err, had) =
             parse_module_errs("export default enum Shape { Circle { radius: number } }");
         assert!(is_err || had);
+    }
+
+    #[test]
+    fn not_operator_negates() {
+        for (src, desc) in [
+            ("not ready", "ident operand"),
+            ("not true", "bool literal"),
+            ("not 0", "num literal"),
+            ("not not x", "double negation"),
+            ("not typeof x", "typeof operand"),
+        ] {
+            let e = parse_expr(Box::leak(src.to_string().into_boxed_str()));
+            assert!(e.is_unary(), "{desc}: expected unary, got {e:?}");
+        }
+        // Binds like `!`: `not a === b` is `(!a) === b`.
+        let e = parse_expr("not a === b");
+        let bin = e.as_bin().unwrap();
+        assert!(bin.left.is_unary());
+    }
+
+    #[test]
+    fn not_stays_an_identifier_in_vanilla_positions() {
+        assert!(parse_expr("not(1)").is_call(), "call");
+        assert!(parse_expr("not.foo").is_member(), "member");
+        assert!(parse_expr("not => not").is_arrow(), "arrow param");
+        assert!(parse_expr("not instanceof Foo").is_bin(), "instanceof");
+        assert!(parse_expr("not as string").is_ts_as(), "as-cast");
+        assert!(parse_expr("not + 1").is_bin(), "binop");
+        let m = test_parser("const not = 1;\nnot;\n", zts(), |p| p.parse_module());
+        assert_eq!(m.body.len(), 2, "binding named not");
+    }
+
+    #[test]
+    fn not_respects_asi() {
+        // `not\nx` must remain TWO expression statements.
+        let m = test_parser("not\nx", zts(), |p| p.parse_module());
+        assert_eq!(m.body.len(), 2);
+        assert!(m.body[0]
+            .as_stmt()
+            .unwrap()
+            .as_expr()
+            .unwrap()
+            .expr
+            .is_ident());
     }
 
     #[test]
