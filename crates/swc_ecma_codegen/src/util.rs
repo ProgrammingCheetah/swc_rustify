@@ -254,6 +254,9 @@ impl StartsWithAlphaNum for Expr {
             Expr::OptChain(e) => e.starts_with_alpha_num(),
 
             Expr::Invalid(..) => true,
+
+            // zts: starts with the `match` word; never reaches codegen anyway.
+            Expr::Match(..) => true,
             #[cfg(swc_ast_unknown)]
             _ => false,
         }

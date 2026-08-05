@@ -2934,6 +2934,13 @@ impl<I: Tokens> Parser<I> {
             return self.parse_flow_match_expr(start);
         }
 
+        #[cfg(feature = "typescript")]
+        if self.is_zts_match_keyword() {
+            if let Some(res) = self.try_parse_zts_match_expr(start) {
+                return res;
+            }
+        }
+
         if cur == Token::Class {
             return self.parse_class_expr(start, decorators.unwrap_or_default());
         }

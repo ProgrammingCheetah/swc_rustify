@@ -166,6 +166,12 @@ pub enum Expr {
 
     #[tag("Invalid")]
     Invalid(Invalid),
+
+    /// zts extension: Rust-style `match (expr) { Variant { bindings } => body
+    /// }`. Must be lowered to vanilla TS before codegen.
+    #[tag("MatchExpression")]
+    #[is(name = "match_expr")]
+    Match(MatchExpr),
 }
 
 bridge_from!(Box<Expr>, Box<JSXElement>, JSXElement);
@@ -417,6 +423,7 @@ impl Expr {
             Expr::PrivateName(e) => e.span = span,
             Expr::OptChain(e) => e.span = span,
             Expr::Lit(e) => e.set_span(span),
+            Expr::Match(e) => e.span = span,
             #[cfg(all(swc_ast_unknown, feature = "encoding-impl"))]
             _ => swc_common::unknown!(),
         }
@@ -469,6 +476,7 @@ impl Clone for Expr {
             OptChain(e) => OptChain(e.clone()),
             Invalid(e) => Invalid(e.clone()),
             TsSatisfies(e) => TsSatisfies(e.clone()),
+            Match(e) => Match(e.clone()),
         }
     }
 }
@@ -507,6 +515,7 @@ boxed_expr!(AssignExpr);
 boxed_expr!(MemberExpr);
 boxed_expr!(SuperPropExpr);
 boxed_expr!(CondExpr);
+boxed_expr!(MatchExpr);
 boxed_expr!(CallExpr);
 boxed_expr!(NewExpr);
 boxed_expr!(SeqExpr);
@@ -1028,6 +1037,64 @@ impl Take for CondExpr {
             test: Take::dummy(),
             cons: Take::dummy(),
             alt: Take::dummy(),
+        }
+    }
+}
+
+/// zts extension: `match (discriminant) { Variant { bindings } => body, ... }`
+///
+/// Never reaches codegen — the zts compiler lowers it to vanilla TS first.
+#[ast_node("MatchExpression")]
+#[derive(Eq, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct MatchExpr {
+    pub span: Span,
+
+    pub discriminant: Box<Expr>,
+
+    #[cfg_attr(feature = "serde-impl", serde(default))]
+    pub arms: Vec<MatchArm>,
+}
+
+impl Take for MatchExpr {
+    fn dummy() -> Self {
+        MatchExpr {
+            span: DUMMY_SP,
+            discriminant: Take::dummy(),
+            arms: Vec::new(),
+        }
+    }
+}
+
+/// zts extension: one arm of a [MatchExpr]: `Variant { bindings } => body`.
+#[ast_node("MatchArm")]
+#[derive(Eq, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct MatchArm {
+    pub span: Span,
+
+    /// The variant name matched against the `kind` discriminant.
+    pub variant: Ident,
+
+    /// The `{ bindings }` destructuring pattern, if present.
+    #[cfg_attr(
+        feature = "encoding-impl",
+        encoding(with = "cbor4ii::core::types::Maybe")
+    )]
+    pub binding: Option<ObjectPat>,
+
+    pub body: Box<Expr>,
+}
+
+impl Take for MatchArm {
+    fn dummy() -> Self {
+        MatchArm {
+            span: DUMMY_SP,
+            variant: Take::dummy(),
+            binding: None,
+            body: Take::dummy(),
         }
     }
 }

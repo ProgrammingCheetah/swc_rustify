@@ -237,6 +237,10 @@ pub struct TsSyntax {
     /// see: https://babeljs.io/docs/en/babel-plugin-transform-typescript#disallowambiguousjsxlike
     #[serde(skip, default)]
     pub disallow_ambiguous_jsx_like: bool,
+
+    /// zts extensions: `match (expr) { Variant { bindings } => body }`.
+    #[serde(default)]
+    pub zts: bool,
 }
 
 #[cfg(feature = "typescript")]
@@ -263,6 +267,9 @@ impl TsSyntax {
         }
         if self.disallow_ambiguous_jsx_like {
             flags |= SyntaxFlags::DISALLOW_AMBIGUOUS_JSX_LIKE;
+        }
+        if self.zts {
+            flags |= SyntaxFlags::ZTS;
         }
         flags
     }
@@ -545,6 +552,12 @@ impl SyntaxFlags {
         self.contains(SyntaxFlags::FLOW_PATTERN_MATCHING)
     }
 
+    /// Should we parse zts extensions?
+    #[inline(always)]
+    pub const fn zts(&self) -> bool {
+        self.contains(SyntaxFlags::ZTS)
+    }
+
     #[cfg(not(feature = "flow"))]
     #[inline(always)]
     pub const fn flow_pragma(&self) -> bool {
@@ -655,5 +668,7 @@ bitflags::bitflags! {
         const FLOW_COMPONENTS = 1 << 20;
         #[cfg(feature = "flow")]
         const FLOW_PATTERN_MATCHING = 1 << 21;
+        /// zts extensions (`match` expressions).
+        const ZTS = 1 << 22;
     }
 }

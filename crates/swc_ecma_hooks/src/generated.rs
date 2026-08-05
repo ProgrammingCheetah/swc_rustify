@@ -896,6 +896,30 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_lit(&mut self, node: &Lit, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchArm` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_arm(&mut self, node: &MatchArm, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchArm` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_arm(&mut self, node: &MatchArm, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Vec < MatchArm >` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_arms(&mut self, node: &[MatchArm], ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Vec < MatchArm >` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_arms(&mut self, node: &[MatchArm], ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchExpr` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_expr(&mut self, node: &MatchExpr, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchExpr` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_expr(&mut self, node: &MatchExpr, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `MemberExpr` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -1191,6 +1215,15 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_opt_object_lit(&mut self, node: &Option<Box<ObjectLit>>, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Option < ObjectPat >` before visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_opt_object_pat(&mut self, node: &Option<ObjectPat>, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Option < ObjectPat >` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_opt_object_pat(&mut self, node: &Option<ObjectPat>, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `Option < Pat >` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -3818,6 +3851,42 @@ where
     }
 
     #[inline]
+    fn enter_match_arm(&mut self, node: &MatchArm, ctx: &mut C) {
+        self.first.enter_match_arm(node, ctx);
+        self.second.enter_match_arm(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_arm(&mut self, node: &MatchArm, ctx: &mut C) {
+        self.second.exit_match_arm(node, ctx);
+        self.first.exit_match_arm(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_arms(&mut self, node: &[MatchArm], ctx: &mut C) {
+        self.first.enter_match_arms(node, ctx);
+        self.second.enter_match_arms(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_arms(&mut self, node: &[MatchArm], ctx: &mut C) {
+        self.second.exit_match_arms(node, ctx);
+        self.first.exit_match_arms(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_expr(&mut self, node: &MatchExpr, ctx: &mut C) {
+        self.first.enter_match_expr(node, ctx);
+        self.second.enter_match_expr(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_expr(&mut self, node: &MatchExpr, ctx: &mut C) {
+        self.second.exit_match_expr(node, ctx);
+        self.first.exit_match_expr(node, ctx);
+    }
+
+    #[inline]
     fn enter_member_expr(&mut self, node: &MemberExpr, ctx: &mut C) {
         self.first.enter_member_expr(node, ctx);
         self.second.enter_member_expr(node, ctx);
@@ -4223,6 +4292,18 @@ where
     fn exit_opt_object_lit(&mut self, node: &Option<Box<ObjectLit>>, ctx: &mut C) {
         self.second.exit_opt_object_lit(node, ctx);
         self.first.exit_opt_object_lit(node, ctx);
+    }
+
+    #[inline]
+    fn enter_opt_object_pat(&mut self, node: &Option<ObjectPat>, ctx: &mut C) {
+        self.first.enter_opt_object_pat(node, ctx);
+        self.second.enter_opt_object_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_opt_object_pat(&mut self, node: &Option<ObjectPat>, ctx: &mut C) {
+        self.second.exit_opt_object_pat(node, ctx);
+        self.first.exit_opt_object_pat(node, ctx);
     }
 
     #[inline]
@@ -7815,6 +7896,54 @@ where
     }
 
     #[inline]
+    fn enter_match_arm(&mut self, node: &MatchArm, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_arm(node, ctx),
+            Self::Right(hook) => hook.enter_match_arm(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_arm(&mut self, node: &MatchArm, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_arm(node, ctx),
+            Self::Right(hook) => hook.exit_match_arm(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_arms(&mut self, node: &[MatchArm], ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_arms(node, ctx),
+            Self::Right(hook) => hook.enter_match_arms(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_arms(&mut self, node: &[MatchArm], ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_arms(node, ctx),
+            Self::Right(hook) => hook.exit_match_arms(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_expr(&mut self, node: &MatchExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_expr(node, ctx),
+            Self::Right(hook) => hook.enter_match_expr(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_expr(&mut self, node: &MatchExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_expr(node, ctx),
+            Self::Right(hook) => hook.exit_match_expr(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_member_expr(&mut self, node: &MemberExpr, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_member_expr(node, ctx),
@@ -8355,6 +8484,22 @@ where
         match self {
             Self::Left(hook) => hook.exit_opt_object_lit(node, ctx),
             Self::Right(hook) => hook.exit_opt_object_lit(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_opt_object_pat(&mut self, node: &Option<ObjectPat>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_opt_object_pat(node, ctx),
+            Self::Right(hook) => hook.enter_opt_object_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_opt_object_pat(&mut self, node: &Option<ObjectPat>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_opt_object_pat(node, ctx),
+            Self::Right(hook) => hook.exit_opt_object_pat(node, ctx),
         }
     }
 
@@ -12343,6 +12488,48 @@ where
     }
 
     #[inline]
+    fn enter_match_arm(&mut self, node: &MatchArm, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_arm(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_arm(&mut self, node: &MatchArm, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_arm(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_match_arms(&mut self, node: &[MatchArm], ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_arms(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_arms(&mut self, node: &[MatchArm], ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_arms(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_match_expr(&mut self, node: &MatchExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_expr(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_expr(&mut self, node: &MatchExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_expr(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_member_expr(&mut self, node: &MemberExpr, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_member_expr(node, ctx);
@@ -12815,6 +13002,20 @@ where
     fn exit_opt_object_lit(&mut self, node: &Option<Box<ObjectLit>>, ctx: &mut C) {
         if let Some(hook) = self {
             hook.exit_opt_object_lit(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_opt_object_pat(&mut self, node: &Option<ObjectPat>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_opt_object_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_opt_object_pat(&mut self, node: &Option<ObjectPat>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_opt_object_pat(node, ctx);
         }
     }
 
@@ -15876,6 +16077,30 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.exit_lit(node, &mut self.context);
     }
 
+    #[doc = "Visits a node of type `MatchArm` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_match_arm(&mut self, node: &MatchArm) {
+        self.hook.enter_match_arm(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_match_arm(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `Vec < MatchArm >` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_match_arms(&mut self, node: &[MatchArm]) {
+        self.hook.enter_match_arms(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_match_arms(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `MatchExpr` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_match_expr(&mut self, node: &MatchExpr) {
+        self.hook.enter_match_expr(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_match_expr(node, &mut self.context);
+    }
+
     #[doc = "Visits a node of type `MemberExpr` using the hook's enter and exit methods."]
     #[inline]
     fn visit_member_expr(&mut self, node: &MemberExpr) {
@@ -16160,6 +16385,14 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.enter_opt_object_lit(node, &mut self.context);
         node.visit_children_with(self);
         self.hook.exit_opt_object_lit(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `Option < ObjectPat >` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_opt_object_pat(&mut self, node: &Option<ObjectPat>) {
+        self.hook.enter_opt_object_pat(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_opt_object_pat(node, &mut self.context);
     }
 
     #[doc = "Visits a node of type `Option < Pat >` using the hook's enter and exit methods."]
@@ -18364,6 +18597,30 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_lit(&mut self, node: &mut Lit, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchArm` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_arm(&mut self, node: &mut MatchArm, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchArm` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_arm(&mut self, node: &mut MatchArm, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Vec < MatchArm >` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_arms(&mut self, node: &mut Vec<MatchArm>, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Vec < MatchArm >` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_arms(&mut self, node: &mut Vec<MatchArm>, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchExpr` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_expr(&mut self, node: &mut MatchExpr, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchExpr` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_expr(&mut self, node: &mut MatchExpr, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `MemberExpr` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -18660,6 +18917,15 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_opt_object_lit(&mut self, node: &mut Option<Box<ObjectLit>>, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Option < ObjectPat >` before visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_opt_object_pat(&mut self, node: &mut Option<ObjectPat>, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Option < ObjectPat >` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_opt_object_pat(&mut self, node: &mut Option<ObjectPat>, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `Option < Pat >` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -21330,6 +21596,42 @@ where
     }
 
     #[inline]
+    fn enter_match_arm(&mut self, node: &mut MatchArm, ctx: &mut C) {
+        self.first.enter_match_arm(node, ctx);
+        self.second.enter_match_arm(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_arm(&mut self, node: &mut MatchArm, ctx: &mut C) {
+        self.second.exit_match_arm(node, ctx);
+        self.first.exit_match_arm(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_arms(&mut self, node: &mut Vec<MatchArm>, ctx: &mut C) {
+        self.first.enter_match_arms(node, ctx);
+        self.second.enter_match_arms(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_arms(&mut self, node: &mut Vec<MatchArm>, ctx: &mut C) {
+        self.second.exit_match_arms(node, ctx);
+        self.first.exit_match_arms(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_expr(&mut self, node: &mut MatchExpr, ctx: &mut C) {
+        self.first.enter_match_expr(node, ctx);
+        self.second.enter_match_expr(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_expr(&mut self, node: &mut MatchExpr, ctx: &mut C) {
+        self.second.exit_match_expr(node, ctx);
+        self.first.exit_match_expr(node, ctx);
+    }
+
+    #[inline]
     fn enter_member_expr(&mut self, node: &mut MemberExpr, ctx: &mut C) {
         self.first.enter_member_expr(node, ctx);
         self.second.enter_member_expr(node, ctx);
@@ -21735,6 +22037,18 @@ where
     fn exit_opt_object_lit(&mut self, node: &mut Option<Box<ObjectLit>>, ctx: &mut C) {
         self.second.exit_opt_object_lit(node, ctx);
         self.first.exit_opt_object_lit(node, ctx);
+    }
+
+    #[inline]
+    fn enter_opt_object_pat(&mut self, node: &mut Option<ObjectPat>, ctx: &mut C) {
+        self.first.enter_opt_object_pat(node, ctx);
+        self.second.enter_opt_object_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_opt_object_pat(&mut self, node: &mut Option<ObjectPat>, ctx: &mut C) {
+        self.second.exit_opt_object_pat(node, ctx);
+        self.first.exit_opt_object_pat(node, ctx);
     }
 
     #[inline]
@@ -25363,6 +25677,54 @@ where
     }
 
     #[inline]
+    fn enter_match_arm(&mut self, node: &mut MatchArm, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_arm(node, ctx),
+            Self::Right(hook) => hook.enter_match_arm(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_arm(&mut self, node: &mut MatchArm, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_arm(node, ctx),
+            Self::Right(hook) => hook.exit_match_arm(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_arms(&mut self, node: &mut Vec<MatchArm>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_arms(node, ctx),
+            Self::Right(hook) => hook.enter_match_arms(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_arms(&mut self, node: &mut Vec<MatchArm>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_arms(node, ctx),
+            Self::Right(hook) => hook.exit_match_arms(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_expr(&mut self, node: &mut MatchExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_expr(node, ctx),
+            Self::Right(hook) => hook.enter_match_expr(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_expr(&mut self, node: &mut MatchExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_expr(node, ctx),
+            Self::Right(hook) => hook.exit_match_expr(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_member_expr(&mut self, node: &mut MemberExpr, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_member_expr(node, ctx),
@@ -25903,6 +26265,22 @@ where
         match self {
             Self::Left(hook) => hook.exit_opt_object_lit(node, ctx),
             Self::Right(hook) => hook.exit_opt_object_lit(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_opt_object_pat(&mut self, node: &mut Option<ObjectPat>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_opt_object_pat(node, ctx),
+            Self::Right(hook) => hook.enter_opt_object_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_opt_object_pat(&mut self, node: &mut Option<ObjectPat>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_opt_object_pat(node, ctx),
+            Self::Right(hook) => hook.exit_opt_object_pat(node, ctx),
         }
     }
 
@@ -29927,6 +30305,48 @@ where
     }
 
     #[inline]
+    fn enter_match_arm(&mut self, node: &mut MatchArm, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_arm(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_arm(&mut self, node: &mut MatchArm, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_arm(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_match_arms(&mut self, node: &mut Vec<MatchArm>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_arms(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_arms(&mut self, node: &mut Vec<MatchArm>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_arms(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_match_expr(&mut self, node: &mut MatchExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_expr(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_expr(&mut self, node: &mut MatchExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_expr(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_member_expr(&mut self, node: &mut MemberExpr, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_member_expr(node, ctx);
@@ -30399,6 +30819,20 @@ where
     fn exit_opt_object_lit(&mut self, node: &mut Option<Box<ObjectLit>>, ctx: &mut C) {
         if let Some(hook) = self {
             hook.exit_opt_object_lit(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_opt_object_pat(&mut self, node: &mut Option<ObjectPat>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_opt_object_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_opt_object_pat(&mut self, node: &mut Option<ObjectPat>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_opt_object_pat(node, ctx);
         }
     }
 
@@ -33488,6 +33922,30 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.exit_lit(node, &mut self.context);
     }
 
+    #[doc = "Visits a node of type `MatchArm` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_match_arm(&mut self, node: &mut MatchArm) {
+        self.hook.enter_match_arm(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_match_arm(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `Vec < MatchArm >` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_match_arms(&mut self, node: &mut Vec<MatchArm>) {
+        self.hook.enter_match_arms(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_match_arms(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `MatchExpr` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_match_expr(&mut self, node: &mut MatchExpr) {
+        self.hook.enter_match_expr(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_match_expr(node, &mut self.context);
+    }
+
     #[doc = "Visits a node of type `MemberExpr` using the hook's enter and exit methods."]
     #[inline]
     fn visit_mut_member_expr(&mut self, node: &mut MemberExpr) {
@@ -33772,6 +34230,14 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.enter_opt_object_lit(node, &mut self.context);
         node.visit_mut_children_with(self);
         self.hook.exit_opt_object_lit(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `Option < ObjectPat >` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_opt_object_pat(&mut self, node: &mut Option<ObjectPat>) {
+        self.hook.enter_opt_object_pat(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_opt_object_pat(node, &mut self.context);
     }
 
     #[doc = "Visits a node of type `Option < Pat >` using the hook's enter and exit methods."]

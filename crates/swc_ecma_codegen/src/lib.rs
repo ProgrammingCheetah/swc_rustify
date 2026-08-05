@@ -1735,6 +1735,9 @@ impl MacroNode for Expr {
             Expr::TsSatisfies(n) => {
                 emit!(n)
             }
+            Expr::Match(..) => {
+                unreachable!("zts MatchExpr must be lowered before emit")
+            }
             #[cfg(swc_ast_unknown)]
             _ => return Err(unknown_error()),
         }

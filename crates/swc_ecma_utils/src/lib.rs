@@ -1910,6 +1910,9 @@ impl ExprCtx {
             //TODO: Drop values if it does not have side effects.
             Expr::Cond(_) => to.push(Box::new(expr)),
 
+            // zts: conservative — keep the whole match expression.
+            Expr::Match(_) => to.push(Box::new(expr)),
+
             Expr::Unary(UnaryExpr {
                 op: op!("typeof"),
                 arg,
@@ -3767,6 +3770,9 @@ fn may_have_side_effects(expr: &Expr, ctx: ExprCtx) -> bool {
                 || cons.may_have_side_effects(ctx)
                 || alt.may_have_side_effects(ctx)
         }
+
+        // zts: conservative.
+        Expr::Match(..) => true,
 
         Expr::Object(ObjectLit { props, .. }) => props.iter().any(|node| match node {
             PropOrSpread::Prop(node) => match &**node {

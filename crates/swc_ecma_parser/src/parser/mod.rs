@@ -48,6 +48,8 @@ mod typescript_stubs;
 mod util;
 #[cfg(feature = "verify")]
 mod verifier;
+#[cfg(feature = "typescript")]
+mod zts;
 
 pub type PResult<T> = Result<T, crate::error::Error>;
 
