@@ -1900,10 +1900,7 @@ impl<I: Tokens> Parser<I> {
             if self.input().syntax().flow() {
                 self.emit_err(self.span(start), SyntaxError::TS1003);
             }
-            return self
-                .parse_ts_enum_decl(start, true)
-                .map(Decl::from)
-                .map(Stmt::from);
+            return self.parse_any_enum_decl(start, true).map(Stmt::from);
         }
 
         let top_level = self.ctx().contains(Context::TopLevel);
@@ -2069,7 +2066,7 @@ impl<I: Tokens> Parser<I> {
         {
             let start = self.input().cur_pos();
             self.bump();
-            return Ok(self.parse_ts_enum_decl(start, false)?.into());
+            return Ok(self.parse_any_enum_decl(start, false)?.into());
         } else if cur == Token::LBrace {
             return self
                 .do_inside_of_context(Context::AllowUsingDecl, |p| p.parse_block(false))

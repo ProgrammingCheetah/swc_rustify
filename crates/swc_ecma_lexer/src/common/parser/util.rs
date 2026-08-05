@@ -84,6 +84,10 @@ pub fn make_decl_declare(mut decl: Decl) -> Decl {
         Decl::TsEnum(ref mut e) => e.declare = true,
         Decl::TsModule(ref mut m) => m.declare = true,
         Decl::Using(..) => unreachable!("Using is not a valid declaration for `declare` keyword"),
+        // zts: `declare` is rejected earlier for zts enums.
+        Decl::ZtsEnum(..) => {
+            unreachable!("ZtsEnum is not a valid declaration for `declare` keyword")
+        }
         #[cfg(swc_ast_unknown)]
         _ => unreachable!(),
     }

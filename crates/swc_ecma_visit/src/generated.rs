@@ -2069,6 +2069,41 @@ pub trait Visit {
     fn visit_yield_expr(&mut self, node: &YieldExpr) {
         <YieldExpr as VisitWith<Self>>::visit_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
+             [`ZtsEnumDecl::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_zts_enum_decl(&mut self, node: &ZtsEnumDecl) {
+        <ZtsEnumDecl as VisitWith<Self>>::visit_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsEnumField`.\n\nBy default, this method calls \
+             [`ZtsEnumField::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_zts_enum_field(&mut self, node: &ZtsEnumField) {
+        <ZtsEnumField as VisitWith<Self>>::visit_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumField >`.\n\nBy default, this method calls [`Vec < \
+             ZtsEnumField >::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_zts_enum_fields(&mut self, node: &[ZtsEnumField]) {
+        <[ZtsEnumField] as VisitWith<Self>>::visit_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsEnumVariant`.\n\nBy default, this method calls \
+             [`ZtsEnumVariant::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_zts_enum_variant(&mut self, node: &ZtsEnumVariant) {
+        <ZtsEnumVariant as VisitWith<Self>>::visit_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumVariant >`.\n\nBy default, this method calls [`Vec \
+             < ZtsEnumVariant >::visit_children_with`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant]) {
+        <[ZtsEnumVariant] as VisitWith<Self>>::visit_children_with(node, self)
+    }
 }
 impl<V> Visit for &mut V
 where
@@ -3571,6 +3606,31 @@ where
     fn visit_yield_expr(&mut self, node: &YieldExpr) {
         <V as Visit>::visit_yield_expr(&mut **self, node)
     }
+
+    #[inline]
+    fn visit_zts_enum_decl(&mut self, node: &ZtsEnumDecl) {
+        <V as Visit>::visit_zts_enum_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_enum_field(&mut self, node: &ZtsEnumField) {
+        <V as Visit>::visit_zts_enum_field(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_enum_fields(&mut self, node: &[ZtsEnumField]) {
+        <V as Visit>::visit_zts_enum_fields(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_enum_variant(&mut self, node: &ZtsEnumVariant) {
+        <V as Visit>::visit_zts_enum_variant(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant]) {
+        <V as Visit>::visit_zts_enum_variants(&mut **self, node)
+    }
 }
 impl<V> Visit for Box<V>
 where
@@ -5072,6 +5132,31 @@ where
     #[inline]
     fn visit_yield_expr(&mut self, node: &YieldExpr) {
         <V as Visit>::visit_yield_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_enum_decl(&mut self, node: &ZtsEnumDecl) {
+        <V as Visit>::visit_zts_enum_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_enum_field(&mut self, node: &ZtsEnumField) {
+        <V as Visit>::visit_zts_enum_field(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_enum_fields(&mut self, node: &[ZtsEnumField]) {
+        <V as Visit>::visit_zts_enum_fields(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_enum_variant(&mut self, node: &ZtsEnumVariant) {
+        <V as Visit>::visit_zts_enum_variant(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant]) {
+        <V as Visit>::visit_zts_enum_variants(&mut **self, node)
     }
 }
 impl<A, B> Visit for ::swc_visit::Either<A, B>
@@ -7525,6 +7610,46 @@ where
             swc_visit::Either::Right(visitor) => Visit::visit_yield_expr(visitor, node),
         }
     }
+
+    #[inline]
+    fn visit_zts_enum_decl(&mut self, node: &ZtsEnumDecl) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_enum_decl(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_enum_decl(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_field(&mut self, node: &ZtsEnumField) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_enum_field(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_enum_field(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_fields(&mut self, node: &[ZtsEnumField]) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_enum_fields(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_enum_fields(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_variant(&mut self, node: &ZtsEnumVariant) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_enum_variant(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_enum_variant(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant]) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_enum_variants(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_enum_variants(visitor, node),
+        }
+    }
 }
 impl<V> Visit for ::swc_visit::Optional<V>
 where
@@ -9924,6 +10049,46 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_zts_enum_decl(&mut self, node: &ZtsEnumDecl) {
+        if self.enabled {
+            <V as Visit>::visit_zts_enum_decl(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_field(&mut self, node: &ZtsEnumField) {
+        if self.enabled {
+            <V as Visit>::visit_zts_enum_field(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_fields(&mut self, node: &[ZtsEnumField]) {
+        if self.enabled {
+            <V as Visit>::visit_zts_enum_fields(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_variant(&mut self, node: &ZtsEnumVariant) {
+        if self.enabled {
+            <V as Visit>::visit_zts_enum_variant(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant]) {
+        if self.enabled {
+            <V as Visit>::visit_zts_enum_variants(&mut self.visitor, node)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 pub trait VisitWith<V: ?Sized + Visit> {
@@ -10895,6 +11060,9 @@ impl<V: ?Sized + Visit> VisitWith<V> for Decl {
             }
             Decl::TsModule { 0: _field_0 } => {
                 <Box<TsModuleDecl> as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
+            Decl::ZtsEnum { 0: _field_0 } => {
+                <Box<ZtsEnumDecl> as VisitWith<V>>::visit_with(_field_0, visitor);
             }
             #[cfg(swc_ast_unknown)]
             _ => (),
@@ -15878,6 +16046,80 @@ impl<V: ?Sized + Visit> VisitWith<V> for YieldExpr {
         }
     }
 }
+impl<V: ?Sized + Visit> VisitWith<V> for ZtsEnumDecl {
+    #[doc = "Calls [Visit`::visit_zts_enum_decl`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_enum_decl(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            ZtsEnumDecl {
+                span,
+                ident,
+                variants,
+            } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <Ident as VisitWith<V>>::visit_with(ident, visitor)
+                };
+                {
+                    <Vec<ZtsEnumVariant> as VisitWith<V>>::visit_with(variants, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for ZtsEnumField {
+    #[doc = "Calls [Visit`::visit_zts_enum_field`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_enum_field(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            ZtsEnumField {
+                span,
+                name,
+                type_ann,
+            } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <IdentName as VisitWith<V>>::visit_with(name, visitor)
+                };
+                {
+                    <Box<TsType> as VisitWith<V>>::visit_with(type_ann, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for ZtsEnumVariant {
+    #[doc = "Calls [Visit`::visit_zts_enum_variant`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_enum_variant(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            ZtsEnumVariant { span, name, fields } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <Ident as VisitWith<V>>::visit_with(name, visitor)
+                };
+                {
+                    <Vec<ZtsEnumField> as VisitWith<V>>::visit_with(fields, visitor)
+                };
+            }
+        }
+    }
+}
 impl<V: ?Sized + Visit> VisitWith<V> for swc_atoms::Atom {
     #[doc = "Calls [Visit`::visit_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -16720,6 +16962,32 @@ impl<V: ?Sized + Visit> VisitWith<V> for swc_atoms::Wtf8Atom {
     #[inline]
     fn visit_children_with(&self, visitor: &mut V) {
         {}
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for [ZtsEnumField] {
+    #[doc = "Calls [Visit`::visit_zts_enum_fields`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_enum_fields(visitor, self)
+    }
+
+    #[inline]
+    fn visit_children_with(&self, visitor: &mut V) {
+        self.iter()
+            .for_each(|item| <ZtsEnumField as VisitWith<V>>::visit_with(item, visitor))
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for [ZtsEnumVariant] {
+    #[doc = "Calls [Visit`::visit_zts_enum_variants`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_enum_variants(visitor, self)
+    }
+
+    #[inline]
+    fn visit_children_with(&self, visitor: &mut V) {
+        self.iter()
+            .for_each(|item| <ZtsEnumVariant as VisitWith<V>>::visit_with(item, visitor))
     }
 }
 impl<V, T> VisitWith<V> for std::boxed::Box<T>
@@ -20322,6 +20590,71 @@ pub trait VisitAstPath {
     ) {
         <YieldExpr as VisitWithAstPath<Self>>::visit_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
+             [`ZtsEnumDecl::visit_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_zts_enum_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <ZtsEnumDecl as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `ZtsEnumField`.\n\nBy default, this method calls \
+             [`ZtsEnumField::visit_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_zts_enum_field<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumField,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <ZtsEnumField as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumField >`.\n\nBy default, this method calls [`Vec < \
+             ZtsEnumField >::visit_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_zts_enum_fields<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast [ZtsEnumField],
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <[ZtsEnumField] as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `ZtsEnumVariant`.\n\nBy default, this method calls \
+             [`ZtsEnumVariant::visit_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_zts_enum_variant<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumVariant,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <ZtsEnumVariant as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumVariant >`.\n\nBy default, this method calls [`Vec \
+             < ZtsEnumVariant >::visit_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_zts_enum_variants<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast [ZtsEnumVariant],
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <[ZtsEnumVariant] as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -22923,6 +23256,51 @@ where
     ) {
         <V as VisitAstPath>::visit_yield_expr(&mut **self, node, __ast_path)
     }
+
+    #[inline]
+    fn visit_zts_enum_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_enum_field<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumField,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_field(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_enum_fields<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast [ZtsEnumField],
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_fields(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_enum_variant<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumVariant,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_variant(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_enum_variants<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast [ZtsEnumVariant],
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_variants(&mut **self, node, __ast_path)
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -25523,6 +25901,51 @@ where
         __ast_path: &mut AstNodePath<'r>,
     ) {
         <V as VisitAstPath>::visit_yield_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_enum_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_enum_field<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumField,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_field(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_enum_fields<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast [ZtsEnumField],
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_fields(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_enum_variant<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumVariant,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_variant(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_enum_variants<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast [ZtsEnumVariant],
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_variants(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -30181,6 +30604,86 @@ where
             }
         }
     }
+
+    #[inline]
+    fn visit_zts_enum_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_enum_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_enum_decl(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_field<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumField,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_enum_field(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_enum_field(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_fields<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast [ZtsEnumField],
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_enum_fields(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_enum_fields(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_variant<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumVariant,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_enum_variant(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_enum_variant(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_variants<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast [ZtsEnumVariant],
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_enum_variants(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_enum_variants(visitor, node, __ast_path)
+            }
+        }
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -33707,6 +34210,66 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_zts_enum_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_enum_decl(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_field<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumField,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_enum_field(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_fields<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast [ZtsEnumField],
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_enum_fields(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_variant<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsEnumVariant,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_enum_variant(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_enum_variants<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast [ZtsEnumVariant],
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_enum_variants(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 #[cfg(any(docsrs, feature = "path"))]
@@ -35981,6 +36544,17 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for Decl {
                     self::fields::DeclField::TsModule,
                 ));
                 <Box<TsModuleDecl> as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Decl::ZtsEnum { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::Decl(
+                    self,
+                    self::fields::DeclField::ZtsEnum,
+                ));
+                <Box<ZtsEnumDecl> as VisitWithAstPath<V>>::visit_with_ast_path(
                     _field_0,
                     visitor,
                     &mut *__ast_path,
@@ -48014,6 +48588,182 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for YieldExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsEnumDecl {
+    #[doc = "Calls [VisitAstPath`::visit_zts_enum_decl`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_decl(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            ZtsEnumDecl {
+                span,
+                ident,
+                variants,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsEnumDecl(
+                        self,
+                        self::fields::ZtsEnumDeclField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsEnumDecl(
+                        self,
+                        self::fields::ZtsEnumDeclField::Ident,
+                    ));
+                    <Ident as VisitWithAstPath<V>>::visit_with_ast_path(
+                        ident,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsEnumDecl(
+                        self,
+                        self::fields::ZtsEnumDeclField::Variants(usize::MAX),
+                    ));
+                    <Vec<ZtsEnumVariant> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        variants,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsEnumField {
+    #[doc = "Calls [VisitAstPath`::visit_zts_enum_field`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_field(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            ZtsEnumField {
+                span,
+                name,
+                type_ann,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsEnumField(
+                        self,
+                        self::fields::ZtsEnumFieldField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsEnumField(
+                        self,
+                        self::fields::ZtsEnumFieldField::Name,
+                    ));
+                    <IdentName as VisitWithAstPath<V>>::visit_with_ast_path(
+                        name,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsEnumField(
+                        self,
+                        self::fields::ZtsEnumFieldField::TypeAnn,
+                    ));
+                    <Box<TsType> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        type_ann,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsEnumVariant {
+    #[doc = "Calls [VisitAstPath`::visit_zts_enum_variant`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_variant(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            ZtsEnumVariant { span, name, fields } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsEnumVariant(
+                        self,
+                        self::fields::ZtsEnumVariantField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsEnumVariant(
+                        self,
+                        self::fields::ZtsEnumVariantField::Name,
+                    ));
+                    <Ident as VisitWithAstPath<V>>::visit_with_ast_path(
+                        name,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsEnumVariant(
+                        self,
+                        self::fields::ZtsEnumVariantField::Fields(usize::MAX),
+                    ));
+                    <Vec<ZtsEnumField> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        fields,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitAstPath`::visit_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -49665,6 +50415,64 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for swc_atoms::Wtf8Atom {
         __ast_path: &mut AstNodePath<'r>,
     ) {
         {}
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for [ZtsEnumField] {
+    #[doc = "Calls [VisitAstPath`::visit_zts_enum_fields`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_fields(visitor, self, __ast_path)
+    }
+
+    #[inline]
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        self.iter().enumerate().for_each(|(__idx, item)| {
+            let mut __ast_path = __ast_path.with_index_guard(__idx);
+            <ZtsEnumField as VisitWithAstPath<V>>::visit_with_ast_path(
+                item,
+                visitor,
+                &mut *__ast_path,
+            )
+        })
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for [ZtsEnumVariant] {
+    #[doc = "Calls [VisitAstPath`::visit_zts_enum_variants`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_enum_variants(visitor, self, __ast_path)
+    }
+
+    #[inline]
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        self.iter().enumerate().for_each(|(__idx, item)| {
+            let mut __ast_path = __ast_path.with_index_guard(__idx);
+            <ZtsEnumVariant as VisitWithAstPath<V>>::visit_with_ast_path(
+                item,
+                visitor,
+                &mut *__ast_path,
+            )
+        })
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -51820,6 +52628,41 @@ pub trait VisitMut {
     fn visit_mut_yield_expr(&mut self, node: &mut YieldExpr) {
         <YieldExpr as VisitMutWith<Self>>::visit_mut_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
+             [`ZtsEnumDecl::visit_mut_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl) {
+        <ZtsEnumDecl as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsEnumField`.\n\nBy default, this method calls \
+             [`ZtsEnumField::visit_mut_children_with`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_mut_zts_enum_field(&mut self, node: &mut ZtsEnumField) {
+        <ZtsEnumField as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumField >`.\n\nBy default, this method calls [`Vec < \
+             ZtsEnumField >::visit_mut_children_with`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_mut_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>) {
+        <Vec<ZtsEnumField> as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsEnumVariant`.\n\nBy default, this method calls \
+             [`ZtsEnumVariant::visit_mut_children_with`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_mut_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant) {
+        <ZtsEnumVariant as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumVariant >`.\n\nBy default, this method calls [`Vec \
+             < ZtsEnumVariant >::visit_mut_children_with`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_mut_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>) {
+        <Vec<ZtsEnumVariant> as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
 }
 impl<V> VisitMut for &mut V
 where
@@ -53322,6 +54165,31 @@ where
     fn visit_mut_yield_expr(&mut self, node: &mut YieldExpr) {
         <V as VisitMut>::visit_mut_yield_expr(&mut **self, node)
     }
+
+    #[inline]
+    fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl) {
+        <V as VisitMut>::visit_mut_zts_enum_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_field(&mut self, node: &mut ZtsEnumField) {
+        <V as VisitMut>::visit_mut_zts_enum_field(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>) {
+        <V as VisitMut>::visit_mut_zts_enum_fields(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant) {
+        <V as VisitMut>::visit_mut_zts_enum_variant(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>) {
+        <V as VisitMut>::visit_mut_zts_enum_variants(&mut **self, node)
+    }
 }
 impl<V> VisitMut for Box<V>
 where
@@ -54823,6 +55691,31 @@ where
     #[inline]
     fn visit_mut_yield_expr(&mut self, node: &mut YieldExpr) {
         <V as VisitMut>::visit_mut_yield_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl) {
+        <V as VisitMut>::visit_mut_zts_enum_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_field(&mut self, node: &mut ZtsEnumField) {
+        <V as VisitMut>::visit_mut_zts_enum_field(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>) {
+        <V as VisitMut>::visit_mut_zts_enum_fields(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant) {
+        <V as VisitMut>::visit_mut_zts_enum_variant(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>) {
+        <V as VisitMut>::visit_mut_zts_enum_variants(&mut **self, node)
     }
 }
 impl<A, B> VisitMut for ::swc_visit::Either<A, B>
@@ -57584,6 +58477,52 @@ where
             swc_visit::Either::Right(visitor) => VisitMut::visit_mut_yield_expr(visitor, node),
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_enum_decl(visitor, node),
+            swc_visit::Either::Right(visitor) => VisitMut::visit_mut_zts_enum_decl(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_field(&mut self, node: &mut ZtsEnumField) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_enum_field(visitor, node),
+            swc_visit::Either::Right(visitor) => VisitMut::visit_mut_zts_enum_field(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_enum_fields(visitor, node),
+            swc_visit::Either::Right(visitor) => VisitMut::visit_mut_zts_enum_fields(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_enum_variant(visitor, node),
+            swc_visit::Either::Right(visitor) => {
+                VisitMut::visit_mut_zts_enum_variant(visitor, node)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMut::visit_mut_zts_enum_variants(visitor, node)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMut::visit_mut_zts_enum_variants(visitor, node)
+            }
+        }
+    }
 }
 impl<V> VisitMut for ::swc_visit::Optional<V>
 where
@@ -59983,6 +60922,46 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_enum_decl(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_field(&mut self, node: &mut ZtsEnumField) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_enum_field(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_enum_fields(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_enum_variant(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_enum_variants(&mut self.visitor, node)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 pub trait VisitMutWith<V: ?Sized + VisitMut> {
@@ -60977,6 +61956,9 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for Decl {
             }
             Decl::TsModule { 0: _field_0 } => {
                 <Box<TsModuleDecl> as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
+            Decl::ZtsEnum { 0: _field_0 } => {
+                <Box<ZtsEnumDecl> as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
             }
             #[cfg(swc_ast_unknown)]
             _ => (),
@@ -66002,6 +66984,80 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for YieldExpr {
         }
     }
 }
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsEnumDecl {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_enum_decl`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_enum_decl(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            ZtsEnumDecl {
+                span,
+                ident,
+                variants,
+            } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <Ident as VisitMutWith<V>>::visit_mut_with(ident, visitor)
+                };
+                {
+                    <Vec<ZtsEnumVariant> as VisitMutWith<V>>::visit_mut_with(variants, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsEnumField {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_enum_field`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_enum_field(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            ZtsEnumField {
+                span,
+                name,
+                type_ann,
+            } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <IdentName as VisitMutWith<V>>::visit_mut_with(name, visitor)
+                };
+                {
+                    <Box<TsType> as VisitMutWith<V>>::visit_mut_with(type_ann, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsEnumVariant {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_enum_variant`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_enum_variant(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            ZtsEnumVariant { span, name, fields } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <Ident as VisitMutWith<V>>::visit_mut_with(name, visitor)
+                };
+                {
+                    <Vec<ZtsEnumField> as VisitMutWith<V>>::visit_mut_with(fields, visitor)
+                };
+            }
+        }
+    }
+}
 impl<V: ?Sized + VisitMut> VisitMutWith<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitMut`::visit_mut_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -66848,6 +67904,32 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for swc_atoms::Wtf8Atom {
     #[inline]
     fn visit_mut_children_with(&mut self, visitor: &mut V) {
         {}
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for Vec<ZtsEnumField> {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_enum_fields`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_enum_fields(visitor, self)
+    }
+
+    #[inline]
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        self.iter_mut()
+            .for_each(|item| <ZtsEnumField as VisitMutWith<V>>::visit_mut_with(item, visitor))
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for Vec<ZtsEnumVariant> {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_enum_variants`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_enum_variants(visitor, self)
+    }
+
+    #[inline]
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        self.iter_mut()
+            .for_each(|item| <ZtsEnumVariant as VisitMutWith<V>>::visit_mut_with(item, visitor))
     }
 }
 impl<V, T> VisitMutWith<V> for std::boxed::Box<T>
@@ -70037,6 +71119,63 @@ pub trait VisitMutAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
+             [`ZtsEnumDecl::visit_mut_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, __ast_path: &mut AstKindPath) {
+        <ZtsEnumDecl as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `ZtsEnumField`.\n\nBy default, this method calls \
+             [`ZtsEnumField::visit_mut_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_mut_zts_enum_field(&mut self, node: &mut ZtsEnumField, __ast_path: &mut AstKindPath) {
+        <ZtsEnumField as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumField >`.\n\nBy default, this method calls [`Vec < \
+             ZtsEnumField >::visit_mut_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_mut_zts_enum_fields(
+        &mut self,
+        node: &mut Vec<ZtsEnumField>,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <Vec<ZtsEnumField> as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `ZtsEnumVariant`.\n\nBy default, this method calls \
+             [`ZtsEnumVariant::visit_mut_children_with_ast_path`]. If you want to recurse, you \
+             need to call it manually."]
+    #[inline]
+    fn visit_mut_zts_enum_variant(
+        &mut self,
+        node: &mut ZtsEnumVariant,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <ZtsEnumVariant as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumVariant >`.\n\nBy default, this method calls [`Vec \
+             < ZtsEnumVariant >::visit_mut_children_with_ast_path`]. If you want to recurse, you \
+             need to call it manually."]
+    #[inline]
+    fn visit_mut_zts_enum_variants(
+        &mut self,
+        node: &mut Vec<ZtsEnumVariant>,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <Vec<ZtsEnumVariant> as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -72034,6 +73173,43 @@ where
     fn visit_mut_yield_expr(&mut self, node: &mut YieldExpr, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_yield_expr(&mut **self, node, __ast_path)
     }
+
+    #[inline]
+    fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_field(&mut self, node: &mut ZtsEnumField, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_field(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_fields(
+        &mut self,
+        node: &mut Vec<ZtsEnumField>,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_fields(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variant(
+        &mut self,
+        node: &mut ZtsEnumVariant,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_variant(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variants(
+        &mut self,
+        node: &mut Vec<ZtsEnumVariant>,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_variants(&mut **self, node, __ast_path)
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -74030,6 +75206,43 @@ where
     #[inline]
     fn visit_mut_yield_expr(&mut self, node: &mut YieldExpr, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_yield_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_field(&mut self, node: &mut ZtsEnumField, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_field(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_fields(
+        &mut self,
+        node: &mut Vec<ZtsEnumField>,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_fields(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variant(
+        &mut self,
+        node: &mut ZtsEnumVariant,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_variant(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variants(
+        &mut self,
+        node: &mut Vec<ZtsEnumVariant>,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_variants(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -78118,6 +79331,78 @@ where
             }
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, __ast_path: &mut AstKindPath) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_enum_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_enum_decl(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_field(&mut self, node: &mut ZtsEnumField, __ast_path: &mut AstKindPath) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_enum_field(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_enum_field(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_fields(
+        &mut self,
+        node: &mut Vec<ZtsEnumField>,
+        __ast_path: &mut AstKindPath,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_enum_fields(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_enum_fields(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variant(
+        &mut self,
+        node: &mut ZtsEnumVariant,
+        __ast_path: &mut AstKindPath,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_enum_variant(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_enum_variant(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variants(
+        &mut self,
+        node: &mut Vec<ZtsEnumVariant>,
+        __ast_path: &mut AstKindPath,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_enum_variants(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_enum_variants(visitor, node, __ast_path)
+            }
+        }
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -81272,6 +82557,58 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, __ast_path: &mut AstKindPath) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_enum_decl(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_field(&mut self, node: &mut ZtsEnumField, __ast_path: &mut AstKindPath) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_enum_field(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_fields(
+        &mut self,
+        node: &mut Vec<ZtsEnumField>,
+        __ast_path: &mut AstKindPath,
+    ) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_enum_fields(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variant(
+        &mut self,
+        node: &mut ZtsEnumVariant,
+        __ast_path: &mut AstKindPath,
+    ) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_enum_variant(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_enum_variants(
+        &mut self,
+        node: &mut Vec<ZtsEnumVariant>,
+        __ast_path: &mut AstKindPath,
+    ) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_enum_variants(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 #[cfg(any(docsrs, feature = "path"))]
@@ -83087,6 +84424,15 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for Decl {
                 let mut __ast_path =
                     __ast_path.with_guard(AstParentKind::Decl(self::fields::DeclField::TsModule));
                 <Box<TsModuleDecl> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Decl::ZtsEnum { 0: _field_0 } => {
+                let mut __ast_path =
+                    __ast_path.with_guard(AstParentKind::Decl(self::fields::DeclField::ZtsEnum));
+                <Box<ZtsEnumDecl> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
                     _field_0,
                     visitor,
                     &mut *__ast_path,
@@ -92672,6 +94018,149 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for YieldExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsEnumDecl {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_enum_decl`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_decl(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            ZtsEnumDecl {
+                span,
+                ident,
+                variants,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumDecl(
+                        self::fields::ZtsEnumDeclField::Span,
+                    ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumDecl(
+                        self::fields::ZtsEnumDeclField::Ident,
+                    ));
+                    <Ident as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        ident,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumDecl(
+                        self::fields::ZtsEnumDeclField::Variants(usize::MAX),
+                    ));
+                    <Vec<ZtsEnumVariant> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        variants,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsEnumField {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_enum_field`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_field(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            ZtsEnumField {
+                span,
+                name,
+                type_ann,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumField(
+                        self::fields::ZtsEnumFieldField::Span,
+                    ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumField(
+                        self::fields::ZtsEnumFieldField::Name,
+                    ));
+                    <IdentName as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        name,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumField(
+                        self::fields::ZtsEnumFieldField::TypeAnn,
+                    ));
+                    <Box<TsType> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        type_ann,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsEnumVariant {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_enum_variant`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_variant(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            ZtsEnumVariant { span, name, fields } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumVariant(
+                        self::fields::ZtsEnumVariantField::Span,
+                    ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumVariant(
+                        self::fields::ZtsEnumVariantField::Name,
+                    ));
+                    <Ident as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        name,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumVariant(
+                        self::fields::ZtsEnumVariantField::Fields(usize::MAX),
+                    ));
+                    <Vec<ZtsEnumField> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        fields,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitMutAstPath`::visit_mut_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -93870,6 +95359,48 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for swc_atoms::Wtf8Atom
     #[inline]
     fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
         {}
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for Vec<ZtsEnumField> {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_enum_fields`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_fields(visitor, self, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        self.iter_mut().enumerate().for_each(|(__idx, item)| {
+            let mut __ast_path = __ast_path.with_index_guard(__idx);
+            <ZtsEnumField as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                item,
+                visitor,
+                &mut *__ast_path,
+            )
+        })
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for Vec<ZtsEnumVariant> {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_enum_variants`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_enum_variants(visitor, self, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        self.iter_mut().enumerate().for_each(|(__idx, item)| {
+            let mut __ast_path = __ast_path.with_index_guard(__idx);
+            <ZtsEnumVariant as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                item,
+                visitor,
+                &mut *__ast_path,
+            )
+        })
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -96010,6 +97541,41 @@ pub trait Fold {
     fn fold_yield_expr(&mut self, node: YieldExpr) -> YieldExpr {
         <YieldExpr as FoldWith<Self>>::fold_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
+             [`ZtsEnumDecl::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_enum_decl(&mut self, node: ZtsEnumDecl) -> ZtsEnumDecl {
+        <ZtsEnumDecl as FoldWith<Self>>::fold_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsEnumField`.\n\nBy default, this method calls \
+             [`ZtsEnumField::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_enum_field(&mut self, node: ZtsEnumField) -> ZtsEnumField {
+        <ZtsEnumField as FoldWith<Self>>::fold_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumField >`.\n\nBy default, this method calls [`Vec < \
+             ZtsEnumField >::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_enum_fields(&mut self, node: Vec<ZtsEnumField>) -> Vec<ZtsEnumField> {
+        <Vec<ZtsEnumField> as FoldWith<Self>>::fold_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsEnumVariant`.\n\nBy default, this method calls \
+             [`ZtsEnumVariant::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_enum_variant(&mut self, node: ZtsEnumVariant) -> ZtsEnumVariant {
+        <ZtsEnumVariant as FoldWith<Self>>::fold_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumVariant >`.\n\nBy default, this method calls [`Vec \
+             < ZtsEnumVariant >::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_enum_variants(&mut self, node: Vec<ZtsEnumVariant>) -> Vec<ZtsEnumVariant> {
+        <Vec<ZtsEnumVariant> as FoldWith<Self>>::fold_children_with(node, self)
+    }
 }
 impl<V> Fold for &mut V
 where
@@ -97572,6 +99138,31 @@ where
     fn fold_yield_expr(&mut self, node: YieldExpr) -> YieldExpr {
         <V as Fold>::fold_yield_expr(&mut **self, node)
     }
+
+    #[inline]
+    fn fold_zts_enum_decl(&mut self, node: ZtsEnumDecl) -> ZtsEnumDecl {
+        <V as Fold>::fold_zts_enum_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_enum_field(&mut self, node: ZtsEnumField) -> ZtsEnumField {
+        <V as Fold>::fold_zts_enum_field(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_enum_fields(&mut self, node: Vec<ZtsEnumField>) -> Vec<ZtsEnumField> {
+        <V as Fold>::fold_zts_enum_fields(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_enum_variant(&mut self, node: ZtsEnumVariant) -> ZtsEnumVariant {
+        <V as Fold>::fold_zts_enum_variant(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_enum_variants(&mut self, node: Vec<ZtsEnumVariant>) -> Vec<ZtsEnumVariant> {
+        <V as Fold>::fold_zts_enum_variants(&mut **self, node)
+    }
 }
 impl<V> Fold for Box<V>
 where
@@ -99133,6 +100724,31 @@ where
     #[inline]
     fn fold_yield_expr(&mut self, node: YieldExpr) -> YieldExpr {
         <V as Fold>::fold_yield_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_enum_decl(&mut self, node: ZtsEnumDecl) -> ZtsEnumDecl {
+        <V as Fold>::fold_zts_enum_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_enum_field(&mut self, node: ZtsEnumField) -> ZtsEnumField {
+        <V as Fold>::fold_zts_enum_field(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_enum_fields(&mut self, node: Vec<ZtsEnumField>) -> Vec<ZtsEnumField> {
+        <V as Fold>::fold_zts_enum_fields(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_enum_variant(&mut self, node: ZtsEnumVariant) -> ZtsEnumVariant {
+        <V as Fold>::fold_zts_enum_variant(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_enum_variants(&mut self, node: Vec<ZtsEnumVariant>) -> Vec<ZtsEnumVariant> {
+        <V as Fold>::fold_zts_enum_variants(&mut **self, node)
     }
 }
 impl<A, B> Fold for ::swc_visit::Either<A, B>
@@ -101618,6 +103234,46 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Fold::fold_yield_expr(visitor, node),
             swc_visit::Either::Right(visitor) => Fold::fold_yield_expr(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_decl(&mut self, node: ZtsEnumDecl) -> ZtsEnumDecl {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_enum_decl(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_enum_decl(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_field(&mut self, node: ZtsEnumField) -> ZtsEnumField {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_enum_field(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_enum_field(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_fields(&mut self, node: Vec<ZtsEnumField>) -> Vec<ZtsEnumField> {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_enum_fields(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_enum_fields(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_variant(&mut self, node: ZtsEnumVariant) -> ZtsEnumVariant {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_enum_variant(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_enum_variant(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_variants(&mut self, node: Vec<ZtsEnumVariant>) -> Vec<ZtsEnumVariant> {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_enum_variants(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_enum_variants(visitor, node),
         }
     }
 }
@@ -104378,6 +106034,51 @@ where
             node
         }
     }
+
+    #[inline]
+    fn fold_zts_enum_decl(&mut self, node: ZtsEnumDecl) -> ZtsEnumDecl {
+        if self.enabled {
+            <V as Fold>::fold_zts_enum_decl(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_field(&mut self, node: ZtsEnumField) -> ZtsEnumField {
+        if self.enabled {
+            <V as Fold>::fold_zts_enum_field(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_fields(&mut self, node: Vec<ZtsEnumField>) -> Vec<ZtsEnumField> {
+        if self.enabled {
+            <V as Fold>::fold_zts_enum_fields(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_variant(&mut self, node: ZtsEnumVariant) -> ZtsEnumVariant {
+        if self.enabled {
+            <V as Fold>::fold_zts_enum_variant(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_variants(&mut self, node: Vec<ZtsEnumVariant>) -> Vec<ZtsEnumVariant> {
+        if self.enabled {
+            <V as Fold>::fold_zts_enum_variants(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 pub trait FoldWith<V: ?Sized + Fold> {
@@ -105333,6 +107034,10 @@ impl<V: ?Sized + Fold> FoldWith<V> for Decl {
             Decl::TsModule { 0: _field_0 } => {
                 let _field_0 = <Box<TsModuleDecl> as FoldWith<V>>::fold_with(_field_0, visitor);
                 Decl::TsModule { 0: _field_0 }
+            }
+            Decl::ZtsEnum { 0: _field_0 } => {
+                let _field_0 = <Box<ZtsEnumDecl> as FoldWith<V>>::fold_with(_field_0, visitor);
+                Decl::ZtsEnum { 0: _field_0 }
             }
             #[cfg(swc_ast_unknown)]
             _ => self,
@@ -110299,6 +112004,74 @@ impl<V: ?Sized + Fold> FoldWith<V> for YieldExpr {
         }
     }
 }
+impl<V: ?Sized + Fold> FoldWith<V> for ZtsEnumDecl {
+    #[doc = "Calls [Fold`::fold_zts_enum_decl`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_enum_decl(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            ZtsEnumDecl {
+                span,
+                ident,
+                variants,
+            } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let ident = { <Ident as FoldWith<V>>::fold_with(ident, visitor) };
+                let variants =
+                    { <Vec<ZtsEnumVariant> as FoldWith<V>>::fold_with(variants, visitor) };
+                ZtsEnumDecl {
+                    span,
+                    ident,
+                    variants,
+                }
+            }
+        }
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for ZtsEnumField {
+    #[doc = "Calls [Fold`::fold_zts_enum_field`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_enum_field(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            ZtsEnumField {
+                span,
+                name,
+                type_ann,
+            } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let name = { <IdentName as FoldWith<V>>::fold_with(name, visitor) };
+                let type_ann = { <Box<TsType> as FoldWith<V>>::fold_with(type_ann, visitor) };
+                ZtsEnumField {
+                    span,
+                    name,
+                    type_ann,
+                }
+            }
+        }
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for ZtsEnumVariant {
+    #[doc = "Calls [Fold`::fold_zts_enum_variant`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_enum_variant(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            ZtsEnumVariant { span, name, fields } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let name = { <Ident as FoldWith<V>>::fold_with(name, visitor) };
+                let fields = { <Vec<ZtsEnumField> as FoldWith<V>>::fold_with(fields, visitor) };
+                ZtsEnumVariant { span, name, fields }
+            }
+        }
+    }
+}
 impl<V: ?Sized + Fold> FoldWith<V> for swc_atoms::Atom {
     #[doc = "Calls [Fold`::fold_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -111087,6 +112860,34 @@ impl<V: ?Sized + Fold> FoldWith<V> for swc_atoms::Wtf8Atom {
     #[inline]
     fn fold_children_with(self, visitor: &mut V) -> Self {
         self
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for Vec<ZtsEnumField> {
+    #[doc = "Calls [Fold`::fold_zts_enum_fields`] with `self`. (Extra impl)"]
+    #[inline]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_enum_fields(visitor, self)
+    }
+
+    #[inline]
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        swc_visit::util::move_map::MoveMap::move_map(self, |item| {
+            <ZtsEnumField as FoldWith<V>>::fold_with(item, visitor)
+        })
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for Vec<ZtsEnumVariant> {
+    #[doc = "Calls [Fold`::fold_zts_enum_variants`] with `self`. (Extra impl)"]
+    #[inline]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_enum_variants(visitor, self)
+    }
+
+    #[inline]
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        swc_visit::util::move_map::MoveMap::move_map(self, |item| {
+            <ZtsEnumVariant as FoldWith<V>>::fold_with(item, visitor)
+        })
     }
 }
 impl<V, T> FoldWith<V> for std::boxed::Box<T>
@@ -114214,6 +116015,67 @@ pub trait FoldAstPath {
     fn fold_yield_expr(&mut self, node: YieldExpr, __ast_path: &mut AstKindPath) -> YieldExpr {
         <YieldExpr as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
+             [`ZtsEnumDecl::fold_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_zts_enum_decl(
+        &mut self,
+        node: ZtsEnumDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumDecl {
+        <ZtsEnumDecl as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
+    }
+    #[doc = "Visit a node of type `ZtsEnumField`.\n\nBy default, this method calls \
+             [`ZtsEnumField::fold_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_zts_enum_field(
+        &mut self,
+        node: ZtsEnumField,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumField {
+        <ZtsEnumField as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumField >`.\n\nBy default, this method calls [`Vec < \
+             ZtsEnumField >::fold_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_zts_enum_fields(
+        &mut self,
+        node: Vec<ZtsEnumField>,
+        __ast_path: &mut AstKindPath,
+    ) -> Vec<ZtsEnumField> {
+        <Vec<ZtsEnumField> as FoldWithAstPath<Self>>::fold_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `ZtsEnumVariant`.\n\nBy default, this method calls \
+             [`ZtsEnumVariant::fold_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_zts_enum_variant(
+        &mut self,
+        node: ZtsEnumVariant,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumVariant {
+        <ZtsEnumVariant as FoldWithAstPath<Self>>::fold_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `Vec < ZtsEnumVariant >`.\n\nBy default, this method calls [`Vec \
+             < ZtsEnumVariant >::fold_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn fold_zts_enum_variants(
+        &mut self,
+        node: Vec<ZtsEnumVariant>,
+        __ast_path: &mut AstKindPath,
+    ) -> Vec<ZtsEnumVariant> {
+        <Vec<ZtsEnumVariant> as FoldWithAstPath<Self>>::fold_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -116447,6 +118309,51 @@ where
     fn fold_yield_expr(&mut self, node: YieldExpr, __ast_path: &mut AstKindPath) -> YieldExpr {
         <V as FoldAstPath>::fold_yield_expr(&mut **self, node, __ast_path)
     }
+
+    #[inline]
+    fn fold_zts_enum_decl(
+        &mut self,
+        node: ZtsEnumDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumDecl {
+        <V as FoldAstPath>::fold_zts_enum_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_enum_field(
+        &mut self,
+        node: ZtsEnumField,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumField {
+        <V as FoldAstPath>::fold_zts_enum_field(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_enum_fields(
+        &mut self,
+        node: Vec<ZtsEnumField>,
+        __ast_path: &mut AstKindPath,
+    ) -> Vec<ZtsEnumField> {
+        <V as FoldAstPath>::fold_zts_enum_fields(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_enum_variant(
+        &mut self,
+        node: ZtsEnumVariant,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumVariant {
+        <V as FoldAstPath>::fold_zts_enum_variant(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_enum_variants(
+        &mut self,
+        node: Vec<ZtsEnumVariant>,
+        __ast_path: &mut AstKindPath,
+    ) -> Vec<ZtsEnumVariant> {
+        <V as FoldAstPath>::fold_zts_enum_variants(&mut **self, node, __ast_path)
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -118679,6 +120586,51 @@ where
     #[inline]
     fn fold_yield_expr(&mut self, node: YieldExpr, __ast_path: &mut AstKindPath) -> YieldExpr {
         <V as FoldAstPath>::fold_yield_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_enum_decl(
+        &mut self,
+        node: ZtsEnumDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumDecl {
+        <V as FoldAstPath>::fold_zts_enum_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_enum_field(
+        &mut self,
+        node: ZtsEnumField,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumField {
+        <V as FoldAstPath>::fold_zts_enum_field(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_enum_fields(
+        &mut self,
+        node: Vec<ZtsEnumField>,
+        __ast_path: &mut AstKindPath,
+    ) -> Vec<ZtsEnumField> {
+        <V as FoldAstPath>::fold_zts_enum_fields(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_enum_variant(
+        &mut self,
+        node: ZtsEnumVariant,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumVariant {
+        <V as FoldAstPath>::fold_zts_enum_variant(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_enum_variants(
+        &mut self,
+        node: Vec<ZtsEnumVariant>,
+        __ast_path: &mut AstKindPath,
+    ) -> Vec<ZtsEnumVariant> {
+        <V as FoldAstPath>::fold_zts_enum_variants(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -122909,6 +124861,86 @@ where
             }
         }
     }
+
+    #[inline]
+    fn fold_zts_enum_decl(
+        &mut self,
+        node: ZtsEnumDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumDecl {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_enum_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_enum_decl(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_field(
+        &mut self,
+        node: ZtsEnumField,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumField {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_enum_field(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_enum_field(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_fields(
+        &mut self,
+        node: Vec<ZtsEnumField>,
+        __ast_path: &mut AstKindPath,
+    ) -> Vec<ZtsEnumField> {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_enum_fields(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_enum_fields(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_variant(
+        &mut self,
+        node: ZtsEnumVariant,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumVariant {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_enum_variant(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_enum_variant(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_variants(
+        &mut self,
+        node: Vec<ZtsEnumVariant>,
+        __ast_path: &mut AstKindPath,
+    ) -> Vec<ZtsEnumVariant> {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_enum_variants(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_enum_variants(visitor, node, __ast_path)
+            }
+        }
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -126354,6 +128386,71 @@ where
             node
         }
     }
+
+    #[inline]
+    fn fold_zts_enum_decl(
+        &mut self,
+        node: ZtsEnumDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumDecl {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_enum_decl(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_field(
+        &mut self,
+        node: ZtsEnumField,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumField {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_enum_field(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_fields(
+        &mut self,
+        node: Vec<ZtsEnumField>,
+        __ast_path: &mut AstKindPath,
+    ) -> Vec<ZtsEnumField> {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_enum_fields(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_variant(
+        &mut self,
+        node: ZtsEnumVariant,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsEnumVariant {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_enum_variant(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_enum_variants(
+        &mut self,
+        node: Vec<ZtsEnumVariant>,
+        __ast_path: &mut AstKindPath,
+    ) -> Vec<ZtsEnumVariant> {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_enum_variants(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 #[cfg(any(docsrs, feature = "path"))]
@@ -128319,6 +130416,16 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for Decl {
                     &mut *__ast_path,
                 );
                 Decl::TsModule { 0: _field_0 }
+            }
+            Decl::ZtsEnum { 0: _field_0 } => {
+                let mut __ast_path =
+                    __ast_path.with_guard(AstParentKind::Decl(self::fields::DeclField::ZtsEnum));
+                let _field_0 = <Box<ZtsEnumDecl> as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                Decl::ZtsEnum { 0: _field_0 }
             }
             #[cfg(swc_ast_unknown)]
             _ => self,
@@ -138641,6 +140748,160 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for YieldExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsEnumDecl {
+    #[doc = "Calls [FoldAstPath`::fold_zts_enum_decl`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_enum_decl(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            ZtsEnumDecl {
+                span,
+                ident,
+                variants,
+            } => {
+                let span = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumDecl(
+                        self::fields::ZtsEnumDeclField::Span,
+                    ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let ident = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumDecl(
+                        self::fields::ZtsEnumDeclField::Ident,
+                    ));
+                    <Ident as FoldWithAstPath<V>>::fold_with_ast_path(
+                        ident,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let variants = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumDecl(
+                        self::fields::ZtsEnumDeclField::Variants(usize::MAX),
+                    ));
+                    <Vec<ZtsEnumVariant> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        variants,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                ZtsEnumDecl {
+                    span,
+                    ident,
+                    variants,
+                }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsEnumField {
+    #[doc = "Calls [FoldAstPath`::fold_zts_enum_field`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_enum_field(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            ZtsEnumField {
+                span,
+                name,
+                type_ann,
+            } => {
+                let span = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumField(
+                        self::fields::ZtsEnumFieldField::Span,
+                    ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let name = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumField(
+                        self::fields::ZtsEnumFieldField::Name,
+                    ));
+                    <IdentName as FoldWithAstPath<V>>::fold_with_ast_path(
+                        name,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let type_ann = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumField(
+                        self::fields::ZtsEnumFieldField::TypeAnn,
+                    ));
+                    <Box<TsType> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        type_ann,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                ZtsEnumField {
+                    span,
+                    name,
+                    type_ann,
+                }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsEnumVariant {
+    #[doc = "Calls [FoldAstPath`::fold_zts_enum_variant`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_enum_variant(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            ZtsEnumVariant { span, name, fields } => {
+                let span = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumVariant(
+                        self::fields::ZtsEnumVariantField::Span,
+                    ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let name = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumVariant(
+                        self::fields::ZtsEnumVariantField::Name,
+                    ));
+                    <Ident as FoldWithAstPath<V>>::fold_with_ast_path(
+                        name,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let fields = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumVariant(
+                        self::fields::ZtsEnumVariantField::Fields(usize::MAX),
+                    ));
+                    <Vec<ZtsEnumField> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        fields,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                ZtsEnumVariant { span, name, fields }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [FoldAstPath`::fold_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -139839,6 +142100,54 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for swc_atoms::Wtf8Atom {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for Vec<ZtsEnumField> {
+    #[doc = "Calls [FoldAstPath`::fold_zts_enum_fields`] with `self`. (Extra impl)"]
+    #[inline]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_enum_fields(visitor, self, __ast_path)
+    }
+
+    #[inline]
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        self.into_iter()
+            .enumerate()
+            .map(|(__idx, item)| {
+                let mut __ast_path = __ast_path.with_index_guard(__idx);
+                <ZtsEnumField as FoldWithAstPath<V>>::fold_with_ast_path(
+                    item,
+                    visitor,
+                    &mut *__ast_path,
+                )
+            })
+            .collect()
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for Vec<ZtsEnumVariant> {
+    #[doc = "Calls [FoldAstPath`::fold_zts_enum_variants`] with `self`. (Extra impl)"]
+    #[inline]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_enum_variants(visitor, self, __ast_path)
+    }
+
+    #[inline]
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        self.into_iter()
+            .enumerate()
+            .map(|(__idx, item)| {
+                let mut __ast_path = __ast_path.with_index_guard(__idx);
+                <ZtsEnumVariant as FoldWithAstPath<V>>::fold_with_ast_path(
+                    item,
+                    visitor,
+                    &mut *__ast_path,
+                )
+            })
+            .collect()
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V, T> FoldWithAstPath<V> for std::boxed::Box<T>
 where
     V: ?Sized + FoldAstPath,
@@ -140676,6 +142985,8 @@ pub mod fields {
         TsEnum,
         #[doc = "Represents [`Decl::TsModule`]"]
         TsModule,
+        #[doc = "Represents [`Decl::ZtsEnum`]"]
+        ZtsEnum,
     }
     impl DecoratorField {
         pub(crate) fn set_index(&mut self, index: usize) {
@@ -144486,6 +146797,65 @@ pub mod fields {
         #[doc = "Represents [`YieldExpr::delegate`]"]
         Delegate,
     }
+    impl ZtsEnumDeclField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                Self::Variants(idx) => {
+                    assert_initial_index(*idx, index);
+                    *idx = index;
+                }
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum ZtsEnumDeclField {
+        #[doc = "Represents [`ZtsEnumDecl::span`]"]
+        Span,
+        #[doc = "Represents [`ZtsEnumDecl::ident`]"]
+        Ident,
+        #[doc = "Represents [`ZtsEnumDecl::variants`]"]
+        Variants(usize),
+    }
+    impl ZtsEnumFieldField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum ZtsEnumFieldField {
+        #[doc = "Represents [`ZtsEnumField::span`]"]
+        Span,
+        #[doc = "Represents [`ZtsEnumField::name`]"]
+        Name,
+        #[doc = "Represents [`ZtsEnumField::type_ann`]"]
+        TypeAnn,
+    }
+    impl ZtsEnumVariantField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                Self::Fields(idx) => {
+                    assert_initial_index(*idx, index);
+                    *idx = index;
+                }
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum ZtsEnumVariantField {
+        #[doc = "Represents [`ZtsEnumVariant::span`]"]
+        Span,
+        #[doc = "Represents [`ZtsEnumVariant::name`]"]
+        Name,
+        #[doc = "Represents [`ZtsEnumVariant::fields`]"]
+        Fields(usize),
+    }
     #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
     pub enum AstParentKind {
@@ -144727,6 +147097,9 @@ pub mod fields {
         WhileStmt(WhileStmtField),
         WithStmt(WithStmtField),
         YieldExpr(YieldExprField),
+        ZtsEnumDecl(ZtsEnumDeclField),
+        ZtsEnumField(ZtsEnumFieldField),
+        ZtsEnumVariant(ZtsEnumVariantField),
     }
     impl ::swc_visit::ParentKind for AstParentKind {
         #[inline]
@@ -144970,6 +147343,9 @@ pub mod fields {
                 Self::WhileStmt(v) => v.set_index(index),
                 Self::WithStmt(v) => v.set_index(index),
                 Self::YieldExpr(v) => v.set_index(index),
+                Self::ZtsEnumDecl(v) => v.set_index(index),
+                Self::ZtsEnumField(v) => v.set_index(index),
+                Self::ZtsEnumVariant(v) => v.set_index(index),
             }
         }
     }
@@ -145225,6 +147601,9 @@ pub mod fields {
         WhileStmt(&'ast WhileStmt, WhileStmtField),
         WithStmt(&'ast WithStmt, WithStmtField),
         YieldExpr(&'ast YieldExpr, YieldExprField),
+        ZtsEnumDecl(&'ast ZtsEnumDecl, ZtsEnumDeclField),
+        ZtsEnumField(&'ast ZtsEnumField, ZtsEnumFieldField),
+        ZtsEnumVariant(&'ast ZtsEnumVariant, ZtsEnumVariantField),
     }
     impl<'ast> ::swc_visit::NodeRef for AstParentNodeRef<'ast> {
         type ParentKind = AstParentKind;
@@ -145474,6 +147853,9 @@ pub mod fields {
                 Self::WhileStmt(_, __field_kind) => __field_kind.set_index(index),
                 Self::WithStmt(_, __field_kind) => __field_kind.set_index(index),
                 Self::YieldExpr(_, __field_kind) => __field_kind.set_index(index),
+                Self::ZtsEnumDecl(_, __field_kind) => __field_kind.set_index(index),
+                Self::ZtsEnumField(_, __field_kind) => __field_kind.set_index(index),
+                Self::ZtsEnumVariant(_, __field_kind) => __field_kind.set_index(index),
             }
         }
     }
@@ -145860,6 +148242,11 @@ pub mod fields {
                 Self::WhileStmt(_, __field_kind) => AstParentKind::WhileStmt(*__field_kind),
                 Self::WithStmt(_, __field_kind) => AstParentKind::WithStmt(*__field_kind),
                 Self::YieldExpr(_, __field_kind) => AstParentKind::YieldExpr(*__field_kind),
+                Self::ZtsEnumDecl(_, __field_kind) => AstParentKind::ZtsEnumDecl(*__field_kind),
+                Self::ZtsEnumField(_, __field_kind) => AstParentKind::ZtsEnumField(*__field_kind),
+                Self::ZtsEnumVariant(_, __field_kind) => {
+                    AstParentKind::ZtsEnumVariant(*__field_kind)
+                }
             }
         }
     }
@@ -147054,6 +149441,21 @@ impl<'ast> From<&'ast YieldExpr> for NodeRef<'ast> {
         NodeRef::YieldExpr(node)
     }
 }
+impl<'ast> From<&'ast ZtsEnumDecl> for NodeRef<'ast> {
+    fn from(node: &'ast ZtsEnumDecl) -> Self {
+        NodeRef::ZtsEnumDecl(node)
+    }
+}
+impl<'ast> From<&'ast ZtsEnumField> for NodeRef<'ast> {
+    fn from(node: &'ast ZtsEnumField) -> Self {
+        NodeRef::ZtsEnumField(node)
+    }
+}
+impl<'ast> From<&'ast ZtsEnumVariant> for NodeRef<'ast> {
+    fn from(node: &'ast ZtsEnumVariant) -> Self {
+        NodeRef::ZtsEnumVariant(node)
+    }
+}
 #[derive(Debug, Clone, Copy)]
 pub enum NodeRef<'ast> {
     Accessibility(&'ast Accessibility),
@@ -147294,6 +149696,9 @@ pub enum NodeRef<'ast> {
     WhileStmt(&'ast WhileStmt),
     WithStmt(&'ast WithStmt),
     YieldExpr(&'ast YieldExpr),
+    ZtsEnumDecl(&'ast ZtsEnumDecl),
+    ZtsEnumField(&'ast ZtsEnumField),
+    ZtsEnumVariant(&'ast ZtsEnumVariant),
 }
 impl<'ast> NodeRef<'ast> {
     #[doc = r" This is not a part of semver-stable API. It is experimental and subject to change."]
@@ -147695,6 +150100,7 @@ impl<'ast> NodeRef<'ast> {
                 Decl::TsTypeAlias(v0) => Box::new(::std::iter::once(NodeRef::TsTypeAliasDecl(v0))),
                 Decl::TsEnum(v0) => Box::new(::std::iter::once(NodeRef::TsEnumDecl(v0))),
                 Decl::TsModule(v0) => Box::new(::std::iter::once(NodeRef::TsModuleDecl(v0))),
+                Decl::ZtsEnum(v0) => Box::new(::std::iter::once(NodeRef::ZtsEnumDecl(v0))),
                 _ => Box::new(::std::iter::empty::<NodeRef<'ast>>()),
             },
             NodeRef::Decorator(node) => {
@@ -149674,6 +152080,35 @@ impl<'ast> NodeRef<'ast> {
                         let item = &*item;
                         ::std::iter::once(NodeRef::Expr(&item))
                     }));
+                Box::new(iterator)
+            }
+            NodeRef::ZtsEnumDecl(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>()
+                    .chain(::std::iter::once(NodeRef::Ident(&node.ident)))
+                    .chain(
+                        node.variants
+                            .iter()
+                            .flat_map(|item| ::std::iter::once(NodeRef::ZtsEnumVariant(&item))),
+                    );
+                Box::new(iterator)
+            }
+            NodeRef::ZtsEnumField(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>()
+                    .chain(::std::iter::once(NodeRef::IdentName(&node.name)))
+                    .chain({
+                        let item = &*node.type_ann;
+                        ::std::iter::once(NodeRef::TsType(&item))
+                    });
+                Box::new(iterator)
+            }
+            NodeRef::ZtsEnumVariant(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>()
+                    .chain(::std::iter::once(NodeRef::Ident(&node.name)))
+                    .chain(
+                        node.fields
+                            .iter()
+                            .flat_map(|item| ::std::iter::once(NodeRef::ZtsEnumField(&item))),
+                    );
                 Box::new(iterator)
             }
         }

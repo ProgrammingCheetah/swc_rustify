@@ -579,13 +579,13 @@ impl<I: Tokens> Parser<I> {
             {
                 let enum_start = self.cur_pos();
                 self.assert_and_bump(Token::Enum);
-                let decl = self.parse_ts_enum_decl(enum_start, false)?;
+                let decl = self.parse_any_enum_decl(enum_start, false)?;
 
                 // `export default enum` is valid in Flow, but SWC's default export decl AST
                 // variant does not model enum declarations.
                 return Ok(ExportDecl {
                     span: self.span(start),
-                    decl: Decl::TsEnum(decl),
+                    decl,
                 }
                 .into());
             } else if self.input().syntax().export_default_from()
@@ -644,8 +644,7 @@ impl<I: Tokens> Parser<I> {
         {
             let enum_start = self.cur_pos();
             self.assert_and_bump(Token::Enum);
-            self.parse_ts_enum_decl(enum_start, false)
-                .map(Decl::TsEnum)?
+            self.parse_any_enum_decl(enum_start, false)?
         } else if !type_only
             && self.input().syntax().typescript_allows_enum()
             && self.input().is(Token::Const)
@@ -658,8 +657,7 @@ impl<I: Tokens> Parser<I> {
                 self.emit_err(self.span(enum_start), SyntaxError::TS1003);
             }
             return self
-                .parse_ts_enum_decl(enum_start, /* is_const */ true)
-                .map(Decl::from)
+                .parse_any_enum_decl(enum_start, /* is_const */ true)
                 .map(|decl| {
                     ExportDecl {
                         span: self.span(start),

@@ -116,6 +116,9 @@ impl MacroNode for Decl {
             Decl::TsInterface(n) => emit!(n),
             Decl::TsModule(n) => emit!(n),
             Decl::TsTypeAlias(n) => emit!(n),
+            Decl::ZtsEnum(..) => {
+                unreachable!("zts ZtsEnumDecl must be lowered before emit")
+            }
             #[cfg(swc_ast_unknown)]
             _ => return Err(unknown_error()),
         }

@@ -19,7 +19,10 @@ pub use self::{
         AutoAccessor, Class, ClassMember, ClassMethod, ClassProp, Constructor, Decorator, Key,
         MethodKind, PrivateMethod, PrivateProp, StaticBlock,
     },
-    decl::{ClassDecl, Decl, FnDecl, UsingDecl, VarDecl, VarDeclKind, VarDeclarator},
+    decl::{
+        ClassDecl, Decl, FnDecl, UsingDecl, VarDecl, VarDeclKind, VarDeclarator, ZtsEnumDecl,
+        ZtsEnumField, ZtsEnumVariant,
+    },
     expr::*,
     function::{Function, Param, ParamOrTsParamProp},
     ident::{

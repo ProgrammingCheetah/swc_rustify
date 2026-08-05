@@ -12,7 +12,12 @@ use swc_common::BytePos;
 use swc_ecma_ast::*;
 
 use super::{PResult, Parser};
-use crate::{lexer::Token, parser::input::Tokens};
+use crate::{
+    context::Context,
+    error::{Error, SyntaxError},
+    lexer::Token,
+    parser::input::Tokens,
+};
 
 impl<I: Tokens> Parser<I> {
     /// Cheap gate: zts enabled, cursor on the word `match`, `(` next.
@@ -117,6 +122,94 @@ impl<I: Tokens> Parser<I> {
         })))
     }
 
+    /// Dispatches enum parsing: zts grammar when the zts flag is on, the
+    /// stock TS enum otherwise. Call sites have already consumed `enum`.
+    pub(super) fn parse_any_enum_decl(&mut self, start: BytePos, is_const: bool) -> PResult<Decl> {
+        if self.input().syntax().zts() {
+            return self.parse_zts_enum_decl(start, is_const);
+        }
+        self.parse_ts_enum_decl(start, is_const).map(Decl::from)
+    }
+
+    /// `enum Shape { Circle { radius: number }, Square { side: number } }`
+    ///
+    /// zts `enum` deliberately replaces TS `enum` (the one place zts is not
+    /// a strict superset). TS member syntax gets a friendly hard error.
+    fn parse_zts_enum_decl(&mut self, start: BytePos, is_const: bool) -> PResult<Decl> {
+        if self.ctx().contains(Context::InDeclare) {
+            return Err(Error::new(self.span(start), SyntaxError::ZtsDeclareEnum));
+        }
+        if is_const {
+            // Recoverable: parse the body anyway for better diagnostics.
+            self.emit_err(self.span(start), SyntaxError::ZtsConstEnum);
+        }
+
+        let ident = self.parse_ident_name()?;
+        let ident = Ident::new_no_ctxt(ident.sym, ident.span);
+
+        expect!(self, Token::LBrace);
+        let mut variants = Vec::new();
+        while !self.input().is(Token::RBrace) {
+            variants.push(self.parse_zts_enum_variant()?);
+            if !self.input_mut().eat(Token::Comma) {
+                break;
+            }
+        }
+        expect!(self, Token::RBrace);
+
+        Ok(Decl::ZtsEnum(Box::new(ZtsEnumDecl {
+            span: self.span(start),
+            ident,
+            variants,
+        })))
+    }
+
+    /// `Variant { field: Type, ... }` — braces required, fields optional.
+    fn parse_zts_enum_variant(&mut self) -> PResult<ZtsEnumVariant> {
+        let start = self.input().cur_pos();
+
+        let name = self.parse_ident_name()?;
+        let name = Ident::new_no_ctxt(name.sym, name.span);
+
+        if !self.input().is(Token::LBrace) {
+            // `Red,` / `Red = 1` — TS member syntax.
+            return Err(Error::new(
+                self.span(start),
+                SyntaxError::ZtsEnumVariantBody,
+            ));
+        }
+        self.bump();
+
+        let mut fields = Vec::new();
+        while !self.input().is(Token::RBrace) {
+            fields.push(self.parse_zts_enum_field()?);
+            if !self.input_mut().eat(Token::Comma) {
+                break;
+            }
+        }
+        expect!(self, Token::RBrace);
+
+        Ok(ZtsEnumVariant {
+            span: self.span(start),
+            name,
+            fields,
+        })
+    }
+
+    /// `field: Type`
+    fn parse_zts_enum_field(&mut self) -> PResult<ZtsEnumField> {
+        let start = self.input().cur_pos();
+        let name = self.parse_ident_name()?;
+        expect!(self, Token::Colon);
+        let type_ann = self.in_type(|p| p.parse_ts_type())?;
+
+        Ok(ZtsEnumField {
+            span: self.span(start),
+            name,
+            type_ann,
+        })
+    }
+
     /// `Variant { bindings } => body`
     fn parse_zts_match_arm(&mut self) -> PResult<MatchArm> {
         let arm_start = self.input().cur_pos();
@@ -157,6 +250,83 @@ mod tests {
 
     fn parse_expr(src: &'static str) -> Box<Expr> {
         test_parser(src, zts(), |p| p.parse_expr())
+    }
+
+    /// Parses a module, returning (module_result_is_err,
+    /// had_recoverable_errors).
+    fn parse_module_errs(src: &'static str) -> (bool, bool) {
+        test_parser(src, zts(), |p| {
+            let res = p.parse_module();
+            let errs = p.take_errors();
+            Ok((res.is_err(), !errs.is_empty()))
+        })
+    }
+
+    #[test]
+    fn zts_enum_basic() {
+        let module = test_parser(
+            "enum Shape { Circle { radius: number }, Square { side: number } }",
+            zts(),
+            |p| p.parse_module(),
+        );
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let e = decl.as_zts_enum().unwrap();
+        assert_eq!(e.ident.sym, "Shape");
+        assert_eq!(e.variants.len(), 2);
+        assert_eq!(e.variants[0].name.sym, "Circle");
+        assert_eq!(e.variants[0].fields.len(), 1);
+        assert_eq!(e.variants[0].fields[0].name.sym, "radius");
+    }
+
+    #[test]
+    fn zts_enum_empty_variant_and_trailing_commas() {
+        let module = test_parser("enum E { A {}, B { x: string, }, }", zts(), |p| {
+            p.parse_module()
+        });
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let e = decl.as_zts_enum().unwrap();
+        assert_eq!(e.variants.len(), 2);
+        assert!(e.variants[0].fields.is_empty());
+    }
+
+    #[test]
+    fn zts_enum_exported() {
+        let module = test_parser("export enum E { A { v: number } }", zts(), |p| {
+            p.parse_module()
+        });
+        let export = module.body[0].as_module_decl().unwrap();
+        let decl = &export.as_export_decl().unwrap().decl;
+        assert!(decl.is_zts_enum());
+    }
+
+    #[test]
+    fn ts_enum_member_syntax_is_a_hard_error() {
+        let (is_err, _) = parse_module_errs("enum Color { Red, Green }");
+        assert!(is_err, "TS enum member syntax must be rejected under zts");
+    }
+
+    #[test]
+    fn const_enum_is_an_error_but_recovers() {
+        let (is_err, had_errs) = parse_module_errs("const enum E { A { v: number } }");
+        assert!(!is_err, "const enum should recover after the diagnostic");
+        assert!(had_errs, "const enum must emit a diagnostic");
+    }
+
+    #[test]
+    fn declare_enum_is_a_hard_error() {
+        let (is_err, had_errs) = parse_module_errs("declare enum E { A { v: number } }");
+        assert!(is_err || had_errs, "declare enum must be rejected");
+    }
+
+    #[test]
+    fn ts_enum_still_works_without_zts_flag() {
+        let module = test_parser(
+            "enum Color { Red, Green }",
+            Syntax::Typescript(Default::default()),
+            |p| p.parse_module(),
+        );
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        assert!(decl.is_ts_enum());
     }
 
     #[test]

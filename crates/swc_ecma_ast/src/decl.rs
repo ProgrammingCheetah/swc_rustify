@@ -6,9 +6,9 @@ use crate::{
     class::Class,
     expr::Expr,
     function::Function,
-    ident::Ident,
+    ident::{Ident, IdentName},
     pat::Pat,
-    typescript::{TsEnumDecl, TsInterfaceDecl, TsModuleDecl, TsTypeAliasDecl},
+    typescript::{TsEnumDecl, TsInterfaceDecl, TsModuleDecl, TsType, TsTypeAliasDecl},
 };
 
 #[ast_node]
@@ -34,6 +34,11 @@ pub enum Decl {
     TsEnum(Box<TsEnumDecl>),
     #[tag("TsModuleDeclaration")]
     TsModule(Box<TsModuleDecl>),
+
+    /// zts extension: Rust-style enum-with-data. Must be lowered to a
+    /// tagged-union type alias + factory object before codegen.
+    #[tag("ZtsEnumDeclaration")]
+    ZtsEnum(Box<ZtsEnumDecl>),
 }
 
 boxed!(
@@ -244,4 +249,64 @@ impl Take for UsingDecl {
             decls: Take::dummy(),
         }
     }
+}
+
+/// zts extension: `enum Shape { Circle { radius: number }, Square { side:
+/// number } }`
+///
+/// Deliberately replaces TypeScript's `enum` when the zts syntax flag is
+/// on. Never reaches codegen — the zts compiler lowers it to a tagged
+/// union type alias plus a factory-function object.
+#[ast_node("ZtsEnumDeclaration")]
+#[derive(Eq, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsEnumDecl {
+    pub span: Span,
+
+    #[cfg_attr(feature = "serde-impl", serde(rename = "identifier"))]
+    pub ident: Ident,
+
+    #[cfg_attr(feature = "serde-impl", serde(default))]
+    pub variants: Vec<ZtsEnumVariant>,
+}
+
+impl Take for ZtsEnumDecl {
+    fn dummy() -> Self {
+        Default::default()
+    }
+}
+
+/// One variant of a [ZtsEnumDecl]: `Circle { radius: number }`.
+#[ast_node("ZtsEnumVariant")]
+#[derive(Eq, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsEnumVariant {
+    pub span: Span,
+
+    pub name: Ident,
+
+    #[cfg_attr(feature = "serde-impl", serde(default))]
+    pub fields: Vec<ZtsEnumField>,
+}
+
+impl Take for ZtsEnumVariant {
+    fn dummy() -> Self {
+        Default::default()
+    }
+}
+
+/// One payload field of a [ZtsEnumVariant]: `radius: number`.
+#[ast_node("ZtsEnumField")]
+#[derive(Eq, Hash, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsEnumField {
+    pub span: Span,
+
+    pub name: IdentName,
+
+    #[cfg_attr(feature = "serde-impl", serde(rename = "typeAnnotation"))]
+    pub type_ann: Box<TsType>,
 }

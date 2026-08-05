@@ -61,6 +61,10 @@ fn make_decl_declare(mut decl: Decl) -> Decl {
         Decl::TsEnum(ref mut e) => e.declare = true,
         Decl::TsModule(ref mut m) => m.declare = true,
         Decl::Using(..) => unreachable!("Using is not a valid declaration for `declare` keyword"),
+        // zts: `declare` is rejected earlier for zts enums.
+        Decl::ZtsEnum(..) => {
+            unreachable!("ZtsEnum is not a valid declaration for `declare` keyword")
+        }
         #[cfg(swc_ast_unknown)]
         _ => unreachable!(),
     }
@@ -4789,6 +4793,13 @@ impl<I: Tokens> Parser<I> {
                 if p.input().syntax().flow() {
                     p.emit_err(p.span(start), SyntaxError::TS1003);
                 }
+                // zts: `declare const enum` has no zts equivalent.
+                if p.input().syntax().zts() {
+                    return Err(crate::error::Error::new(
+                        p.span(start),
+                        SyntaxError::ZtsDeclareEnum,
+                    ));
+                }
 
                 return p
                     .parse_ts_enum_decl(start, /* is_const */ true)
@@ -5062,8 +5073,7 @@ impl<I: Tokens> Parser<I> {
                         self.bump();
                     }
                     return self
-                        .parse_ts_enum_decl(start, /* is_const */ false)
-                        .map(From::from)
+                        .parse_any_enum_decl(start, /* is_const */ false)
                         .map(Some);
                 }
             }

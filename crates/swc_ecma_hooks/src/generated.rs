@@ -2539,6 +2539,49 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_yield_expr(&mut self, node: &YieldExpr, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsEnumDecl` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_enum_decl(&mut self, node: &ZtsEnumDecl, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsEnumDecl` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_enum_decl(&mut self, node: &ZtsEnumDecl, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsEnumField` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_enum_field(&mut self, node: &ZtsEnumField, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsEnumField` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_enum_field(&mut self, node: &ZtsEnumField, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Vec < ZtsEnumField >` before visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_enum_fields(&mut self, node: &[ZtsEnumField], ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Vec < ZtsEnumField >` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_enum_fields(&mut self, node: &[ZtsEnumField], ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsEnumVariant` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_enum_variant(&mut self, node: &ZtsEnumVariant, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsEnumVariant` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_enum_variant(&mut self, node: &ZtsEnumVariant, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Vec < ZtsEnumVariant >` before visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_enum_variants(&mut self, node: &[ZtsEnumVariant], ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Vec < ZtsEnumVariant >` after visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant], ctx: &mut C) {}
 }
 #[doc = r" A composable hook that combines two hooks (immutable version)."]
 #[doc = r""]
@@ -6160,6 +6203,66 @@ where
     fn exit_yield_expr(&mut self, node: &YieldExpr, ctx: &mut C) {
         self.second.exit_yield_expr(node, ctx);
         self.first.exit_yield_expr(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_enum_decl(&mut self, node: &ZtsEnumDecl, ctx: &mut C) {
+        self.first.enter_zts_enum_decl(node, ctx);
+        self.second.enter_zts_enum_decl(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_enum_decl(&mut self, node: &ZtsEnumDecl, ctx: &mut C) {
+        self.second.exit_zts_enum_decl(node, ctx);
+        self.first.exit_zts_enum_decl(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_enum_field(&mut self, node: &ZtsEnumField, ctx: &mut C) {
+        self.first.enter_zts_enum_field(node, ctx);
+        self.second.enter_zts_enum_field(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_enum_field(&mut self, node: &ZtsEnumField, ctx: &mut C) {
+        self.second.exit_zts_enum_field(node, ctx);
+        self.first.exit_zts_enum_field(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_enum_fields(&mut self, node: &[ZtsEnumField], ctx: &mut C) {
+        self.first.enter_zts_enum_fields(node, ctx);
+        self.second.enter_zts_enum_fields(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_enum_fields(&mut self, node: &[ZtsEnumField], ctx: &mut C) {
+        self.second.exit_zts_enum_fields(node, ctx);
+        self.first.exit_zts_enum_fields(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_enum_variant(&mut self, node: &ZtsEnumVariant, ctx: &mut C) {
+        self.first.enter_zts_enum_variant(node, ctx);
+        self.second.enter_zts_enum_variant(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_enum_variant(&mut self, node: &ZtsEnumVariant, ctx: &mut C) {
+        self.second.exit_zts_enum_variant(node, ctx);
+        self.first.exit_zts_enum_variant(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_enum_variants(&mut self, node: &[ZtsEnumVariant], ctx: &mut C) {
+        self.first.enter_zts_enum_variants(node, ctx);
+        self.second.enter_zts_enum_variants(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant], ctx: &mut C) {
+        self.second.exit_zts_enum_variants(node, ctx);
+        self.first.exit_zts_enum_variants(node, ctx);
     }
 }
 impl<L, R, C> VisitHook<C> for swc_common::pass::Either<L, R>
@@ -10970,6 +11073,86 @@ where
             Self::Right(hook) => hook.exit_yield_expr(node, ctx),
         }
     }
+
+    #[inline]
+    fn enter_zts_enum_decl(&mut self, node: &ZtsEnumDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_enum_decl(node, ctx),
+            Self::Right(hook) => hook.enter_zts_enum_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_decl(&mut self, node: &ZtsEnumDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_enum_decl(node, ctx),
+            Self::Right(hook) => hook.exit_zts_enum_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_field(&mut self, node: &ZtsEnumField, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_enum_field(node, ctx),
+            Self::Right(hook) => hook.enter_zts_enum_field(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_field(&mut self, node: &ZtsEnumField, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_enum_field(node, ctx),
+            Self::Right(hook) => hook.exit_zts_enum_field(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_fields(&mut self, node: &[ZtsEnumField], ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_enum_fields(node, ctx),
+            Self::Right(hook) => hook.enter_zts_enum_fields(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_fields(&mut self, node: &[ZtsEnumField], ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_enum_fields(node, ctx),
+            Self::Right(hook) => hook.exit_zts_enum_fields(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_variant(&mut self, node: &ZtsEnumVariant, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_enum_variant(node, ctx),
+            Self::Right(hook) => hook.enter_zts_enum_variant(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_variant(&mut self, node: &ZtsEnumVariant, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_enum_variant(node, ctx),
+            Self::Right(hook) => hook.exit_zts_enum_variant(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_variants(&mut self, node: &[ZtsEnumVariant], ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_enum_variants(node, ctx),
+            Self::Right(hook) => hook.enter_zts_enum_variants(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant], ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_enum_variants(node, ctx),
+            Self::Right(hook) => hook.exit_zts_enum_variants(node, ctx),
+        }
+    }
 }
 impl<H, C> VisitHook<C> for Option<H>
 where
@@ -15180,6 +15363,76 @@ where
             hook.exit_yield_expr(node, ctx);
         }
     }
+
+    #[inline]
+    fn enter_zts_enum_decl(&mut self, node: &ZtsEnumDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_enum_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_decl(&mut self, node: &ZtsEnumDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_enum_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_field(&mut self, node: &ZtsEnumField, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_enum_field(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_field(&mut self, node: &ZtsEnumField, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_enum_field(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_fields(&mut self, node: &[ZtsEnumField], ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_enum_fields(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_fields(&mut self, node: &[ZtsEnumField], ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_enum_fields(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_variant(&mut self, node: &ZtsEnumVariant, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_enum_variant(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_variant(&mut self, node: &ZtsEnumVariant, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_enum_variant(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_variants(&mut self, node: &[ZtsEnumVariant], ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_enum_variants(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant], ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_enum_variants(node, ctx);
+        }
+    }
 }
 #[doc = r" An adapter that implements Visit using a VisitHook."]
 #[doc = r""]
@@ -17692,6 +17945,47 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.enter_yield_expr(node, &mut self.context);
         node.visit_children_with(self);
         self.hook.exit_yield_expr(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsEnumDecl` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_enum_decl(&mut self, node: &ZtsEnumDecl) {
+        self.hook.enter_zts_enum_decl(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_enum_decl(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsEnumField` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_enum_field(&mut self, node: &ZtsEnumField) {
+        self.hook.enter_zts_enum_field(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_enum_field(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `Vec < ZtsEnumField >` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_enum_fields(&mut self, node: &[ZtsEnumField]) {
+        self.hook.enter_zts_enum_fields(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_enum_fields(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsEnumVariant` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_enum_variant(&mut self, node: &ZtsEnumVariant) {
+        self.hook.enter_zts_enum_variant(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_enum_variant(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `Vec < ZtsEnumVariant >` using the hook's enter and exit \
+             methods."]
+    #[inline]
+    fn visit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant]) {
+        self.hook.enter_zts_enum_variants(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_enum_variants(node, &mut self.context);
     }
 }
 #[doc = r" A hook trait for composable AST visitors."]
@@ -20276,6 +20570,49 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_yield_expr(&mut self, node: &mut YieldExpr, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsEnumDecl` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsEnumDecl` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsEnumField` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_enum_field(&mut self, node: &mut ZtsEnumField, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsEnumField` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_enum_field(&mut self, node: &mut ZtsEnumField, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Vec < ZtsEnumField >` before visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Vec < ZtsEnumField >` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsEnumVariant` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsEnumVariant` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Vec < ZtsEnumVariant >` before visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Vec < ZtsEnumVariant >` after visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>, ctx: &mut C) {}
 }
 #[doc = r" A composable hook that combines two hooks."]
 #[doc = r""]
@@ -23933,6 +24270,66 @@ where
     fn exit_yield_expr(&mut self, node: &mut YieldExpr, ctx: &mut C) {
         self.second.exit_yield_expr(node, ctx);
         self.first.exit_yield_expr(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, ctx: &mut C) {
+        self.first.enter_zts_enum_decl(node, ctx);
+        self.second.enter_zts_enum_decl(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, ctx: &mut C) {
+        self.second.exit_zts_enum_decl(node, ctx);
+        self.first.exit_zts_enum_decl(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_enum_field(&mut self, node: &mut ZtsEnumField, ctx: &mut C) {
+        self.first.enter_zts_enum_field(node, ctx);
+        self.second.enter_zts_enum_field(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_enum_field(&mut self, node: &mut ZtsEnumField, ctx: &mut C) {
+        self.second.exit_zts_enum_field(node, ctx);
+        self.first.exit_zts_enum_field(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>, ctx: &mut C) {
+        self.first.enter_zts_enum_fields(node, ctx);
+        self.second.enter_zts_enum_fields(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>, ctx: &mut C) {
+        self.second.exit_zts_enum_fields(node, ctx);
+        self.first.exit_zts_enum_fields(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant, ctx: &mut C) {
+        self.first.enter_zts_enum_variant(node, ctx);
+        self.second.enter_zts_enum_variant(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant, ctx: &mut C) {
+        self.second.exit_zts_enum_variant(node, ctx);
+        self.first.exit_zts_enum_variant(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>, ctx: &mut C) {
+        self.first.enter_zts_enum_variants(node, ctx);
+        self.second.enter_zts_enum_variants(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>, ctx: &mut C) {
+        self.second.exit_zts_enum_variants(node, ctx);
+        self.first.exit_zts_enum_variants(node, ctx);
     }
 }
 impl<L, R, C> VisitMutHook<C> for swc_common::pass::Either<L, R>
@@ -28779,6 +29176,86 @@ where
             Self::Right(hook) => hook.exit_yield_expr(node, ctx),
         }
     }
+
+    #[inline]
+    fn enter_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_enum_decl(node, ctx),
+            Self::Right(hook) => hook.enter_zts_enum_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_enum_decl(node, ctx),
+            Self::Right(hook) => hook.exit_zts_enum_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_field(&mut self, node: &mut ZtsEnumField, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_enum_field(node, ctx),
+            Self::Right(hook) => hook.enter_zts_enum_field(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_field(&mut self, node: &mut ZtsEnumField, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_enum_field(node, ctx),
+            Self::Right(hook) => hook.exit_zts_enum_field(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_enum_fields(node, ctx),
+            Self::Right(hook) => hook.enter_zts_enum_fields(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_enum_fields(node, ctx),
+            Self::Right(hook) => hook.exit_zts_enum_fields(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_enum_variant(node, ctx),
+            Self::Right(hook) => hook.enter_zts_enum_variant(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_enum_variant(node, ctx),
+            Self::Right(hook) => hook.exit_zts_enum_variant(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_enum_variants(node, ctx),
+            Self::Right(hook) => hook.enter_zts_enum_variants(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_enum_variants(node, ctx),
+            Self::Right(hook) => hook.exit_zts_enum_variants(node, ctx),
+        }
+    }
 }
 impl<H, C> VisitMutHook<C> for Option<H>
 where
@@ -33025,6 +33502,76 @@ where
             hook.exit_yield_expr(node, ctx);
         }
     }
+
+    #[inline]
+    fn enter_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_enum_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_enum_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_field(&mut self, node: &mut ZtsEnumField, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_enum_field(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_field(&mut self, node: &mut ZtsEnumField, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_enum_field(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_enum_fields(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_enum_fields(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_enum_variant(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_enum_variant(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_enum_variants(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_enum_variants(node, ctx);
+        }
+    }
 }
 #[doc = r" An adapter that implements VisitMut using a VisitMutHook."]
 #[doc = r""]
@@ -35537,5 +36084,46 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.enter_yield_expr(node, &mut self.context);
         node.visit_mut_children_with(self);
         self.hook.exit_yield_expr(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsEnumDecl` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl) {
+        self.hook.enter_zts_enum_decl(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_enum_decl(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsEnumField` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_enum_field(&mut self, node: &mut ZtsEnumField) {
+        self.hook.enter_zts_enum_field(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_enum_field(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `Vec < ZtsEnumField >` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_enum_fields(&mut self, node: &mut Vec<ZtsEnumField>) {
+        self.hook.enter_zts_enum_fields(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_enum_fields(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsEnumVariant` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_enum_variant(&mut self, node: &mut ZtsEnumVariant) {
+        self.hook.enter_zts_enum_variant(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_enum_variant(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `Vec < ZtsEnumVariant >` using the hook's enter and exit \
+             methods."]
+    #[inline]
+    fn visit_mut_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>) {
+        self.hook.enter_zts_enum_variants(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_enum_variants(node, &mut self.context);
     }
 }

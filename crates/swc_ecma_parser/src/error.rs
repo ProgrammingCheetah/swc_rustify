@@ -41,6 +41,14 @@ impl Error {
 #[non_exhaustive]
 pub enum SyntaxError {
     Eof,
+
+    /// zts: TS enum member syntax inside a zts enum.
+    ZtsEnumVariantBody,
+    /// zts: `const enum`.
+    ZtsConstEnum,
+    /// zts: `declare enum`.
+    ZtsDeclareEnum,
+
     DeclNotAllowed,
 
     UsingDeclNotAllowed,
@@ -633,6 +641,18 @@ impl SyntaxError {
             }
             SyntaxError::TS1107 => "Jump target cannot cross function boundary".into(),
             SyntaxError::TS1109 => "Expression expected".into(),
+            SyntaxError::ZtsEnumVariantBody => {
+                "zts enum variants take the form `Variant { field: Type, ... }` — TypeScript enum \
+                 members are not supported; zts `enum` lowers to a tagged union + factory functions"
+                    .into()
+            }
+            SyntaxError::ZtsConstEnum => "`const enum` is not supported in zts; use a plain zts \
+                                          `enum` (it lowers to a tagged union + factory functions)"
+                .into(),
+            SyntaxError::ZtsDeclareEnum => "`declare enum` is not supported in zts; declare the \
+                                            lowered shape instead (a type alias union + a factory \
+                                            object)"
+                .into(),
             SyntaxError::TS1114 => "Duplicate label".into(),
             SyntaxError::TS1115 => "A 'continue' statement can only jump to a label of an \
                                     enclosing iteration statement"
