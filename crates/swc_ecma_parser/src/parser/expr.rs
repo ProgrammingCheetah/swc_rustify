@@ -81,6 +81,11 @@ impl<I: Tokens> Parser<I> {
         // requirement once the compiler runs in-process (napi/Vite), where
         // stacks are small and an abort kills the host. The zts semantic
         // pass enforces the actual nesting limit with a real diagnostic.
+        //
+        // CAUTION: maybe_grow is a no-op on wasm32/arm/miri or with
+        // `default-features = false` (no stacker) — those builds revert to
+        // stack-overflow behavior on deep input. Any wasm shipping shape
+        // of the zts toolchain must bound input depth BEFORE parsing.
         if self.input().syntax().zts() {
             return crate::maybe_grow(256 * 1024, 1024 * 1024, || {
                 self.parse_assignment_expr_inner()
