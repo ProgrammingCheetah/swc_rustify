@@ -71,6 +71,12 @@ pub struct Parser<I: self::input::Tokens> {
     found_module_item: bool,
     #[cfg(feature = "flow")]
     allow_super_call: bool,
+    /// zts: start positions where `match (...) {` header speculation
+    /// already failed. Prevents exponential re-speculation on nested
+    /// `match (match (...` inputs. Deliberately NOT restored by
+    /// checkpoints: a failed speculation at a position stays failed.
+    #[cfg(feature = "typescript")]
+    zts_match_speculation_failures: rustc_hash::FxHashSet<BytePos>,
 }
 
 impl<I: Tokens> Parser<I> {
@@ -193,6 +199,8 @@ impl<I: Tokens> Parser<I> {
             found_module_item: false,
             #[cfg(feature = "flow")]
             allow_super_call: false,
+            #[cfg(feature = "typescript")]
+            zts_match_speculation_failures: Default::default(),
         };
 
         // consume EOF
