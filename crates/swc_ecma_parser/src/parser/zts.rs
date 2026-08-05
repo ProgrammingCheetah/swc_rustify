@@ -276,7 +276,12 @@ impl<I: Tokens> Parser<I> {
 
         let alt = if self.input().is(Token::If) {
             let alt_start = self.input().cur_pos();
-            let expr = self.parse_zts_if_expr(alt_start)?;
+            // else-if links recurse outside parse_assignment_expr's
+            // maybe_grow; grow here too or long chains SIGABRT the parser
+            // before the zts semantic depth limit can reject them.
+            let expr = crate::maybe_grow(256 * 1024, 1024 * 1024, || {
+                self.parse_zts_if_expr(alt_start)
+            })?;
             let Expr::ZtsIf(if_expr) = *expr else {
                 unreachable!("parse_zts_if_expr returns Expr::ZtsIf")
             };
