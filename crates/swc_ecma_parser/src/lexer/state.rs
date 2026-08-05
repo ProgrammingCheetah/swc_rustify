@@ -147,6 +147,17 @@ impl crate::input::Tokens for Lexer<'_> {
     }
 
     #[inline]
+    fn error_counts(&self) -> (usize, usize) {
+        (self.errors.len(), self.module_errors.len())
+    }
+
+    #[inline]
+    fn truncate_errors(&mut self, counts: (usize, usize)) {
+        self.errors.truncate(counts.0);
+        self.module_errors.truncate(counts.1);
+    }
+
+    #[inline]
     fn end_pos(&self) -> BytePos {
         self.input.end_pos()
     }

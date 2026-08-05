@@ -12,7 +12,7 @@ use swc_common::BytePos;
 use swc_ecma_ast::*;
 
 use super::{PResult, Parser};
-use crate::{context::Context, lexer::Token, parser::input::Tokens};
+use crate::{lexer::Token, parser::input::Tokens};
 
 impl<I: Tokens> Parser<I> {
     /// Cheap gate: zts enabled, cursor on the word `match`, `(` next.
@@ -29,14 +29,15 @@ impl<I: Tokens> Parser<I> {
         self.input_mut().peek() == Some(Token::LParen)
     }
 
-    /// Speculatively checks for the header `match ( expr ) { Word`.
+    /// Speculatively parses the header `match ( expr ) { Word`.
     ///
-    /// Returns `None` (with the parser fully backtracked) when the shape is
-    /// not a match expression, so `match` falls through to the plain
-    /// identifier path. When the header matches, the parser rewinds and
-    /// re-parses it for real — with diagnostics live — and commits: arm
-    /// syntax errors are then reported as real errors instead of falling
-    /// back to a bogus call expression.
+    /// Returns `None` (with the parser fully backtracked and any errors
+    /// recorded during the speculation rolled back) when the shape is not
+    /// a match expression, so `match` falls through to the plain identifier
+    /// path. When the header matches, parsing commits without a rewind —
+    /// the discriminant is parsed exactly once, with diagnostics live, so
+    /// nested matches in discriminant position stay linear-time and
+    /// recoverable errors inside the discriminant are reported.
     ///
     /// Disambiguation rules (all deliberate):
     /// - The `{` must sit on the same line as the `)`. ASI makes `match(1)\n{
@@ -49,59 +50,46 @@ impl<I: Tokens> Parser<I> {
         &mut self,
         start: BytePos,
     ) -> Option<PResult<Box<Expr>>> {
-        // Packrat memo: without it, nested `match (match (...` re-runs the
-        // speculation once per enclosing attempt — exponential time.
+        // Packrat memo of failures: without it, nested `match (match (...`
+        // re-runs the speculation once per enclosing attempt — exponential
+        // time.
         if self.zts_match_speculation_failures.contains(&start) {
             return None;
         }
 
-        let prev_ignore_error = self.input().get_ctx().contains(Context::IgnoreError);
         let checkpoint = self.checkpoint_save();
-        self.set_ctx(self.ctx() | Context::IgnoreError);
+        let err_counts = self.input().iter.error_counts();
 
-        let header_matches = (|| -> PResult<bool> {
+        let header = (|| -> PResult<Option<Box<Expr>>> {
             // `match`
             self.bump();
             if !self.input_mut().eat(Token::LParen) {
-                return Ok(false);
+                return Ok(None);
             }
-            let _discriminant = self.allow_in_expr(|p| p.parse_expr())?;
+            let discriminant = self.allow_in_expr(|p| p.parse_expr())?;
             if !self.input_mut().eat(Token::RParen) {
-                return Ok(false);
+                return Ok(None);
             }
             if !self.input().is(Token::LBrace) || self.input_mut().had_line_break_before_cur() {
-                return Ok(false);
+                return Ok(None);
             }
-            Ok(self.input_mut().peek().is_some_and(|t| t.is_word()))
+            if !self.input_mut().peek().is_some_and(|t| t.is_word()) {
+                return Ok(None);
+            }
+            Ok(Some(discriminant))
         })();
 
-        // Restore error reporting and rewind unconditionally: even on a
-        // header match we re-parse from `match` so that recoverable
-        // diagnostics inside the discriminant (suppressed during
-        // speculation) are emitted for real.
-        let mut ctx = self.ctx();
-        ctx.set(Context::IgnoreError, prev_ignore_error);
-        self.input_mut().set_ctx(ctx);
-        self.checkpoint_load(checkpoint);
-
-        match header_matches {
-            Ok(true) => Some(self.parse_zts_match_committed(start)),
-            Ok(false) | Err(..) => {
+        match header {
+            Ok(Some(discriminant)) => Some(self.parse_zts_match_body(start, discriminant)),
+            Ok(None) | Err(..) => {
+                // Backtrack: rewind tokens AND drop any recoverable errors
+                // the failed speculation recorded.
+                self.checkpoint_load(checkpoint);
+                self.input_mut().iter.truncate_errors(err_counts);
                 self.zts_match_speculation_failures.insert(start);
                 None
             }
         }
-    }
-
-    /// Re-parses `match ( expr )` with diagnostics enabled, then the body.
-    /// Only called after the speculative header check succeeded.
-    fn parse_zts_match_committed(&mut self, start: BytePos) -> PResult<Box<Expr>> {
-        // `match`
-        self.bump();
-        self.expect(Token::LParen)?;
-        let discriminant = self.allow_in_expr(|p| p.parse_expr())?;
-        self.expect(Token::RParen)?;
-        self.parse_zts_match_body(start, discriminant)
     }
 
     /// Parses `{ Arm, Arm, }` after a committed header. The cursor sits on
@@ -273,6 +261,39 @@ mod tests {
             "nested match speculation took {:?} — memoization is broken",
             started.elapsed()
         );
+    }
+
+    #[test]
+    fn success_nesting_in_discriminant_is_linear() {
+        // Matches nested in DISCRIMINANT position, all succeeding. The
+        // failure memo does not apply here; this guards against the commit
+        // path re-parsing discriminants (which would be exponential).
+        let mut src = String::from("x");
+        for _ in 0..48 {
+            src = format!("match ({src}) {{ A {{ a }} => a }}");
+        }
+        let src: &'static str = Box::leak(format!("const r = {src};").into_boxed_str());
+        let started = std::time::Instant::now();
+        let module = test_parser(src, zts(), |p| p.parse_module());
+        assert_eq!(module.body.len(), 1);
+        assert!(
+            started.elapsed() < std::time::Duration::from_secs(5),
+            "success-path nesting took {:?} — discriminants are being re-parsed",
+            started.elapsed()
+        );
+    }
+
+    #[test]
+    fn deep_paren_nesting_does_not_crash() {
+        // 8000 paren levels would overflow the stack in a debug build;
+        // with the zts flag on, expression recursion rides on maybe_grow
+        // (stacker) and must parse cleanly. The nesting LIMIT is enforced
+        // by the zts semantic pass, not the parser.
+        let n = 8000;
+        let src: &'static str =
+            Box::leak(format!("const a = {}1{};", "(".repeat(n), ")".repeat(n)).into_boxed_str());
+        let module = test_parser(src, zts(), |p| p.parse_module());
+        assert_eq!(module.body.len(), 1);
     }
 
     #[test]

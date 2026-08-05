@@ -76,6 +76,21 @@ impl<I: Tokens> Parser<I> {
     pub(crate) fn parse_assignment_expr(&mut self) -> PResult<Box<Expr>> {
         trace_cur!(self, parse_assignment_expr);
 
+        // zts: expression recursion rides on maybe_grow (stacker) so deep
+        // nesting grows the stack instead of SIGABRT-ing — a hard
+        // requirement once the compiler runs in-process (napi/Vite), where
+        // stacks are small and an abort kills the host. The zts semantic
+        // pass enforces the actual nesting limit with a real diagnostic.
+        if self.input().syntax().zts() {
+            return crate::maybe_grow(256 * 1024, 1024 * 1024, || {
+                self.parse_assignment_expr_inner()
+            });
+        }
+
+        self.parse_assignment_expr_inner()
+    }
+
+    fn parse_assignment_expr_inner(&mut self) -> PResult<Box<Expr>> {
         if self.input().is(Token::JSXTagStart) && self.input().syntax().typescript() {
             // Note: When the JSX plugin is on, type assertions (`<T> x`) aren't valid
             // syntax.

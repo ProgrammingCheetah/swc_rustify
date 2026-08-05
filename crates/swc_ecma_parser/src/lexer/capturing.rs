@@ -125,6 +125,14 @@ impl<I: Tokens> Tokens for Capturing<I> {
         self.inner.add_module_mode_error(error);
     }
 
+    fn error_counts(&self) -> (usize, usize) {
+        self.inner.error_counts()
+    }
+
+    fn truncate_errors(&mut self, counts: (usize, usize)) {
+        self.inner.truncate_errors(counts);
+    }
+
     fn end_pos(&self) -> swc_common::BytePos {
         self.inner.end_pos()
     }

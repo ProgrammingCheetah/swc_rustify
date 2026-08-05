@@ -46,6 +46,9 @@ pub trait ExprExt {
 
             Expr::Cond(..) => false,
 
+            // zts
+            Expr::Match(..) => false,
+
             Expr::Yield(..) | Expr::Arrow(..) | Expr::Assign(..) => false,
 
             Expr::Seq(..) => false,

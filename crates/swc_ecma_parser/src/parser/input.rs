@@ -54,6 +54,15 @@ pub trait Tokens: Clone {
     /// If the program was parsed as a script, this contains the module
     /// errors should the program be identified as a module in the future.
     fn take_script_module_errors(&mut self) -> Vec<Error>;
+
+    /// zts: current (errors, module_errors) lengths, for speculative-parse
+    /// rollback via [Tokens::truncate_errors].
+    fn error_counts(&self) -> (usize, usize);
+
+    /// zts: drop errors recorded after an [Tokens::error_counts] snapshot.
+    /// Used when a speculative parse backtracks: errors emitted during the
+    /// failed speculation must not survive it.
+    fn truncate_errors(&mut self, counts: (usize, usize));
     fn update_token_flags(&mut self, f: impl FnOnce(&mut TokenFlags));
     fn token_flags(&self) -> TokenFlags;
 
