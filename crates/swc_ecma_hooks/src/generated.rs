@@ -2582,6 +2582,30 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant], ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsExprBlock` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_expr_block(&mut self, node: &ZtsExprBlock, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsExprBlock` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_expr_block(&mut self, node: &ZtsExprBlock, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsIfAlt` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_if_alt(&mut self, node: &ZtsIfAlt, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsIfAlt` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_if_alt(&mut self, node: &ZtsIfAlt, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsIfExpr` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_if_expr(&mut self, node: &ZtsIfExpr, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsIfExpr` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_if_expr(&mut self, node: &ZtsIfExpr, ctx: &mut C) {}
 }
 #[doc = r" A composable hook that combines two hooks (immutable version)."]
 #[doc = r""]
@@ -6263,6 +6287,42 @@ where
     fn exit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant], ctx: &mut C) {
         self.second.exit_zts_enum_variants(node, ctx);
         self.first.exit_zts_enum_variants(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_expr_block(&mut self, node: &ZtsExprBlock, ctx: &mut C) {
+        self.first.enter_zts_expr_block(node, ctx);
+        self.second.enter_zts_expr_block(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_expr_block(&mut self, node: &ZtsExprBlock, ctx: &mut C) {
+        self.second.exit_zts_expr_block(node, ctx);
+        self.first.exit_zts_expr_block(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_if_alt(&mut self, node: &ZtsIfAlt, ctx: &mut C) {
+        self.first.enter_zts_if_alt(node, ctx);
+        self.second.enter_zts_if_alt(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_if_alt(&mut self, node: &ZtsIfAlt, ctx: &mut C) {
+        self.second.exit_zts_if_alt(node, ctx);
+        self.first.exit_zts_if_alt(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_if_expr(&mut self, node: &ZtsIfExpr, ctx: &mut C) {
+        self.first.enter_zts_if_expr(node, ctx);
+        self.second.enter_zts_if_expr(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_if_expr(&mut self, node: &ZtsIfExpr, ctx: &mut C) {
+        self.second.exit_zts_if_expr(node, ctx);
+        self.first.exit_zts_if_expr(node, ctx);
     }
 }
 impl<L, R, C> VisitHook<C> for swc_common::pass::Either<L, R>
@@ -11153,6 +11213,54 @@ where
             Self::Right(hook) => hook.exit_zts_enum_variants(node, ctx),
         }
     }
+
+    #[inline]
+    fn enter_zts_expr_block(&mut self, node: &ZtsExprBlock, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_expr_block(node, ctx),
+            Self::Right(hook) => hook.enter_zts_expr_block(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_expr_block(&mut self, node: &ZtsExprBlock, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_expr_block(node, ctx),
+            Self::Right(hook) => hook.exit_zts_expr_block(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_if_alt(&mut self, node: &ZtsIfAlt, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_if_alt(node, ctx),
+            Self::Right(hook) => hook.enter_zts_if_alt(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_if_alt(&mut self, node: &ZtsIfAlt, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_if_alt(node, ctx),
+            Self::Right(hook) => hook.exit_zts_if_alt(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_if_expr(&mut self, node: &ZtsIfExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_if_expr(node, ctx),
+            Self::Right(hook) => hook.enter_zts_if_expr(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_if_expr(&mut self, node: &ZtsIfExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_if_expr(node, ctx),
+            Self::Right(hook) => hook.exit_zts_if_expr(node, ctx),
+        }
+    }
 }
 impl<H, C> VisitHook<C> for Option<H>
 where
@@ -15433,6 +15541,48 @@ where
             hook.exit_zts_enum_variants(node, ctx);
         }
     }
+
+    #[inline]
+    fn enter_zts_expr_block(&mut self, node: &ZtsExprBlock, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_expr_block(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_expr_block(&mut self, node: &ZtsExprBlock, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_expr_block(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_if_alt(&mut self, node: &ZtsIfAlt, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_if_alt(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_if_alt(&mut self, node: &ZtsIfAlt, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_if_alt(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_if_expr(&mut self, node: &ZtsIfExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_if_expr(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_if_expr(&mut self, node: &ZtsIfExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_if_expr(node, ctx);
+        }
+    }
 }
 #[doc = r" An adapter that implements Visit using a VisitHook."]
 #[doc = r""]
@@ -17986,6 +18136,30 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.enter_zts_enum_variants(node, &mut self.context);
         node.visit_children_with(self);
         self.hook.exit_zts_enum_variants(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsExprBlock` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_expr_block(&mut self, node: &ZtsExprBlock) {
+        self.hook.enter_zts_expr_block(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_expr_block(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsIfAlt` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_if_alt(&mut self, node: &ZtsIfAlt) {
+        self.hook.enter_zts_if_alt(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_if_alt(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsIfExpr` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_if_expr(&mut self, node: &ZtsIfExpr) {
+        self.hook.enter_zts_if_expr(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_if_expr(node, &mut self.context);
     }
 }
 #[doc = r" A hook trait for composable AST visitors."]
@@ -20613,6 +20787,30 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsExprBlock` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_expr_block(&mut self, node: &mut ZtsExprBlock, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsExprBlock` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_expr_block(&mut self, node: &mut ZtsExprBlock, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsIfAlt` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_if_alt(&mut self, node: &mut ZtsIfAlt, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsIfAlt` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_if_alt(&mut self, node: &mut ZtsIfAlt, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsIfExpr` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_if_expr(&mut self, node: &mut ZtsIfExpr, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsIfExpr` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_if_expr(&mut self, node: &mut ZtsIfExpr, ctx: &mut C) {}
 }
 #[doc = r" A composable hook that combines two hooks."]
 #[doc = r""]
@@ -24330,6 +24528,42 @@ where
     fn exit_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>, ctx: &mut C) {
         self.second.exit_zts_enum_variants(node, ctx);
         self.first.exit_zts_enum_variants(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_expr_block(&mut self, node: &mut ZtsExprBlock, ctx: &mut C) {
+        self.first.enter_zts_expr_block(node, ctx);
+        self.second.enter_zts_expr_block(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_expr_block(&mut self, node: &mut ZtsExprBlock, ctx: &mut C) {
+        self.second.exit_zts_expr_block(node, ctx);
+        self.first.exit_zts_expr_block(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_if_alt(&mut self, node: &mut ZtsIfAlt, ctx: &mut C) {
+        self.first.enter_zts_if_alt(node, ctx);
+        self.second.enter_zts_if_alt(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_if_alt(&mut self, node: &mut ZtsIfAlt, ctx: &mut C) {
+        self.second.exit_zts_if_alt(node, ctx);
+        self.first.exit_zts_if_alt(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_if_expr(&mut self, node: &mut ZtsIfExpr, ctx: &mut C) {
+        self.first.enter_zts_if_expr(node, ctx);
+        self.second.enter_zts_if_expr(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_if_expr(&mut self, node: &mut ZtsIfExpr, ctx: &mut C) {
+        self.second.exit_zts_if_expr(node, ctx);
+        self.first.exit_zts_if_expr(node, ctx);
     }
 }
 impl<L, R, C> VisitMutHook<C> for swc_common::pass::Either<L, R>
@@ -29256,6 +29490,54 @@ where
             Self::Right(hook) => hook.exit_zts_enum_variants(node, ctx),
         }
     }
+
+    #[inline]
+    fn enter_zts_expr_block(&mut self, node: &mut ZtsExprBlock, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_expr_block(node, ctx),
+            Self::Right(hook) => hook.enter_zts_expr_block(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_expr_block(&mut self, node: &mut ZtsExprBlock, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_expr_block(node, ctx),
+            Self::Right(hook) => hook.exit_zts_expr_block(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_if_alt(&mut self, node: &mut ZtsIfAlt, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_if_alt(node, ctx),
+            Self::Right(hook) => hook.enter_zts_if_alt(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_if_alt(&mut self, node: &mut ZtsIfAlt, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_if_alt(node, ctx),
+            Self::Right(hook) => hook.exit_zts_if_alt(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_if_expr(&mut self, node: &mut ZtsIfExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_if_expr(node, ctx),
+            Self::Right(hook) => hook.enter_zts_if_expr(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_if_expr(&mut self, node: &mut ZtsIfExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_if_expr(node, ctx),
+            Self::Right(hook) => hook.exit_zts_if_expr(node, ctx),
+        }
+    }
 }
 impl<H, C> VisitMutHook<C> for Option<H>
 where
@@ -33572,6 +33854,48 @@ where
             hook.exit_zts_enum_variants(node, ctx);
         }
     }
+
+    #[inline]
+    fn enter_zts_expr_block(&mut self, node: &mut ZtsExprBlock, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_expr_block(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_expr_block(&mut self, node: &mut ZtsExprBlock, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_expr_block(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_if_alt(&mut self, node: &mut ZtsIfAlt, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_if_alt(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_if_alt(&mut self, node: &mut ZtsIfAlt, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_if_alt(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_if_expr(&mut self, node: &mut ZtsIfExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_if_expr(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_if_expr(&mut self, node: &mut ZtsIfExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_if_expr(node, ctx);
+        }
+    }
 }
 #[doc = r" An adapter that implements VisitMut using a VisitMutHook."]
 #[doc = r""]
@@ -36125,5 +36449,29 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.enter_zts_enum_variants(node, &mut self.context);
         node.visit_mut_children_with(self);
         self.hook.exit_zts_enum_variants(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsExprBlock` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_expr_block(&mut self, node: &mut ZtsExprBlock) {
+        self.hook.enter_zts_expr_block(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_expr_block(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsIfAlt` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_if_alt(&mut self, node: &mut ZtsIfAlt) {
+        self.hook.enter_zts_if_alt(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_if_alt(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsIfExpr` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr) {
+        self.hook.enter_zts_if_expr(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_if_expr(node, &mut self.context);
     }
 }

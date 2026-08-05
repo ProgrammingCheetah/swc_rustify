@@ -401,6 +401,13 @@ impl<I: Tokens> Parser<I> {
         let tok = self.input.cur();
         match tok {
             Token::This => return self.parse_this_expr(start),
+            // zts: `if` in expression position. Vanilla TS has no valid
+            // parse here (it would be "Expression expected"), so this is a
+            // pure extension — no backtracking needed.
+            #[cfg(feature = "typescript")]
+            Token::If if self.input().syntax().zts() => {
+                return self.parse_zts_if_expr(start);
+            }
             Token::Async => {
                 if let Some(res) = self.try_parse_async_start(can_be_arrow) {
                     return res;

@@ -16,7 +16,7 @@ use crate::{
     operators::{AssignOp, BinaryOp, UnaryOp, UpdateOp},
     pat::Pat,
     prop::Prop,
-    stmt::BlockStmt,
+    stmt::{BlockStmt, Stmt},
     typescript::{
         TsAsExpr, TsConstAssertion, TsInstantiation, TsNonNullExpr, TsSatisfiesExpr, TsTypeAnn,
         TsTypeAssertion, TsTypeParamDecl, TsTypeParamInstantiation,
@@ -172,6 +172,17 @@ pub enum Expr {
     #[tag("MatchExpression")]
     #[is(name = "match_expr")]
     Match(MatchExpr),
+
+    /// zts extension: expression `if (test) { ... } else { ... }`.
+    /// Must be lowered to vanilla TS before codegen.
+    #[tag("ZtsIfExpression")]
+    ZtsIf(ZtsIfExpr),
+
+    /// zts extension: a block used as an expression (`{ stmts; tail }`).
+    /// Only produced in zts if-expression branches and match arm bodies;
+    /// always consumed by the lowering of its parent construct.
+    #[tag("ZtsExprBlock")]
+    ZtsExprBlock(ZtsExprBlock),
 }
 
 bridge_from!(Box<Expr>, Box<JSXElement>, JSXElement);
@@ -424,6 +435,8 @@ impl Expr {
             Expr::OptChain(e) => e.span = span,
             Expr::Lit(e) => e.set_span(span),
             Expr::Match(e) => e.span = span,
+            Expr::ZtsIf(e) => e.span = span,
+            Expr::ZtsExprBlock(e) => e.span = span,
             #[cfg(all(swc_ast_unknown, feature = "encoding-impl"))]
             _ => swc_common::unknown!(),
         }
@@ -477,6 +490,8 @@ impl Clone for Expr {
             Invalid(e) => Invalid(e.clone()),
             TsSatisfies(e) => TsSatisfies(e.clone()),
             Match(e) => Match(e.clone()),
+            ZtsIf(e) => ZtsIf(e.clone()),
+            ZtsExprBlock(e) => ZtsExprBlock(e.clone()),
         }
     }
 }
@@ -516,6 +531,8 @@ boxed_expr!(MemberExpr);
 boxed_expr!(SuperPropExpr);
 boxed_expr!(CondExpr);
 boxed_expr!(MatchExpr);
+boxed_expr!(ZtsIfExpr);
+boxed_expr!(ZtsExprBlock);
 boxed_expr!(CallExpr);
 boxed_expr!(NewExpr);
 boxed_expr!(SeqExpr);
@@ -1095,6 +1112,71 @@ impl Take for MatchArm {
             variant: Take::dummy(),
             binding: None,
             body: Take::dummy(),
+        }
+    }
+}
+
+/// zts extension: `if (test) { ... } else { ... }` in expression position.
+/// `else` is mandatory (an expression must have a value on every path).
+#[ast_node("ZtsIfExpression")]
+#[derive(Eq, Hash, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsIfExpr {
+    pub span: Span,
+
+    pub test: Box<Expr>,
+
+    pub cons: ZtsExprBlock,
+
+    pub alt: ZtsIfAlt,
+}
+
+impl Take for ZtsIfExpr {
+    fn dummy() -> Self {
+        ZtsIfExpr {
+            span: DUMMY_SP,
+            test: Take::dummy(),
+            cons: Take::dummy(),
+            alt: ZtsIfAlt::Block(Take::dummy()),
+        }
+    }
+}
+
+/// The `else` side of a [ZtsIfExpr]: another block, or an `else if` chain.
+#[ast_node]
+#[derive(Eq, Hash, Is, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub enum ZtsIfAlt {
+    #[tag("ZtsExprBlock")]
+    Block(ZtsExprBlock),
+    #[tag("ZtsIfExpression")]
+    #[is(name = "if_chain")]
+    If(Box<ZtsIfExpr>),
+}
+
+/// zts extension: a block used as an expression. Its value is `tail`, the
+/// block's final expression; `stmts` are the statements before it.
+#[ast_node("ZtsExprBlock")]
+#[derive(Eq, Hash, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsExprBlock {
+    pub span: Span,
+
+    #[cfg_attr(feature = "serde-impl", serde(default))]
+    pub stmts: Vec<Stmt>,
+
+    pub tail: Box<Expr>,
+}
+
+impl Take for ZtsExprBlock {
+    fn dummy() -> Self {
+        ZtsExprBlock {
+            span: DUMMY_SP,
+            stmts: Vec::new(),
+            tail: Take::dummy(),
         }
     }
 }

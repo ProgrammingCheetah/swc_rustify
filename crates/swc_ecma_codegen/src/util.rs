@@ -255,8 +255,10 @@ impl StartsWithAlphaNum for Expr {
 
             Expr::Invalid(..) => true,
 
-            // zts: starts with the `match` word; never reaches codegen anyway.
-            Expr::Match(..) => true,
+            // zts: `match`/`if` start with a word, a block with `{`;
+            // none reach codegen anyway.
+            Expr::Match(..) | Expr::ZtsIf(..) => true,
+            Expr::ZtsExprBlock(..) => false,
             #[cfg(swc_ast_unknown)]
             _ => false,
         }

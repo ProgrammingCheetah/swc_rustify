@@ -211,6 +211,10 @@ impl<I: Tokens> Parser<I> {
     }
 
     /// `Variant { bindings } => body`
+    ///
+    /// The body is an assignment expression, or — mirroring arrow-function
+    /// bodies — a block expression when it opens with `{` (a block's value
+    /// is its tail expression; object literals need parens, `=> ({ ... })`).
     fn parse_zts_match_arm(&mut self) -> PResult<MatchArm> {
         let arm_start = self.input().cur_pos();
 
@@ -224,13 +228,71 @@ impl<I: Tokens> Parser<I> {
         };
 
         expect!(self, Token::Arrow);
-        let body = self.allow_in_expr(Self::parse_assignment_expr)?;
+        let body = if self.input().is(Token::LBrace) {
+            let block = self.parse_zts_expr_block()?;
+            Box::new(Expr::ZtsExprBlock(block))
+        } else {
+            self.allow_in_expr(Self::parse_assignment_expr)?
+        };
 
         Ok(MatchArm {
             span: self.span(arm_start),
             variant,
             binding,
             body,
+        })
+    }
+
+    /// `if (test) { ... } else { ... }` in expression position. `else` is
+    /// mandatory; `else if` chains are allowed. The `if` token is current.
+    pub(super) fn parse_zts_if_expr(&mut self, start: BytePos) -> PResult<Box<Expr>> {
+        self.assert_and_bump(Token::If);
+        expect!(self, Token::LParen);
+        let test = self.allow_in_expr(|p| p.parse_expr())?;
+        expect!(self, Token::RParen);
+
+        let cons = self.parse_zts_expr_block()?;
+
+        if !self.input_mut().eat(Token::Else) {
+            return Err(Error::new(self.span(start), SyntaxError::ZtsIfWithoutElse));
+        }
+
+        let alt = if self.input().is(Token::If) {
+            let alt_start = self.input().cur_pos();
+            let expr = self.parse_zts_if_expr(alt_start)?;
+            let Expr::ZtsIf(if_expr) = *expr else {
+                unreachable!("parse_zts_if_expr returns Expr::ZtsIf")
+            };
+            ZtsIfAlt::If(Box::new(if_expr))
+        } else {
+            ZtsIfAlt::Block(self.parse_zts_expr_block()?)
+        };
+
+        Ok(Box::new(Expr::ZtsIf(ZtsIfExpr {
+            span: self.span(start),
+            test,
+            cons,
+            alt,
+        })))
+    }
+
+    /// `{ stmts...; tail }` — a block whose value is its final expression.
+    fn parse_zts_expr_block(&mut self) -> PResult<ZtsExprBlock> {
+        let start = self.input().cur_pos();
+        let block = self.parse_block(false)?;
+
+        let mut stmts = block.stmts;
+        let Some(Stmt::Expr(tail_stmt)) = stmts.pop() else {
+            return Err(Error::new(
+                self.span(start),
+                SyntaxError::ZtsBlockWithoutTail,
+            ));
+        };
+
+        Ok(ZtsExprBlock {
+            span: self.span(start),
+            stmts,
+            tail: tail_stmt.expr,
         })
     }
 }
@@ -260,6 +322,56 @@ mod tests {
             let errs = p.take_errors();
             Ok((res.is_err(), !errs.is_empty()))
         })
+    }
+
+    #[test]
+    fn if_expr_basic() {
+        let e = parse_expr("if (b === 0) { 3 } else { 4 }");
+        let i = e.expect_zts_if();
+        assert!(i.cons.stmts.is_empty());
+        assert!(i.alt.is_block());
+    }
+
+    #[test]
+    fn if_expr_multi_stmt_and_else_if() {
+        let e = parse_expr(
+            "if (a) { const x = f(); x + 1 } else if (b) { 2 } else { const y = g(); y }",
+        );
+        let i = e.expect_zts_if();
+        assert_eq!(i.cons.stmts.len(), 1);
+        let ZtsIfAlt::If(chain) = &i.alt else {
+            panic!("expected else-if chain")
+        };
+        assert!(chain.alt.is_block());
+    }
+
+    #[test]
+    fn if_expr_without_else_is_an_error() {
+        let (is_err, had_errs) = parse_module_errs("const a = if (b) { 1 };");
+        assert!(is_err || had_errs, "if-expression without else must error");
+    }
+
+    #[test]
+    fn if_expr_block_without_tail_is_an_error() {
+        let (is_err, had_errs) = parse_module_errs("const a = if (b) { const x = 1; } else { 2 };");
+        assert!(
+            is_err || had_errs,
+            "block without tail expression must error"
+        );
+    }
+
+    #[test]
+    fn if_statement_still_works() {
+        let module = test_parser("if (a) { f(); } else { g(); }", zts(), |p| p.parse_module());
+        assert!(matches!(module.body[0].as_stmt().unwrap(), Stmt::If(..)));
+    }
+
+    #[test]
+    fn match_arm_block_body() {
+        let e = parse_expr("match (t) { K { v } => { const d = v * 2; d + 1 }, L { w } => w }");
+        let m = e.expect_match_expr();
+        let body = m.arms[0].body.as_zts_expr_block().unwrap();
+        assert_eq!(body.stmts.len(), 1);
     }
 
     #[test]

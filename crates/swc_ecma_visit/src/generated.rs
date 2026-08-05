@@ -2104,6 +2104,27 @@ pub trait Visit {
     fn visit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant]) {
         <[ZtsEnumVariant] as VisitWith<Self>>::visit_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsExprBlock`.\n\nBy default, this method calls \
+             [`ZtsExprBlock::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_zts_expr_block(&mut self, node: &ZtsExprBlock) {
+        <ZtsExprBlock as VisitWith<Self>>::visit_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsIfAlt`.\n\nBy default, this method calls \
+             [`ZtsIfAlt::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_zts_if_alt(&mut self, node: &ZtsIfAlt) {
+        <ZtsIfAlt as VisitWith<Self>>::visit_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsIfExpr`.\n\nBy default, this method calls \
+             [`ZtsIfExpr::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_zts_if_expr(&mut self, node: &ZtsIfExpr) {
+        <ZtsIfExpr as VisitWith<Self>>::visit_children_with(node, self)
+    }
 }
 impl<V> Visit for &mut V
 where
@@ -3631,6 +3652,21 @@ where
     fn visit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant]) {
         <V as Visit>::visit_zts_enum_variants(&mut **self, node)
     }
+
+    #[inline]
+    fn visit_zts_expr_block(&mut self, node: &ZtsExprBlock) {
+        <V as Visit>::visit_zts_expr_block(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_if_alt(&mut self, node: &ZtsIfAlt) {
+        <V as Visit>::visit_zts_if_alt(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_if_expr(&mut self, node: &ZtsIfExpr) {
+        <V as Visit>::visit_zts_if_expr(&mut **self, node)
+    }
 }
 impl<V> Visit for Box<V>
 where
@@ -5157,6 +5193,21 @@ where
     #[inline]
     fn visit_zts_enum_variants(&mut self, node: &[ZtsEnumVariant]) {
         <V as Visit>::visit_zts_enum_variants(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_expr_block(&mut self, node: &ZtsExprBlock) {
+        <V as Visit>::visit_zts_expr_block(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_if_alt(&mut self, node: &ZtsIfAlt) {
+        <V as Visit>::visit_zts_if_alt(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_if_expr(&mut self, node: &ZtsIfExpr) {
+        <V as Visit>::visit_zts_if_expr(&mut **self, node)
     }
 }
 impl<A, B> Visit for ::swc_visit::Either<A, B>
@@ -7650,6 +7701,30 @@ where
             swc_visit::Either::Right(visitor) => Visit::visit_zts_enum_variants(visitor, node),
         }
     }
+
+    #[inline]
+    fn visit_zts_expr_block(&mut self, node: &ZtsExprBlock) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_expr_block(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_expr_block(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_zts_if_alt(&mut self, node: &ZtsIfAlt) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_if_alt(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_if_alt(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_zts_if_expr(&mut self, node: &ZtsIfExpr) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_if_expr(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_if_expr(visitor, node),
+        }
+    }
 }
 impl<V> Visit for ::swc_visit::Optional<V>
 where
@@ -10089,6 +10164,30 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_zts_expr_block(&mut self, node: &ZtsExprBlock) {
+        if self.enabled {
+            <V as Visit>::visit_zts_expr_block(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_if_alt(&mut self, node: &ZtsIfAlt) {
+        if self.enabled {
+            <V as Visit>::visit_zts_if_alt(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_if_expr(&mut self, node: &ZtsIfExpr) {
+        if self.enabled {
+            <V as Visit>::visit_zts_if_expr(&mut self.visitor, node)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 pub trait VisitWith<V: ?Sized + Visit> {
@@ -11440,6 +11539,12 @@ impl<V: ?Sized + Visit> VisitWith<V> for Expr {
             }
             Expr::Match { 0: _field_0 } => {
                 <MatchExpr as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
+            Expr::ZtsIf { 0: _field_0 } => {
+                <ZtsIfExpr as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
+            Expr::ZtsExprBlock { 0: _field_0 } => {
+                <ZtsExprBlock as VisitWith<V>>::visit_with(_field_0, visitor);
             }
             #[cfg(swc_ast_unknown)]
             _ => (),
@@ -16120,6 +16225,77 @@ impl<V: ?Sized + Visit> VisitWith<V> for ZtsEnumVariant {
         }
     }
 }
+impl<V: ?Sized + Visit> VisitWith<V> for ZtsExprBlock {
+    #[doc = "Calls [Visit`::visit_zts_expr_block`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_expr_block(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            ZtsExprBlock { span, stmts, tail } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <Vec<Stmt> as VisitWith<V>>::visit_with(stmts, visitor)
+                };
+                {
+                    <Box<Expr> as VisitWith<V>>::visit_with(tail, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for ZtsIfAlt {
+    #[doc = "Calls [Visit`::visit_zts_if_alt`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_if_alt(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            ZtsIfAlt::Block { 0: _field_0 } => {
+                <ZtsExprBlock as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
+            ZtsIfAlt::If { 0: _field_0 } => {
+                <Box<ZtsIfExpr> as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for ZtsIfExpr {
+    #[doc = "Calls [Visit`::visit_zts_if_expr`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_if_expr(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            ZtsIfExpr {
+                span,
+                test,
+                cons,
+                alt,
+            } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <Box<Expr> as VisitWith<V>>::visit_with(test, visitor)
+                };
+                {
+                    <ZtsExprBlock as VisitWith<V>>::visit_with(cons, visitor)
+                };
+                {
+                    <ZtsIfAlt as VisitWith<V>>::visit_with(alt, visitor)
+                };
+            }
+        }
+    }
+}
 impl<V: ?Sized + Visit> VisitWith<V> for swc_atoms::Atom {
     #[doc = "Calls [Visit`::visit_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -20655,6 +20831,41 @@ pub trait VisitAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `ZtsExprBlock`.\n\nBy default, this method calls \
+             [`ZtsExprBlock::visit_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_zts_expr_block<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsExprBlock,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <ZtsExprBlock as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `ZtsIfAlt`.\n\nBy default, this method calls \
+             [`ZtsIfAlt::visit_children_with_ast_path`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_zts_if_alt<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsIfAlt,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <ZtsIfAlt as VisitWithAstPath<Self>>::visit_children_with_ast_path(node, self, __ast_path)
+    }
+    #[doc = "Visit a node of type `ZtsIfExpr`.\n\nBy default, this method calls \
+             [`ZtsIfExpr::visit_children_with_ast_path`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_zts_if_expr<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsIfExpr,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <ZtsIfExpr as VisitWithAstPath<Self>>::visit_children_with_ast_path(node, self, __ast_path)
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -23301,6 +23512,33 @@ where
     ) {
         <V as VisitAstPath>::visit_zts_enum_variants(&mut **self, node, __ast_path)
     }
+
+    #[inline]
+    fn visit_zts_expr_block<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsExprBlock,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_expr_block(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_if_alt<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsIfAlt,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_if_alt(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_if_expr<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsIfExpr,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_if_expr(&mut **self, node, __ast_path)
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -25946,6 +26184,33 @@ where
         __ast_path: &mut AstNodePath<'r>,
     ) {
         <V as VisitAstPath>::visit_zts_enum_variants(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_expr_block<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsExprBlock,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_expr_block(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_if_alt<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsIfAlt,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_if_alt(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_if_expr<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsIfExpr,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_if_expr(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -30684,6 +30949,54 @@ where
             }
         }
     }
+
+    #[inline]
+    fn visit_zts_expr_block<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsExprBlock,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_expr_block(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_expr_block(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_zts_if_alt<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsIfAlt,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_if_alt(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_if_alt(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_zts_if_expr<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsIfExpr,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_if_expr(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_if_expr(visitor, node, __ast_path)
+            }
+        }
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -34270,6 +34583,42 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_zts_expr_block<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsExprBlock,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_expr_block(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_if_alt<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsIfAlt,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_if_alt(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_if_expr<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsIfExpr,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_if_expr(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 #[cfg(any(docsrs, feature = "path"))]
@@ -37562,6 +37911,26 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for Expr {
                 let mut __ast_path = __ast_path
                     .with_guard(AstParentNodeRef::Expr(self, self::fields::ExprField::Match));
                 <MatchExpr as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Expr::ZtsIf { 0: _field_0 } => {
+                let mut __ast_path = __ast_path
+                    .with_guard(AstParentNodeRef::Expr(self, self::fields::ExprField::ZtsIf));
+                <ZtsIfExpr as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Expr::ZtsExprBlock { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::Expr(
+                    self,
+                    self::fields::ExprField::ZtsExprBlock,
+                ));
+                <ZtsExprBlock as VisitWithAstPath<V>>::visit_with_ast_path(
                     _field_0,
                     visitor,
                     &mut *__ast_path,
@@ -48764,6 +49133,179 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsEnumVariant {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsExprBlock {
+    #[doc = "Calls [VisitAstPath`::visit_zts_expr_block`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_expr_block(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            ZtsExprBlock { span, stmts, tail } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsExprBlock(
+                        self,
+                        self::fields::ZtsExprBlockField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsExprBlock(
+                        self,
+                        self::fields::ZtsExprBlockField::Stmts(usize::MAX),
+                    ));
+                    <Vec<Stmt> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        stmts,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsExprBlock(
+                        self,
+                        self::fields::ZtsExprBlockField::Tail,
+                    ));
+                    <Box<Expr> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        tail,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsIfAlt {
+    #[doc = "Calls [VisitAstPath`::visit_zts_if_alt`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_if_alt(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            ZtsIfAlt::Block { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsIfAlt(
+                    self,
+                    self::fields::ZtsIfAltField::Block,
+                ));
+                <ZtsExprBlock as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            ZtsIfAlt::If { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsIfAlt(
+                    self,
+                    self::fields::ZtsIfAltField::If,
+                ));
+                <Box<ZtsIfExpr> as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsIfExpr {
+    #[doc = "Calls [VisitAstPath`::visit_zts_if_expr`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_if_expr(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            ZtsIfExpr {
+                span,
+                test,
+                cons,
+                alt,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsIfExpr(
+                        self,
+                        self::fields::ZtsIfExprField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsIfExpr(
+                        self,
+                        self::fields::ZtsIfExprField::Test,
+                    ));
+                    <Box<Expr> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        test,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsIfExpr(
+                        self,
+                        self::fields::ZtsIfExprField::Cons,
+                    ));
+                    <ZtsExprBlock as VisitWithAstPath<V>>::visit_with_ast_path(
+                        cons,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsIfExpr(
+                        self,
+                        self::fields::ZtsIfExprField::Alt,
+                    ));
+                    <ZtsIfAlt as VisitWithAstPath<V>>::visit_with_ast_path(
+                        alt,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitAstPath`::visit_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -52663,6 +53205,27 @@ pub trait VisitMut {
     fn visit_mut_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>) {
         <Vec<ZtsEnumVariant> as VisitMutWith<Self>>::visit_mut_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsExprBlock`.\n\nBy default, this method calls \
+             [`ZtsExprBlock::visit_mut_children_with`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_mut_zts_expr_block(&mut self, node: &mut ZtsExprBlock) {
+        <ZtsExprBlock as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsIfAlt`.\n\nBy default, this method calls \
+             [`ZtsIfAlt::visit_mut_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_mut_zts_if_alt(&mut self, node: &mut ZtsIfAlt) {
+        <ZtsIfAlt as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsIfExpr`.\n\nBy default, this method calls \
+             [`ZtsIfExpr::visit_mut_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr) {
+        <ZtsIfExpr as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
 }
 impl<V> VisitMut for &mut V
 where
@@ -54190,6 +54753,21 @@ where
     fn visit_mut_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>) {
         <V as VisitMut>::visit_mut_zts_enum_variants(&mut **self, node)
     }
+
+    #[inline]
+    fn visit_mut_zts_expr_block(&mut self, node: &mut ZtsExprBlock) {
+        <V as VisitMut>::visit_mut_zts_expr_block(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_alt(&mut self, node: &mut ZtsIfAlt) {
+        <V as VisitMut>::visit_mut_zts_if_alt(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr) {
+        <V as VisitMut>::visit_mut_zts_if_expr(&mut **self, node)
+    }
 }
 impl<V> VisitMut for Box<V>
 where
@@ -55716,6 +56294,21 @@ where
     #[inline]
     fn visit_mut_zts_enum_variants(&mut self, node: &mut Vec<ZtsEnumVariant>) {
         <V as VisitMut>::visit_mut_zts_enum_variants(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_expr_block(&mut self, node: &mut ZtsExprBlock) {
+        <V as VisitMut>::visit_mut_zts_expr_block(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_alt(&mut self, node: &mut ZtsIfAlt) {
+        <V as VisitMut>::visit_mut_zts_if_alt(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr) {
+        <V as VisitMut>::visit_mut_zts_if_expr(&mut **self, node)
     }
 }
 impl<A, B> VisitMut for ::swc_visit::Either<A, B>
@@ -58523,6 +59116,30 @@ where
             }
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_expr_block(&mut self, node: &mut ZtsExprBlock) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_expr_block(visitor, node),
+            swc_visit::Either::Right(visitor) => VisitMut::visit_mut_zts_expr_block(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_alt(&mut self, node: &mut ZtsIfAlt) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_if_alt(visitor, node),
+            swc_visit::Either::Right(visitor) => VisitMut::visit_mut_zts_if_alt(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_if_expr(visitor, node),
+            swc_visit::Either::Right(visitor) => VisitMut::visit_mut_zts_if_expr(visitor, node),
+        }
+    }
 }
 impl<V> VisitMut for ::swc_visit::Optional<V>
 where
@@ -60962,6 +61579,30 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_expr_block(&mut self, node: &mut ZtsExprBlock) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_expr_block(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_alt(&mut self, node: &mut ZtsIfAlt) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_if_alt(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_if_expr(&mut self.visitor, node)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 pub trait VisitMutWith<V: ?Sized + VisitMut> {
@@ -62336,6 +62977,12 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for Expr {
             }
             Expr::Match { 0: _field_0 } => {
                 <MatchExpr as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
+            Expr::ZtsIf { 0: _field_0 } => {
+                <ZtsIfExpr as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
+            Expr::ZtsExprBlock { 0: _field_0 } => {
+                <ZtsExprBlock as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
             }
             #[cfg(swc_ast_unknown)]
             _ => (),
@@ -67058,6 +67705,77 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsEnumVariant {
         }
     }
 }
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsExprBlock {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_expr_block`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_expr_block(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            ZtsExprBlock { span, stmts, tail } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <Vec<Stmt> as VisitMutWith<V>>::visit_mut_with(stmts, visitor)
+                };
+                {
+                    <Box<Expr> as VisitMutWith<V>>::visit_mut_with(tail, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsIfAlt {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_if_alt`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_if_alt(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            ZtsIfAlt::Block { 0: _field_0 } => {
+                <ZtsExprBlock as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
+            ZtsIfAlt::If { 0: _field_0 } => {
+                <Box<ZtsIfExpr> as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsIfExpr {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_if_expr`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_if_expr(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            ZtsIfExpr {
+                span,
+                test,
+                cons,
+                alt,
+            } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <Box<Expr> as VisitMutWith<V>>::visit_mut_with(test, visitor)
+                };
+                {
+                    <ZtsExprBlock as VisitMutWith<V>>::visit_mut_with(cons, visitor)
+                };
+                {
+                    <ZtsIfAlt as VisitMutWith<V>>::visit_mut_with(alt, visitor)
+                };
+            }
+        }
+    }
+}
 impl<V: ?Sized + VisitMut> VisitMutWith<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitMut`::visit_mut_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -71176,6 +71894,33 @@ pub trait VisitMutAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `ZtsExprBlock`.\n\nBy default, this method calls \
+             [`ZtsExprBlock::visit_mut_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_mut_zts_expr_block(&mut self, node: &mut ZtsExprBlock, __ast_path: &mut AstKindPath) {
+        <ZtsExprBlock as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `ZtsIfAlt`.\n\nBy default, this method calls \
+             [`ZtsIfAlt::visit_mut_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_mut_zts_if_alt(&mut self, node: &mut ZtsIfAlt, __ast_path: &mut AstKindPath) {
+        <ZtsIfAlt as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `ZtsIfExpr`.\n\nBy default, this method calls \
+             [`ZtsIfExpr::visit_mut_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr, __ast_path: &mut AstKindPath) {
+        <ZtsIfExpr as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -73210,6 +73955,21 @@ where
     ) {
         <V as VisitMutAstPath>::visit_mut_zts_enum_variants(&mut **self, node, __ast_path)
     }
+
+    #[inline]
+    fn visit_mut_zts_expr_block(&mut self, node: &mut ZtsExprBlock, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_expr_block(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_alt(&mut self, node: &mut ZtsIfAlt, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_if_alt(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_if_expr(&mut **self, node, __ast_path)
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -75243,6 +76003,21 @@ where
         __ast_path: &mut AstKindPath,
     ) {
         <V as VisitMutAstPath>::visit_mut_zts_enum_variants(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_expr_block(&mut self, node: &mut ZtsExprBlock, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_expr_block(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_alt(&mut self, node: &mut ZtsIfAlt, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_if_alt(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_if_expr(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -79403,6 +80178,42 @@ where
             }
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_expr_block(&mut self, node: &mut ZtsExprBlock, __ast_path: &mut AstKindPath) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_expr_block(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_expr_block(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_alt(&mut self, node: &mut ZtsIfAlt, __ast_path: &mut AstKindPath) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_if_alt(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_if_alt(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr, __ast_path: &mut AstKindPath) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_if_expr(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_if_expr(visitor, node, __ast_path)
+            }
+        }
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -82609,6 +83420,30 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_expr_block(&mut self, node: &mut ZtsExprBlock, __ast_path: &mut AstKindPath) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_expr_block(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_alt(&mut self, node: &mut ZtsIfAlt, __ast_path: &mut AstKindPath) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_if_alt(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr, __ast_path: &mut AstKindPath) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_if_expr(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 #[cfg(any(docsrs, feature = "path"))]
@@ -85263,6 +86098,24 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for Expr {
                 let mut __ast_path =
                     __ast_path.with_guard(AstParentKind::Expr(self::fields::ExprField::Match));
                 <MatchExpr as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Expr::ZtsIf { 0: _field_0 } => {
+                let mut __ast_path =
+                    __ast_path.with_guard(AstParentKind::Expr(self::fields::ExprField::ZtsIf));
+                <ZtsIfExpr as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Expr::ZtsExprBlock { 0: _field_0 } => {
+                let mut __ast_path = __ast_path
+                    .with_guard(AstParentKind::Expr(self::fields::ExprField::ZtsExprBlock));
+                <ZtsExprBlock as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
                     _field_0,
                     visitor,
                     &mut *__ast_path,
@@ -94161,6 +95014,140 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsEnumVariant {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsExprBlock {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_expr_block`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_expr_block(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            ZtsExprBlock { span, stmts, tail } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsExprBlock(
+                        self::fields::ZtsExprBlockField::Span,
+                    ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsExprBlock(
+                        self::fields::ZtsExprBlockField::Stmts(usize::MAX),
+                    ));
+                    <Vec<Stmt> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        stmts,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsExprBlock(
+                        self::fields::ZtsExprBlockField::Tail,
+                    ));
+                    <Box<Expr> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        tail,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsIfAlt {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_if_alt`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_if_alt(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            ZtsIfAlt::Block { 0: _field_0 } => {
+                let mut __ast_path = __ast_path
+                    .with_guard(AstParentKind::ZtsIfAlt(self::fields::ZtsIfAltField::Block));
+                <ZtsExprBlock as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            ZtsIfAlt::If { 0: _field_0 } => {
+                let mut __ast_path =
+                    __ast_path.with_guard(AstParentKind::ZtsIfAlt(self::fields::ZtsIfAltField::If));
+                <Box<ZtsIfExpr> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsIfExpr {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_if_expr`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_if_expr(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            ZtsIfExpr {
+                span,
+                test,
+                cons,
+                alt,
+            } => {
+                {
+                    let mut __ast_path = __ast_path
+                        .with_guard(AstParentKind::ZtsIfExpr(self::fields::ZtsIfExprField::Span));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path
+                        .with_guard(AstParentKind::ZtsIfExpr(self::fields::ZtsIfExprField::Test));
+                    <Box<Expr> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        test,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path
+                        .with_guard(AstParentKind::ZtsIfExpr(self::fields::ZtsIfExprField::Cons));
+                    <ZtsExprBlock as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        cons,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path
+                        .with_guard(AstParentKind::ZtsIfExpr(self::fields::ZtsIfExprField::Alt));
+                    <ZtsIfAlt as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        alt,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitMutAstPath`::visit_mut_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -97576,6 +98563,27 @@ pub trait Fold {
     fn fold_zts_enum_variants(&mut self, node: Vec<ZtsEnumVariant>) -> Vec<ZtsEnumVariant> {
         <Vec<ZtsEnumVariant> as FoldWith<Self>>::fold_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsExprBlock`.\n\nBy default, this method calls \
+             [`ZtsExprBlock::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_expr_block(&mut self, node: ZtsExprBlock) -> ZtsExprBlock {
+        <ZtsExprBlock as FoldWith<Self>>::fold_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsIfAlt`.\n\nBy default, this method calls \
+             [`ZtsIfAlt::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_if_alt(&mut self, node: ZtsIfAlt) -> ZtsIfAlt {
+        <ZtsIfAlt as FoldWith<Self>>::fold_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsIfExpr`.\n\nBy default, this method calls \
+             [`ZtsIfExpr::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_if_expr(&mut self, node: ZtsIfExpr) -> ZtsIfExpr {
+        <ZtsIfExpr as FoldWith<Self>>::fold_children_with(node, self)
+    }
 }
 impl<V> Fold for &mut V
 where
@@ -99163,6 +100171,21 @@ where
     fn fold_zts_enum_variants(&mut self, node: Vec<ZtsEnumVariant>) -> Vec<ZtsEnumVariant> {
         <V as Fold>::fold_zts_enum_variants(&mut **self, node)
     }
+
+    #[inline]
+    fn fold_zts_expr_block(&mut self, node: ZtsExprBlock) -> ZtsExprBlock {
+        <V as Fold>::fold_zts_expr_block(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_if_alt(&mut self, node: ZtsIfAlt) -> ZtsIfAlt {
+        <V as Fold>::fold_zts_if_alt(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_if_expr(&mut self, node: ZtsIfExpr) -> ZtsIfExpr {
+        <V as Fold>::fold_zts_if_expr(&mut **self, node)
+    }
 }
 impl<V> Fold for Box<V>
 where
@@ -100749,6 +101772,21 @@ where
     #[inline]
     fn fold_zts_enum_variants(&mut self, node: Vec<ZtsEnumVariant>) -> Vec<ZtsEnumVariant> {
         <V as Fold>::fold_zts_enum_variants(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_expr_block(&mut self, node: ZtsExprBlock) -> ZtsExprBlock {
+        <V as Fold>::fold_zts_expr_block(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_if_alt(&mut self, node: ZtsIfAlt) -> ZtsIfAlt {
+        <V as Fold>::fold_zts_if_alt(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_if_expr(&mut self, node: ZtsIfExpr) -> ZtsIfExpr {
+        <V as Fold>::fold_zts_if_expr(&mut **self, node)
     }
 }
 impl<A, B> Fold for ::swc_visit::Either<A, B>
@@ -103274,6 +104312,30 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Fold::fold_zts_enum_variants(visitor, node),
             swc_visit::Either::Right(visitor) => Fold::fold_zts_enum_variants(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_expr_block(&mut self, node: ZtsExprBlock) -> ZtsExprBlock {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_expr_block(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_expr_block(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_if_alt(&mut self, node: ZtsIfAlt) -> ZtsIfAlt {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_if_alt(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_if_alt(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_if_expr(&mut self, node: ZtsIfExpr) -> ZtsIfExpr {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_if_expr(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_if_expr(visitor, node),
         }
     }
 }
@@ -106079,6 +107141,33 @@ where
             node
         }
     }
+
+    #[inline]
+    fn fold_zts_expr_block(&mut self, node: ZtsExprBlock) -> ZtsExprBlock {
+        if self.enabled {
+            <V as Fold>::fold_zts_expr_block(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_if_alt(&mut self, node: ZtsIfAlt) -> ZtsIfAlt {
+        if self.enabled {
+            <V as Fold>::fold_zts_if_alt(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_if_expr(&mut self, node: ZtsIfExpr) -> ZtsIfExpr {
+        if self.enabled {
+            <V as Fold>::fold_zts_if_expr(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 pub trait FoldWith<V: ?Sized + Fold> {
@@ -107441,6 +108530,14 @@ impl<V: ?Sized + Fold> FoldWith<V> for Expr {
             Expr::Match { 0: _field_0 } => {
                 let _field_0 = <MatchExpr as FoldWith<V>>::fold_with(_field_0, visitor);
                 Expr::Match { 0: _field_0 }
+            }
+            Expr::ZtsIf { 0: _field_0 } => {
+                let _field_0 = <ZtsIfExpr as FoldWith<V>>::fold_with(_field_0, visitor);
+                Expr::ZtsIf { 0: _field_0 }
+            }
+            Expr::ZtsExprBlock { 0: _field_0 } => {
+                let _field_0 = <ZtsExprBlock as FoldWith<V>>::fold_with(_field_0, visitor);
+                Expr::ZtsExprBlock { 0: _field_0 }
             }
             #[cfg(swc_ast_unknown)]
             _ => self,
@@ -112072,6 +113169,72 @@ impl<V: ?Sized + Fold> FoldWith<V> for ZtsEnumVariant {
         }
     }
 }
+impl<V: ?Sized + Fold> FoldWith<V> for ZtsExprBlock {
+    #[doc = "Calls [Fold`::fold_zts_expr_block`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_expr_block(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            ZtsExprBlock { span, stmts, tail } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let stmts = { <Vec<Stmt> as FoldWith<V>>::fold_with(stmts, visitor) };
+                let tail = { <Box<Expr> as FoldWith<V>>::fold_with(tail, visitor) };
+                ZtsExprBlock { span, stmts, tail }
+            }
+        }
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for ZtsIfAlt {
+    #[doc = "Calls [Fold`::fold_zts_if_alt`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_if_alt(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            ZtsIfAlt::Block { 0: _field_0 } => {
+                let _field_0 = <ZtsExprBlock as FoldWith<V>>::fold_with(_field_0, visitor);
+                ZtsIfAlt::Block { 0: _field_0 }
+            }
+            ZtsIfAlt::If { 0: _field_0 } => {
+                let _field_0 = <Box<ZtsIfExpr> as FoldWith<V>>::fold_with(_field_0, visitor);
+                ZtsIfAlt::If { 0: _field_0 }
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => self,
+        }
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for ZtsIfExpr {
+    #[doc = "Calls [Fold`::fold_zts_if_expr`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_if_expr(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            ZtsIfExpr {
+                span,
+                test,
+                cons,
+                alt,
+            } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let test = { <Box<Expr> as FoldWith<V>>::fold_with(test, visitor) };
+                let cons = { <ZtsExprBlock as FoldWith<V>>::fold_with(cons, visitor) };
+                let alt = { <ZtsIfAlt as FoldWith<V>>::fold_with(alt, visitor) };
+                ZtsIfExpr {
+                    span,
+                    test,
+                    cons,
+                    alt,
+                }
+            }
+        }
+    }
+}
 impl<V: ?Sized + Fold> FoldWith<V> for swc_atoms::Atom {
     #[doc = "Calls [Fold`::fold_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -116076,6 +117239,31 @@ pub trait FoldAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `ZtsExprBlock`.\n\nBy default, this method calls \
+             [`ZtsExprBlock::fold_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_zts_expr_block(
+        &mut self,
+        node: ZtsExprBlock,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsExprBlock {
+        <ZtsExprBlock as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
+    }
+    #[doc = "Visit a node of type `ZtsIfAlt`.\n\nBy default, this method calls \
+             [`ZtsIfAlt::fold_children_with_ast_path`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn fold_zts_if_alt(&mut self, node: ZtsIfAlt, __ast_path: &mut AstKindPath) -> ZtsIfAlt {
+        <ZtsIfAlt as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
+    }
+    #[doc = "Visit a node of type `ZtsIfExpr`.\n\nBy default, this method calls \
+             [`ZtsIfExpr::fold_children_with_ast_path`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn fold_zts_if_expr(&mut self, node: ZtsIfExpr, __ast_path: &mut AstKindPath) -> ZtsIfExpr {
+        <ZtsIfExpr as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -118354,6 +119542,25 @@ where
     ) -> Vec<ZtsEnumVariant> {
         <V as FoldAstPath>::fold_zts_enum_variants(&mut **self, node, __ast_path)
     }
+
+    #[inline]
+    fn fold_zts_expr_block(
+        &mut self,
+        node: ZtsExprBlock,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsExprBlock {
+        <V as FoldAstPath>::fold_zts_expr_block(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_if_alt(&mut self, node: ZtsIfAlt, __ast_path: &mut AstKindPath) -> ZtsIfAlt {
+        <V as FoldAstPath>::fold_zts_if_alt(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_if_expr(&mut self, node: ZtsIfExpr, __ast_path: &mut AstKindPath) -> ZtsIfExpr {
+        <V as FoldAstPath>::fold_zts_if_expr(&mut **self, node, __ast_path)
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -120631,6 +121838,25 @@ where
         __ast_path: &mut AstKindPath,
     ) -> Vec<ZtsEnumVariant> {
         <V as FoldAstPath>::fold_zts_enum_variants(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_expr_block(
+        &mut self,
+        node: ZtsExprBlock,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsExprBlock {
+        <V as FoldAstPath>::fold_zts_expr_block(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_if_alt(&mut self, node: ZtsIfAlt, __ast_path: &mut AstKindPath) -> ZtsIfAlt {
+        <V as FoldAstPath>::fold_zts_if_alt(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_if_expr(&mut self, node: ZtsIfExpr, __ast_path: &mut AstKindPath) -> ZtsIfExpr {
+        <V as FoldAstPath>::fold_zts_if_expr(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -124941,6 +126167,46 @@ where
             }
         }
     }
+
+    #[inline]
+    fn fold_zts_expr_block(
+        &mut self,
+        node: ZtsExprBlock,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsExprBlock {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_expr_block(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_expr_block(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_zts_if_alt(&mut self, node: ZtsIfAlt, __ast_path: &mut AstKindPath) -> ZtsIfAlt {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_if_alt(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_if_alt(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_zts_if_expr(&mut self, node: ZtsIfExpr, __ast_path: &mut AstKindPath) -> ZtsIfExpr {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_if_expr(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_if_expr(visitor, node, __ast_path)
+            }
+        }
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -128451,6 +129717,37 @@ where
             node
         }
     }
+
+    #[inline]
+    fn fold_zts_expr_block(
+        &mut self,
+        node: ZtsExprBlock,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsExprBlock {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_expr_block(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_if_alt(&mut self, node: ZtsIfAlt, __ast_path: &mut AstKindPath) -> ZtsIfAlt {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_if_alt(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_if_expr(&mut self, node: ZtsIfExpr, __ast_path: &mut AstKindPath) -> ZtsIfExpr {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_if_expr(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 #[cfg(any(docsrs, feature = "path"))]
@@ -131321,6 +132618,26 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for Expr {
                     &mut *__ast_path,
                 );
                 Expr::Match { 0: _field_0 }
+            }
+            Expr::ZtsIf { 0: _field_0 } => {
+                let mut __ast_path =
+                    __ast_path.with_guard(AstParentKind::Expr(self::fields::ExprField::ZtsIf));
+                let _field_0 = <ZtsIfExpr as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                Expr::ZtsIf { 0: _field_0 }
+            }
+            Expr::ZtsExprBlock { 0: _field_0 } => {
+                let mut __ast_path = __ast_path
+                    .with_guard(AstParentKind::Expr(self::fields::ExprField::ZtsExprBlock));
+                let _field_0 = <ZtsExprBlock as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                Expr::ZtsExprBlock { 0: _field_0 }
             }
             #[cfg(swc_ast_unknown)]
             _ => self,
@@ -140902,6 +142219,149 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsEnumVariant {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsExprBlock {
+    #[doc = "Calls [FoldAstPath`::fold_zts_expr_block`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_expr_block(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            ZtsExprBlock { span, stmts, tail } => {
+                let span = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsExprBlock(
+                        self::fields::ZtsExprBlockField::Span,
+                    ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let stmts = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsExprBlock(
+                        self::fields::ZtsExprBlockField::Stmts(usize::MAX),
+                    ));
+                    <Vec<Stmt> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        stmts,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let tail = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsExprBlock(
+                        self::fields::ZtsExprBlockField::Tail,
+                    ));
+                    <Box<Expr> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        tail,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                ZtsExprBlock { span, stmts, tail }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsIfAlt {
+    #[doc = "Calls [FoldAstPath`::fold_zts_if_alt`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_if_alt(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            ZtsIfAlt::Block { 0: _field_0 } => {
+                let mut __ast_path = __ast_path
+                    .with_guard(AstParentKind::ZtsIfAlt(self::fields::ZtsIfAltField::Block));
+                let _field_0 = <ZtsExprBlock as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                ZtsIfAlt::Block { 0: _field_0 }
+            }
+            ZtsIfAlt::If { 0: _field_0 } => {
+                let mut __ast_path =
+                    __ast_path.with_guard(AstParentKind::ZtsIfAlt(self::fields::ZtsIfAltField::If));
+                let _field_0 = <Box<ZtsIfExpr> as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                ZtsIfAlt::If { 0: _field_0 }
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => self,
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsIfExpr {
+    #[doc = "Calls [FoldAstPath`::fold_zts_if_expr`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_if_expr(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            ZtsIfExpr {
+                span,
+                test,
+                cons,
+                alt,
+            } => {
+                let span = {
+                    let mut __ast_path = __ast_path
+                        .with_guard(AstParentKind::ZtsIfExpr(self::fields::ZtsIfExprField::Span));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let test = {
+                    let mut __ast_path = __ast_path
+                        .with_guard(AstParentKind::ZtsIfExpr(self::fields::ZtsIfExprField::Test));
+                    <Box<Expr> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        test,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let cons = {
+                    let mut __ast_path = __ast_path
+                        .with_guard(AstParentKind::ZtsIfExpr(self::fields::ZtsIfExprField::Cons));
+                    <ZtsExprBlock as FoldWithAstPath<V>>::fold_with_ast_path(
+                        cons,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let alt = {
+                    let mut __ast_path = __ast_path
+                        .with_guard(AstParentKind::ZtsIfExpr(self::fields::ZtsIfExprField::Alt));
+                    <ZtsIfAlt as FoldWithAstPath<V>>::fold_with_ast_path(
+                        alt,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                ZtsIfExpr {
+                    span,
+                    test,
+                    cons,
+                    alt,
+                }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [FoldAstPath`::fold_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -143263,6 +144723,10 @@ pub mod fields {
         Invalid,
         #[doc = "Represents [`Expr::Match`]"]
         Match,
+        #[doc = "Represents [`Expr::ZtsIf`]"]
+        ZtsIf,
+        #[doc = "Represents [`Expr::ZtsExprBlock`]"]
+        ZtsExprBlock,
     }
     impl ExprOrSpreadField {
         pub(crate) fn set_index(&mut self, index: usize) {
@@ -146856,6 +148320,60 @@ pub mod fields {
         #[doc = "Represents [`ZtsEnumVariant::fields`]"]
         Fields(usize),
     }
+    impl ZtsExprBlockField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                Self::Stmts(idx) => {
+                    assert_initial_index(*idx, index);
+                    *idx = index;
+                }
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum ZtsExprBlockField {
+        #[doc = "Represents [`ZtsExprBlock::span`]"]
+        Span,
+        #[doc = "Represents [`ZtsExprBlock::stmts`]"]
+        Stmts(usize),
+        #[doc = "Represents [`ZtsExprBlock::tail`]"]
+        Tail,
+    }
+    impl ZtsIfAltField {
+        #[inline(always)]
+        pub(crate) fn set_index(&mut self, _: usize) {
+            swc_visit::wrong_ast_path();
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum ZtsIfAltField {
+        #[doc = "Represents [`ZtsIfAlt::Block`]"]
+        Block,
+        #[doc = "Represents [`ZtsIfAlt::If`]"]
+        If,
+    }
+    impl ZtsIfExprField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum ZtsIfExprField {
+        #[doc = "Represents [`ZtsIfExpr::span`]"]
+        Span,
+        #[doc = "Represents [`ZtsIfExpr::test`]"]
+        Test,
+        #[doc = "Represents [`ZtsIfExpr::cons`]"]
+        Cons,
+        #[doc = "Represents [`ZtsIfExpr::alt`]"]
+        Alt,
+    }
     #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
     pub enum AstParentKind {
@@ -147100,6 +148618,9 @@ pub mod fields {
         ZtsEnumDecl(ZtsEnumDeclField),
         ZtsEnumField(ZtsEnumFieldField),
         ZtsEnumVariant(ZtsEnumVariantField),
+        ZtsExprBlock(ZtsExprBlockField),
+        ZtsIfAlt(ZtsIfAltField),
+        ZtsIfExpr(ZtsIfExprField),
     }
     impl ::swc_visit::ParentKind for AstParentKind {
         #[inline]
@@ -147346,6 +148867,9 @@ pub mod fields {
                 Self::ZtsEnumDecl(v) => v.set_index(index),
                 Self::ZtsEnumField(v) => v.set_index(index),
                 Self::ZtsEnumVariant(v) => v.set_index(index),
+                Self::ZtsExprBlock(v) => v.set_index(index),
+                Self::ZtsIfAlt(v) => v.set_index(index),
+                Self::ZtsIfExpr(v) => v.set_index(index),
             }
         }
     }
@@ -147604,6 +149128,9 @@ pub mod fields {
         ZtsEnumDecl(&'ast ZtsEnumDecl, ZtsEnumDeclField),
         ZtsEnumField(&'ast ZtsEnumField, ZtsEnumFieldField),
         ZtsEnumVariant(&'ast ZtsEnumVariant, ZtsEnumVariantField),
+        ZtsExprBlock(&'ast ZtsExprBlock, ZtsExprBlockField),
+        ZtsIfAlt(&'ast ZtsIfAlt, ZtsIfAltField),
+        ZtsIfExpr(&'ast ZtsIfExpr, ZtsIfExprField),
     }
     impl<'ast> ::swc_visit::NodeRef for AstParentNodeRef<'ast> {
         type ParentKind = AstParentKind;
@@ -147856,6 +149383,9 @@ pub mod fields {
                 Self::ZtsEnumDecl(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsEnumField(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsEnumVariant(_, __field_kind) => __field_kind.set_index(index),
+                Self::ZtsExprBlock(_, __field_kind) => __field_kind.set_index(index),
+                Self::ZtsIfAlt(_, __field_kind) => __field_kind.set_index(index),
+                Self::ZtsIfExpr(_, __field_kind) => __field_kind.set_index(index),
             }
         }
     }
@@ -148247,6 +149777,9 @@ pub mod fields {
                 Self::ZtsEnumVariant(_, __field_kind) => {
                     AstParentKind::ZtsEnumVariant(*__field_kind)
                 }
+                Self::ZtsExprBlock(_, __field_kind) => AstParentKind::ZtsExprBlock(*__field_kind),
+                Self::ZtsIfAlt(_, __field_kind) => AstParentKind::ZtsIfAlt(*__field_kind),
+                Self::ZtsIfExpr(_, __field_kind) => AstParentKind::ZtsIfExpr(*__field_kind),
             }
         }
     }
@@ -149456,6 +150989,21 @@ impl<'ast> From<&'ast ZtsEnumVariant> for NodeRef<'ast> {
         NodeRef::ZtsEnumVariant(node)
     }
 }
+impl<'ast> From<&'ast ZtsExprBlock> for NodeRef<'ast> {
+    fn from(node: &'ast ZtsExprBlock) -> Self {
+        NodeRef::ZtsExprBlock(node)
+    }
+}
+impl<'ast> From<&'ast ZtsIfAlt> for NodeRef<'ast> {
+    fn from(node: &'ast ZtsIfAlt) -> Self {
+        NodeRef::ZtsIfAlt(node)
+    }
+}
+impl<'ast> From<&'ast ZtsIfExpr> for NodeRef<'ast> {
+    fn from(node: &'ast ZtsIfExpr) -> Self {
+        NodeRef::ZtsIfExpr(node)
+    }
+}
 #[derive(Debug, Clone, Copy)]
 pub enum NodeRef<'ast> {
     Accessibility(&'ast Accessibility),
@@ -149699,6 +151247,9 @@ pub enum NodeRef<'ast> {
     ZtsEnumDecl(&'ast ZtsEnumDecl),
     ZtsEnumField(&'ast ZtsEnumField),
     ZtsEnumVariant(&'ast ZtsEnumVariant),
+    ZtsExprBlock(&'ast ZtsExprBlock),
+    ZtsIfAlt(&'ast ZtsIfAlt),
+    ZtsIfExpr(&'ast ZtsIfExpr),
 }
 impl<'ast> NodeRef<'ast> {
     #[doc = r" This is not a part of semver-stable API. It is experimental and subject to change."]
@@ -150243,6 +151794,8 @@ impl<'ast> NodeRef<'ast> {
                 Expr::OptChain(v0) => Box::new(::std::iter::once(NodeRef::OptChainExpr(v0))),
                 Expr::Invalid(v0) => Box::new(::std::iter::once(NodeRef::Invalid(v0))),
                 Expr::Match(v0) => Box::new(::std::iter::once(NodeRef::MatchExpr(v0))),
+                Expr::ZtsIf(v0) => Box::new(::std::iter::once(NodeRef::ZtsIfExpr(v0))),
+                Expr::ZtsExprBlock(v0) => Box::new(::std::iter::once(NodeRef::ZtsExprBlock(v0))),
                 _ => Box::new(::std::iter::empty::<NodeRef<'ast>>()),
             },
             NodeRef::ExprOrSpread(node) => {
@@ -152109,6 +153662,34 @@ impl<'ast> NodeRef<'ast> {
                             .iter()
                             .flat_map(|item| ::std::iter::once(NodeRef::ZtsEnumField(&item))),
                     );
+                Box::new(iterator)
+            }
+            NodeRef::ZtsExprBlock(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>()
+                    .chain(
+                        node.stmts
+                            .iter()
+                            .flat_map(|item| ::std::iter::once(NodeRef::Stmt(&item))),
+                    )
+                    .chain({
+                        let item = &*node.tail;
+                        ::std::iter::once(NodeRef::Expr(&item))
+                    });
+                Box::new(iterator)
+            }
+            NodeRef::ZtsIfAlt(node) => match node {
+                ZtsIfAlt::Block(v0) => Box::new(::std::iter::once(NodeRef::ZtsExprBlock(v0))),
+                ZtsIfAlt::If(v0) => Box::new(::std::iter::once(NodeRef::ZtsIfExpr(v0))),
+                _ => Box::new(::std::iter::empty::<NodeRef<'ast>>()),
+            },
+            NodeRef::ZtsIfExpr(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>()
+                    .chain({
+                        let item = &*node.test;
+                        ::std::iter::once(NodeRef::Expr(&item))
+                    })
+                    .chain(::std::iter::once(NodeRef::ZtsExprBlock(&node.cons)))
+                    .chain(::std::iter::once(NodeRef::ZtsIfAlt(&node.alt)));
                 Box::new(iterator)
             }
         }

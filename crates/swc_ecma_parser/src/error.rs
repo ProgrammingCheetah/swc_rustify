@@ -44,6 +44,10 @@ pub enum SyntaxError {
 
     /// zts: TS enum member syntax inside a zts enum.
     ZtsEnumVariantBody,
+    /// zts: expression `if` without `else`.
+    ZtsIfWithoutElse,
+    /// zts: expression block whose last statement is not an expression.
+    ZtsBlockWithoutTail,
     /// zts: `const enum`.
     ZtsConstEnum,
     /// zts: `declare enum`.
@@ -646,6 +650,13 @@ impl SyntaxError {
                  members are not supported; zts `enum` lowers to a tagged union + factory functions"
                     .into()
             }
+            SyntaxError::ZtsIfWithoutElse => {
+                "an `if` used as an expression must have an `else`: every path needs a value".into()
+            }
+            SyntaxError::ZtsBlockWithoutTail => "a block used as an expression must end with an \
+                                                 expression (its value); the last statement here \
+                                                 is not an expression"
+                .into(),
             SyntaxError::ZtsConstEnum => "`const enum` is not supported in zts; use a plain zts \
                                           `enum` (it lowers to a tagged union + factory functions)"
                 .into(),
