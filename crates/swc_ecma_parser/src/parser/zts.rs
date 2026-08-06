@@ -212,6 +212,30 @@ impl<I: Tokens> Parser<I> {
         })))
     }
 
+    /// `newtype AccountId = string;`
+    ///
+    /// The caller (parse_ts_decl) has already committed: the `newtype` word
+    /// is consumed and the current token is the name identifier on the same
+    /// line — exactly the `type`-alias commit rule, so `newtype` stays a
+    /// valid identifier everywhere else. No type params in v1 (the `=` is
+    /// expected right after the name).
+    pub(super) fn parse_zts_newtype_decl(&mut self, start: BytePos) -> PResult<Decl> {
+        if self.ctx().contains(Context::InDeclare) {
+            return Err(Error::new(self.span(start), SyntaxError::ZtsDeclareNewtype));
+        }
+
+        let ident = self.parse_ident_name()?;
+        let ident = Ident::new_no_ctxt(ident.sym, ident.span);
+        let type_ann = self.expect_then_parse_ts_type(Token::Eq, "=")?;
+        self.expect_general_semi()?;
+
+        Ok(Decl::ZtsNewtype(Box::new(ZtsNewtypeDecl {
+            span: self.span(start),
+            ident,
+            type_ann,
+        })))
+    }
+
     /// `Variant { field: Type, ... }` — braces required, fields optional.
     fn parse_zts_enum_variant(&mut self) -> PResult<ZtsEnumVariant> {
         let start = self.input().cur_pos();
@@ -807,6 +831,69 @@ mod tests {
         // Only the `{` must share a line with `)`; arms can wrap freely.
         let e = parse_expr("match (x) { A { a } =>\n  a,\n  B { b } => b\n}");
         assert_eq!(e.expect_match_expr().arms.len(), 2);
+    }
+
+    #[test]
+    fn newtype_decl_parses() {
+        let module = test_parser("newtype AccountId = string;", zts(), |p| p.parse_module());
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let n = decl.as_zts_newtype().unwrap();
+        assert_eq!(n.ident.sym, "AccountId");
+        assert!(n.type_ann.is_ts_keyword_type());
+    }
+
+    #[test]
+    fn export_newtype_decl_parses() {
+        let module = test_parser("export newtype UserId = string;", zts(), |p| p.parse_module());
+        let item = &module.body[0];
+        let export = item.as_module_decl().unwrap().as_export_decl().unwrap();
+        assert!(export.decl.is_zts_newtype());
+    }
+
+    #[test]
+    fn newtype_stays_an_identifier_elsewhere() {
+        // Assignment, call, member access, and ASI-split lines must all
+        // keep `newtype` as a plain identifier.
+        for src in [
+            "const newtype = 1;",
+            "newtype = 5;",
+            "newtype(x);",
+            "newtype.foo;",
+            "newtype\nAccountId;",
+        ] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let module = test_parser(src, zts(), |p| p.parse_module());
+            assert!(
+                !matches!(
+                    module.body[0].as_stmt(),
+                    Some(Stmt::Decl(Decl::ZtsNewtype(..)))
+                ),
+                "{src:?} must not parse as a newtype decl"
+            );
+        }
+    }
+
+    #[test]
+    fn declare_newtype_is_an_error() {
+        let (is_err, had) = parse_module_errs("declare newtype AccountId = string;");
+        assert!(is_err || had, "`declare newtype` must error");
+    }
+
+    #[test]
+    fn newtype_disabled_without_flag() {
+        // Without the zts flag, `newtype X = string;` stays what it is in
+        // vanilla TS: a syntax error (two identifiers on one line), NOT a
+        // newtype decl.
+        let (is_err, had) = test_parser(
+            "newtype X = string;",
+            Syntax::Typescript(Default::default()),
+            |p| {
+                let res = p.parse_module();
+                let errs = p.take_errors();
+                Ok((res.is_err(), !errs.is_empty()))
+            },
+        );
+        assert!(is_err || had, "vanilla TS must reject `newtype X = ...`");
     }
 
     #[test]

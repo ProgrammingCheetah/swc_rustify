@@ -58,6 +58,8 @@ pub enum SyntaxError {
     ZtsExportDefaultEnum,
     /// zts: `=> { a }` arm body, ambiguous with an object literal.
     ZtsAmbiguousArmBody,
+    /// zts: `declare newtype`.
+    ZtsDeclareNewtype,
 
     DeclNotAllowed,
 
@@ -683,6 +685,10 @@ impl SyntaxError {
             SyntaxError::ZtsDeclareEnum => "`declare enum` is not supported in zts; declare the \
                                             lowered shape instead (a type alias union + a factory \
                                             object)"
+                .into(),
+            SyntaxError::ZtsDeclareNewtype => "`declare newtype` is not supported in zts; declare \
+                                               the lowered shape instead (a branded type alias + a \
+                                               factory function)"
                 .into(),
             SyntaxError::TS1114 => "Duplicate label".into(),
             SyntaxError::TS1115 => "A 'continue' statement can only jump to a label of an \

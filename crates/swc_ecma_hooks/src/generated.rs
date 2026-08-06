@@ -2638,6 +2638,14 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_if_expr(&mut self, node: &ZtsIfExpr, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsNewtypeDecl` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsNewtypeDecl` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {}
 }
 #[doc = r" A composable hook that combines two hooks (immutable version)."]
 #[doc = r""]
@@ -6403,6 +6411,18 @@ where
     fn exit_zts_if_expr(&mut self, node: &ZtsIfExpr, ctx: &mut C) {
         self.second.exit_zts_if_expr(node, ctx);
         self.first.exit_zts_if_expr(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {
+        self.first.enter_zts_newtype_decl(node, ctx);
+        self.second.enter_zts_newtype_decl(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {
+        self.second.exit_zts_newtype_decl(node, ctx);
+        self.first.exit_zts_newtype_decl(node, ctx);
     }
 }
 impl<L, R, C> VisitHook<C> for swc_common::pass::Either<L, R>
@@ -11405,6 +11425,22 @@ where
             Self::Right(hook) => hook.exit_zts_if_expr(node, ctx),
         }
     }
+
+    #[inline]
+    fn enter_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_newtype_decl(node, ctx),
+            Self::Right(hook) => hook.enter_zts_newtype_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_newtype_decl(node, ctx),
+            Self::Right(hook) => hook.exit_zts_newtype_decl(node, ctx),
+        }
+    }
 }
 impl<H, C> VisitHook<C> for Option<H>
 where
@@ -15783,6 +15819,20 @@ where
             hook.exit_zts_if_expr(node, ctx);
         }
     }
+
+    #[inline]
+    fn enter_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_newtype_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_newtype_decl(node, ctx);
+        }
+    }
 }
 #[doc = r" An adapter that implements Visit using a VisitHook."]
 #[doc = r""]
@@ -18392,6 +18442,14 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.enter_zts_if_expr(node, &mut self.context);
         node.visit_children_with(self);
         self.hook.exit_zts_if_expr(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsNewtypeDecl` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl) {
+        self.hook.enter_zts_newtype_decl(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_newtype_decl(node, &mut self.context);
     }
 }
 #[doc = r" A hook trait for composable AST visitors."]
@@ -21075,6 +21133,14 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_if_expr(&mut self, node: &mut ZtsIfExpr, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsNewtypeDecl` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsNewtypeDecl` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {}
 }
 #[doc = r" A composable hook that combines two hooks."]
 #[doc = r""]
@@ -24876,6 +24942,18 @@ where
     fn exit_zts_if_expr(&mut self, node: &mut ZtsIfExpr, ctx: &mut C) {
         self.second.exit_zts_if_expr(node, ctx);
         self.first.exit_zts_if_expr(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {
+        self.first.enter_zts_newtype_decl(node, ctx);
+        self.second.enter_zts_newtype_decl(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {
+        self.second.exit_zts_newtype_decl(node, ctx);
+        self.first.exit_zts_newtype_decl(node, ctx);
     }
 }
 impl<L, R, C> VisitMutHook<C> for swc_common::pass::Either<L, R>
@@ -29914,6 +29992,22 @@ where
             Self::Right(hook) => hook.exit_zts_if_expr(node, ctx),
         }
     }
+
+    #[inline]
+    fn enter_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_newtype_decl(node, ctx),
+            Self::Right(hook) => hook.enter_zts_newtype_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_newtype_decl(node, ctx),
+            Self::Right(hook) => hook.exit_zts_newtype_decl(node, ctx),
+        }
+    }
 }
 impl<H, C> VisitMutHook<C> for Option<H>
 where
@@ -34328,6 +34422,20 @@ where
             hook.exit_zts_if_expr(node, ctx);
         }
     }
+
+    #[inline]
+    fn enter_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_newtype_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_newtype_decl(node, ctx);
+        }
+    }
 }
 #[doc = r" An adapter that implements VisitMut using a VisitMutHook."]
 #[doc = r""]
@@ -36937,5 +37045,13 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.enter_zts_if_expr(node, &mut self.context);
         node.visit_mut_children_with(self);
         self.hook.exit_zts_if_expr(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsNewtypeDecl` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl) {
+        self.hook.enter_zts_newtype_decl(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_newtype_decl(node, &mut self.context);
     }
 }

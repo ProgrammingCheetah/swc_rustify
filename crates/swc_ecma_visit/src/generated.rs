@@ -2153,6 +2153,13 @@ pub trait Visit {
     fn visit_zts_if_expr(&mut self, node: &ZtsIfExpr) {
         <ZtsIfExpr as VisitWith<Self>>::visit_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsNewtypeDecl`.\n\nBy default, this method calls \
+             [`ZtsNewtypeDecl::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl) {
+        <ZtsNewtypeDecl as VisitWith<Self>>::visit_children_with(node, self)
+    }
 }
 impl<V> Visit for &mut V
 where
@@ -3715,6 +3722,11 @@ where
     fn visit_zts_if_expr(&mut self, node: &ZtsIfExpr) {
         <V as Visit>::visit_zts_if_expr(&mut **self, node)
     }
+
+    #[inline]
+    fn visit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl) {
+        <V as Visit>::visit_zts_newtype_decl(&mut **self, node)
+    }
 }
 impl<V> Visit for Box<V>
 where
@@ -5276,6 +5288,11 @@ where
     #[inline]
     fn visit_zts_if_expr(&mut self, node: &ZtsIfExpr) {
         <V as Visit>::visit_zts_if_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl) {
+        <V as Visit>::visit_zts_newtype_decl(&mut **self, node)
     }
 }
 impl<A, B> Visit for ::swc_visit::Either<A, B>
@@ -7825,6 +7842,14 @@ where
             swc_visit::Either::Right(visitor) => Visit::visit_zts_if_expr(visitor, node),
         }
     }
+
+    #[inline]
+    fn visit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_newtype_decl(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_newtype_decl(visitor, node),
+        }
+    }
 }
 impl<V> Visit for ::swc_visit::Optional<V>
 where
@@ -10320,6 +10345,14 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl) {
+        if self.enabled {
+            <V as Visit>::visit_zts_newtype_decl(&mut self.visitor, node)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 pub trait VisitWith<V: ?Sized + Visit> {
@@ -11294,6 +11327,9 @@ impl<V: ?Sized + Visit> VisitWith<V> for Decl {
             }
             Decl::ZtsEnum { 0: _field_0 } => {
                 <Box<ZtsEnumDecl> as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
+            Decl::ZtsNewtype { 0: _field_0 } => {
+                <Box<ZtsNewtypeDecl> as VisitWith<V>>::visit_with(_field_0, visitor);
             }
             #[cfg(swc_ast_unknown)]
             _ => (),
@@ -16507,6 +16543,32 @@ impl<V: ?Sized + Visit> VisitWith<V> for ZtsIfExpr {
         }
     }
 }
+impl<V: ?Sized + Visit> VisitWith<V> for ZtsNewtypeDecl {
+    #[doc = "Calls [Visit`::visit_zts_newtype_decl`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_newtype_decl(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            ZtsNewtypeDecl {
+                span,
+                ident,
+                type_ann,
+            } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <Ident as VisitWith<V>>::visit_with(ident, visitor)
+                };
+                {
+                    <Box<TsType> as VisitWith<V>>::visit_with(type_ann, visitor)
+                };
+            }
+        }
+    }
+}
 impl<V: ?Sized + Visit> VisitWith<V> for swc_atoms::Atom {
     #[doc = "Calls [Visit`::visit_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -21127,6 +21189,19 @@ pub trait VisitAstPath {
     ) {
         <ZtsIfExpr as VisitWithAstPath<Self>>::visit_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `ZtsNewtypeDecl`.\n\nBy default, this method calls \
+             [`ZtsNewtypeDecl::visit_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_zts_newtype_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsNewtypeDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <ZtsNewtypeDecl as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -23836,6 +23911,15 @@ where
     ) {
         <V as VisitAstPath>::visit_zts_if_expr(&mut **self, node, __ast_path)
     }
+
+    #[inline]
+    fn visit_zts_newtype_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsNewtypeDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_newtype_decl(&mut **self, node, __ast_path)
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -26544,6 +26628,15 @@ where
         __ast_path: &mut AstNodePath<'r>,
     ) {
         <V as VisitAstPath>::visit_zts_if_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_newtype_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsNewtypeDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_newtype_decl(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -31394,6 +31487,22 @@ where
             }
         }
     }
+
+    #[inline]
+    fn visit_zts_newtype_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsNewtypeDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_newtype_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_newtype_decl(visitor, node, __ast_path)
+            }
+        }
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -35064,6 +35173,18 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_zts_newtype_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsNewtypeDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_newtype_decl(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 #[cfg(any(docsrs, feature = "path"))]
@@ -37349,6 +37470,17 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for Decl {
                     self::fields::DeclField::ZtsEnum,
                 ));
                 <Box<ZtsEnumDecl> as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Decl::ZtsNewtype { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::Decl(
+                    self,
+                    self::fields::DeclField::ZtsNewtype,
+                ));
+                <Box<ZtsNewtypeDecl> as VisitWithAstPath<V>>::visit_with_ast_path(
                     _field_0,
                     visitor,
                     &mut *__ast_path,
@@ -49934,6 +50066,66 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsIfExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsNewtypeDecl {
+    #[doc = "Calls [VisitAstPath`::visit_zts_newtype_decl`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_newtype_decl(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            ZtsNewtypeDecl {
+                span,
+                ident,
+                type_ann,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsNewtypeDecl(
+                        self,
+                        self::fields::ZtsNewtypeDeclField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsNewtypeDecl(
+                        self,
+                        self::fields::ZtsNewtypeDeclField::Ident,
+                    ));
+                    <Ident as VisitWithAstPath<V>>::visit_with_ast_path(
+                        ident,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsNewtypeDecl(
+                        self,
+                        self::fields::ZtsNewtypeDeclField::TypeAnn,
+                    ));
+                    <Box<TsType> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        type_ann,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitAstPath`::visit_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -53882,6 +54074,13 @@ pub trait VisitMut {
     fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr) {
         <ZtsIfExpr as VisitMutWith<Self>>::visit_mut_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsNewtypeDecl`.\n\nBy default, this method calls \
+             [`ZtsNewtypeDecl::visit_mut_children_with`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_mut_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl) {
+        <ZtsNewtypeDecl as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
 }
 impl<V> VisitMut for &mut V
 where
@@ -55444,6 +55643,11 @@ where
     fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr) {
         <V as VisitMut>::visit_mut_zts_if_expr(&mut **self, node)
     }
+
+    #[inline]
+    fn visit_mut_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl) {
+        <V as VisitMut>::visit_mut_zts_newtype_decl(&mut **self, node)
+    }
 }
 impl<V> VisitMut for Box<V>
 where
@@ -57005,6 +57209,11 @@ where
     #[inline]
     fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr) {
         <V as VisitMut>::visit_mut_zts_if_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl) {
+        <V as VisitMut>::visit_mut_zts_newtype_decl(&mut **self, node)
     }
 }
 impl<A, B> VisitMut for ::swc_visit::Either<A, B>
@@ -59876,6 +60085,16 @@ where
             swc_visit::Either::Right(visitor) => VisitMut::visit_mut_zts_if_expr(visitor, node),
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_newtype_decl(visitor, node),
+            swc_visit::Either::Right(visitor) => {
+                VisitMut::visit_mut_zts_newtype_decl(visitor, node)
+            }
+        }
+    }
 }
 impl<V> VisitMut for ::swc_visit::Optional<V>
 where
@@ -62371,6 +62590,14 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_newtype_decl(&mut self.visitor, node)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 pub trait VisitMutWith<V: ?Sized + VisitMut> {
@@ -63368,6 +63595,9 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for Decl {
             }
             Decl::ZtsEnum { 0: _field_0 } => {
                 <Box<ZtsEnumDecl> as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
+            Decl::ZtsNewtype { 0: _field_0 } => {
+                <Box<ZtsNewtypeDecl> as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
             }
             #[cfg(swc_ast_unknown)]
             _ => (),
@@ -68623,6 +68853,32 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsIfExpr {
         }
     }
 }
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsNewtypeDecl {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_newtype_decl`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_newtype_decl(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            ZtsNewtypeDecl {
+                span,
+                ident,
+                type_ann,
+            } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <Ident as VisitMutWith<V>>::visit_mut_with(ident, visitor)
+                };
+                {
+                    <Box<TsType> as VisitMutWith<V>>::visit_mut_with(type_ann, visitor)
+                };
+            }
+        }
+    }
+}
 impl<V: ?Sized + VisitMut> VisitMutWith<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitMut`::visit_mut_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -72812,6 +73068,19 @@ pub trait VisitMutAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `ZtsNewtypeDecl`.\n\nBy default, this method calls \
+             [`ZtsNewtypeDecl::visit_mut_children_with_ast_path`]. If you want to recurse, you \
+             need to call it manually."]
+    #[inline]
+    fn visit_mut_zts_newtype_decl(
+        &mut self,
+        node: &mut ZtsNewtypeDecl,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <ZtsNewtypeDecl as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -74889,6 +75158,15 @@ where
     fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_zts_if_expr(&mut **self, node, __ast_path)
     }
+
+    #[inline]
+    fn visit_mut_zts_newtype_decl(
+        &mut self,
+        node: &mut ZtsNewtypeDecl,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_newtype_decl(&mut **self, node, __ast_path)
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -76965,6 +77243,15 @@ where
     #[inline]
     fn visit_mut_zts_if_expr(&mut self, node: &mut ZtsIfExpr, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_zts_if_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_newtype_decl(
+        &mut self,
+        node: &mut ZtsNewtypeDecl,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_newtype_decl(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -81217,6 +81504,22 @@ where
             }
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_newtype_decl(
+        &mut self,
+        node: &mut ZtsNewtypeDecl,
+        __ast_path: &mut AstKindPath,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_newtype_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_newtype_decl(visitor, node, __ast_path)
+            }
+        }
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -84491,6 +84794,18 @@ where
         } else {
         }
     }
+
+    #[inline]
+    fn visit_mut_zts_newtype_decl(
+        &mut self,
+        node: &mut ZtsNewtypeDecl,
+        __ast_path: &mut AstKindPath,
+    ) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_newtype_decl(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 #[cfg(any(docsrs, feature = "path"))]
@@ -86315,6 +86630,15 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for Decl {
                 let mut __ast_path =
                     __ast_path.with_guard(AstParentKind::Decl(self::fields::DeclField::ZtsEnum));
                 <Box<ZtsEnumDecl> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Decl::ZtsNewtype { 0: _field_0 } => {
+                let mut __ast_path =
+                    __ast_path.with_guard(AstParentKind::Decl(self::fields::DeclField::ZtsNewtype));
+                <Box<ZtsNewtypeDecl> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
                     _field_0,
                     visitor,
                     &mut *__ast_path,
@@ -96337,6 +96661,55 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsIfExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsNewtypeDecl {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_newtype_decl`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_newtype_decl(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            ZtsNewtypeDecl {
+                span,
+                ident,
+                type_ann,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsNewtypeDecl(
+                        self::fields::ZtsNewtypeDeclField::Span,
+                    ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsNewtypeDecl(
+                        self::fields::ZtsNewtypeDeclField::Ident,
+                    ));
+                    <Ident as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        ident,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsNewtypeDecl(
+                        self::fields::ZtsNewtypeDeclField::TypeAnn,
+                    ));
+                    <Box<TsType> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        type_ann,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitMutAstPath`::visit_mut_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -99801,6 +100174,13 @@ pub trait Fold {
     fn fold_zts_if_expr(&mut self, node: ZtsIfExpr) -> ZtsIfExpr {
         <ZtsIfExpr as FoldWith<Self>>::fold_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsNewtypeDecl`.\n\nBy default, this method calls \
+             [`ZtsNewtypeDecl::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_newtype_decl(&mut self, node: ZtsNewtypeDecl) -> ZtsNewtypeDecl {
+        <ZtsNewtypeDecl as FoldWith<Self>>::fold_children_with(node, self)
+    }
 }
 impl<V> Fold for &mut V
 where
@@ -101423,6 +101803,11 @@ where
     fn fold_zts_if_expr(&mut self, node: ZtsIfExpr) -> ZtsIfExpr {
         <V as Fold>::fold_zts_if_expr(&mut **self, node)
     }
+
+    #[inline]
+    fn fold_zts_newtype_decl(&mut self, node: ZtsNewtypeDecl) -> ZtsNewtypeDecl {
+        <V as Fold>::fold_zts_newtype_decl(&mut **self, node)
+    }
 }
 impl<V> Fold for Box<V>
 where
@@ -103044,6 +103429,11 @@ where
     #[inline]
     fn fold_zts_if_expr(&mut self, node: ZtsIfExpr) -> ZtsIfExpr {
         <V as Fold>::fold_zts_if_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_newtype_decl(&mut self, node: ZtsNewtypeDecl) -> ZtsNewtypeDecl {
+        <V as Fold>::fold_zts_newtype_decl(&mut **self, node)
     }
 }
 impl<A, B> Fold for ::swc_visit::Either<A, B>
@@ -105625,6 +106015,14 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Fold::fold_zts_if_expr(visitor, node),
             swc_visit::Either::Right(visitor) => Fold::fold_zts_if_expr(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_newtype_decl(&mut self, node: ZtsNewtypeDecl) -> ZtsNewtypeDecl {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_newtype_decl(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_newtype_decl(visitor, node),
         }
     }
 }
@@ -108493,6 +108891,15 @@ where
             node
         }
     }
+
+    #[inline]
+    fn fold_zts_newtype_decl(&mut self, node: ZtsNewtypeDecl) -> ZtsNewtypeDecl {
+        if self.enabled {
+            <V as Fold>::fold_zts_newtype_decl(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 pub trait FoldWith<V: ?Sized + Fold> {
@@ -109452,6 +109859,10 @@ impl<V: ?Sized + Fold> FoldWith<V> for Decl {
             Decl::ZtsEnum { 0: _field_0 } => {
                 let _field_0 = <Box<ZtsEnumDecl> as FoldWith<V>>::fold_with(_field_0, visitor);
                 Decl::ZtsEnum { 0: _field_0 }
+            }
+            Decl::ZtsNewtype { 0: _field_0 } => {
+                let _field_0 = <Box<ZtsNewtypeDecl> as FoldWith<V>>::fold_with(_field_0, visitor);
+                Decl::ZtsNewtype { 0: _field_0 }
             }
             #[cfg(swc_ast_unknown)]
             _ => self,
@@ -114638,6 +115049,31 @@ impl<V: ?Sized + Fold> FoldWith<V> for ZtsIfExpr {
         }
     }
 }
+impl<V: ?Sized + Fold> FoldWith<V> for ZtsNewtypeDecl {
+    #[doc = "Calls [Fold`::fold_zts_newtype_decl`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_newtype_decl(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            ZtsNewtypeDecl {
+                span,
+                ident,
+                type_ann,
+            } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let ident = { <Ident as FoldWith<V>>::fold_with(ident, visitor) };
+                let type_ann = { <Box<TsType> as FoldWith<V>>::fold_with(type_ann, visitor) };
+                ZtsNewtypeDecl {
+                    span,
+                    ident,
+                    type_ann,
+                }
+            }
+        }
+    }
+}
 impl<V: ?Sized + Fold> FoldWith<V> for swc_atoms::Atom {
     #[doc = "Calls [Fold`::fold_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -118711,6 +119147,19 @@ pub trait FoldAstPath {
     fn fold_zts_if_expr(&mut self, node: ZtsIfExpr, __ast_path: &mut AstKindPath) -> ZtsIfExpr {
         <ZtsIfExpr as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `ZtsNewtypeDecl`.\n\nBy default, this method calls \
+             [`ZtsNewtypeDecl::fold_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_zts_newtype_decl(
+        &mut self,
+        node: ZtsNewtypeDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsNewtypeDecl {
+        <ZtsNewtypeDecl as FoldWithAstPath<Self>>::fold_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -121040,6 +121489,15 @@ where
     fn fold_zts_if_expr(&mut self, node: ZtsIfExpr, __ast_path: &mut AstKindPath) -> ZtsIfExpr {
         <V as FoldAstPath>::fold_zts_if_expr(&mut **self, node, __ast_path)
     }
+
+    #[inline]
+    fn fold_zts_newtype_decl(
+        &mut self,
+        node: ZtsNewtypeDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsNewtypeDecl {
+        <V as FoldAstPath>::fold_zts_newtype_decl(&mut **self, node, __ast_path)
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -123368,6 +123826,15 @@ where
     #[inline]
     fn fold_zts_if_expr(&mut self, node: ZtsIfExpr, __ast_path: &mut AstKindPath) -> ZtsIfExpr {
         <V as FoldAstPath>::fold_zts_if_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_newtype_decl(
+        &mut self,
+        node: ZtsNewtypeDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsNewtypeDecl {
+        <V as FoldAstPath>::fold_zts_newtype_decl(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -127778,6 +128245,22 @@ where
             }
         }
     }
+
+    #[inline]
+    fn fold_zts_newtype_decl(
+        &mut self,
+        node: ZtsNewtypeDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsNewtypeDecl {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_newtype_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_newtype_decl(visitor, node, __ast_path)
+            }
+        }
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -131367,6 +131850,19 @@ where
             node
         }
     }
+
+    #[inline]
+    fn fold_zts_newtype_decl(
+        &mut self,
+        node: ZtsNewtypeDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsNewtypeDecl {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_newtype_decl(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 #[cfg(any(docsrs, feature = "path"))]
@@ -133342,6 +133838,16 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for Decl {
                     &mut *__ast_path,
                 );
                 Decl::ZtsEnum { 0: _field_0 }
+            }
+            Decl::ZtsNewtype { 0: _field_0 } => {
+                let mut __ast_path =
+                    __ast_path.with_guard(AstParentKind::Decl(self::fields::DeclField::ZtsNewtype));
+                let _field_0 = <Box<ZtsNewtypeDecl> as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                Decl::ZtsNewtype { 0: _field_0 }
             }
             #[cfg(swc_ast_unknown)]
             _ => self,
@@ -144128,6 +144634,60 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsIfExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsNewtypeDecl {
+    #[doc = "Calls [FoldAstPath`::fold_zts_newtype_decl`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_newtype_decl(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            ZtsNewtypeDecl {
+                span,
+                ident,
+                type_ann,
+            } => {
+                let span = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsNewtypeDecl(
+                        self::fields::ZtsNewtypeDeclField::Span,
+                    ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let ident = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsNewtypeDecl(
+                        self::fields::ZtsNewtypeDeclField::Ident,
+                    ));
+                    <Ident as FoldWithAstPath<V>>::fold_with_ast_path(
+                        ident,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let type_ann = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsNewtypeDecl(
+                        self::fields::ZtsNewtypeDeclField::TypeAnn,
+                    ));
+                    <Box<TsType> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        type_ann,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                ZtsNewtypeDecl {
+                    span,
+                    ident,
+                    type_ann,
+                }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [FoldAstPath`::fold_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -146213,6 +146773,8 @@ pub mod fields {
         TsModule,
         #[doc = "Represents [`Decl::ZtsEnum`]"]
         ZtsEnum,
+        #[doc = "Represents [`Decl::ZtsNewtype`]"]
+        ZtsNewtype,
     }
     impl DecoratorField {
         pub(crate) fn set_index(&mut self, index: usize) {
@@ -150201,6 +150763,23 @@ pub mod fields {
         #[doc = "Represents [`ZtsIfExpr::alt`]"]
         Alt,
     }
+    impl ZtsNewtypeDeclField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum ZtsNewtypeDeclField {
+        #[doc = "Represents [`ZtsNewtypeDecl::span`]"]
+        Span,
+        #[doc = "Represents [`ZtsNewtypeDecl::ident`]"]
+        Ident,
+        #[doc = "Represents [`ZtsNewtypeDecl::type_ann`]"]
+        TypeAnn,
+    }
     #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
     pub enum AstParentKind {
@@ -150452,6 +151031,7 @@ pub mod fields {
         ZtsExprBlock(ZtsExprBlockField),
         ZtsIfAlt(ZtsIfAltField),
         ZtsIfExpr(ZtsIfExprField),
+        ZtsNewtypeDecl(ZtsNewtypeDeclField),
     }
     impl ::swc_visit::ParentKind for AstParentKind {
         #[inline]
@@ -150705,6 +151285,7 @@ pub mod fields {
                 Self::ZtsExprBlock(v) => v.set_index(index),
                 Self::ZtsIfAlt(v) => v.set_index(index),
                 Self::ZtsIfExpr(v) => v.set_index(index),
+                Self::ZtsNewtypeDecl(v) => v.set_index(index),
             }
         }
     }
@@ -150970,6 +151551,7 @@ pub mod fields {
         ZtsExprBlock(&'ast ZtsExprBlock, ZtsExprBlockField),
         ZtsIfAlt(&'ast ZtsIfAlt, ZtsIfAltField),
         ZtsIfExpr(&'ast ZtsIfExpr, ZtsIfExprField),
+        ZtsNewtypeDecl(&'ast ZtsNewtypeDecl, ZtsNewtypeDeclField),
     }
     impl<'ast> ::swc_visit::NodeRef for AstParentNodeRef<'ast> {
         type ParentKind = AstParentKind;
@@ -151229,6 +151811,7 @@ pub mod fields {
                 Self::ZtsExprBlock(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsIfAlt(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsIfExpr(_, __field_kind) => __field_kind.set_index(index),
+                Self::ZtsNewtypeDecl(_, __field_kind) => __field_kind.set_index(index),
             }
         }
     }
@@ -151631,6 +152214,9 @@ pub mod fields {
                 Self::ZtsExprBlock(_, __field_kind) => AstParentKind::ZtsExprBlock(*__field_kind),
                 Self::ZtsIfAlt(_, __field_kind) => AstParentKind::ZtsIfAlt(*__field_kind),
                 Self::ZtsIfExpr(_, __field_kind) => AstParentKind::ZtsIfExpr(*__field_kind),
+                Self::ZtsNewtypeDecl(_, __field_kind) => {
+                    AstParentKind::ZtsNewtypeDecl(*__field_kind)
+                }
             }
         }
     }
@@ -152875,6 +153461,11 @@ impl<'ast> From<&'ast ZtsIfExpr> for NodeRef<'ast> {
         NodeRef::ZtsIfExpr(node)
     }
 }
+impl<'ast> From<&'ast ZtsNewtypeDecl> for NodeRef<'ast> {
+    fn from(node: &'ast ZtsNewtypeDecl) -> Self {
+        NodeRef::ZtsNewtypeDecl(node)
+    }
+}
 #[derive(Debug, Clone, Copy)]
 pub enum NodeRef<'ast> {
     Accessibility(&'ast Accessibility),
@@ -153125,6 +153716,7 @@ pub enum NodeRef<'ast> {
     ZtsExprBlock(&'ast ZtsExprBlock),
     ZtsIfAlt(&'ast ZtsIfAlt),
     ZtsIfExpr(&'ast ZtsIfExpr),
+    ZtsNewtypeDecl(&'ast ZtsNewtypeDecl),
 }
 impl<'ast> NodeRef<'ast> {
     #[doc = r" This is not a part of semver-stable API. It is experimental and subject to change."]
@@ -153527,6 +154119,7 @@ impl<'ast> NodeRef<'ast> {
                 Decl::TsEnum(v0) => Box::new(::std::iter::once(NodeRef::TsEnumDecl(v0))),
                 Decl::TsModule(v0) => Box::new(::std::iter::once(NodeRef::TsModuleDecl(v0))),
                 Decl::ZtsEnum(v0) => Box::new(::std::iter::once(NodeRef::ZtsEnumDecl(v0))),
+                Decl::ZtsNewtype(v0) => Box::new(::std::iter::once(NodeRef::ZtsNewtypeDecl(v0))),
                 _ => Box::new(::std::iter::empty::<NodeRef<'ast>>()),
             },
             NodeRef::Decorator(node) => {
@@ -155587,6 +156180,15 @@ impl<'ast> NodeRef<'ast> {
                     })
                     .chain(::std::iter::once(NodeRef::ZtsExprBlock(&node.cons)))
                     .chain(::std::iter::once(NodeRef::ZtsIfAlt(&node.alt)));
+                Box::new(iterator)
+            }
+            NodeRef::ZtsNewtypeDecl(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>()
+                    .chain(::std::iter::once(NodeRef::Ident(&node.ident)))
+                    .chain({
+                        let item = &*node.type_ann;
+                        ::std::iter::once(NodeRef::TsType(&item))
+                    });
                 Box::new(iterator)
             }
         }

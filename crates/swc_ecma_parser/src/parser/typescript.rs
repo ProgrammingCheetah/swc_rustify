@@ -65,6 +65,9 @@ fn make_decl_declare(mut decl: Decl) -> Decl {
         Decl::ZtsEnum(..) => {
             unreachable!("ZtsEnum is not a valid declaration for `declare` keyword")
         }
+        Decl::ZtsNewtype(..) => {
+            unreachable!("ZtsNewtype is not a valid declaration for `declare` keyword")
+        }
         #[cfg(swc_ast_unknown)]
         _ => unreachable!(),
     }
@@ -1273,7 +1276,7 @@ impl<I: Tokens> Parser<I> {
     }
 
     /// `tsExpectThenParseType`
-    fn expect_then_parse_ts_type(
+    pub(super) fn expect_then_parse_ts_type(
         &mut self,
         token: Token,
         token_str: &'static str,
@@ -5161,6 +5164,15 @@ impl<I: Tokens> Parser<I> {
                         .parse_ts_type_alias_decl(start)
                         .map(From::from)
                         .map(Some);
+                }
+            }
+
+            "newtype" if self.input().syntax().zts() => {
+                if next || (!self.input().had_line_break_before_cur() && self.is_ident_ref()) {
+                    if next {
+                        self.bump();
+                    }
+                    return self.parse_zts_newtype_decl(start).map(Some);
                 }
             }
 

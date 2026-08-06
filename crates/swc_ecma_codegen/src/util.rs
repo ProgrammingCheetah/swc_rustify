@@ -370,7 +370,8 @@ impl StartsWithAlphaNum for Decl {
             | Decl::TsModule(..)
             | Decl::TsTypeAlias(..)
             | Decl::Using(..)
-            | Decl::ZtsEnum(..) => true,
+            | Decl::ZtsEnum(..)
+            | Decl::ZtsNewtype(..) => true,
             #[cfg(swc_ast_unknown)]
             _ => false,
         }

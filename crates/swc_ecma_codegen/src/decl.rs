@@ -119,6 +119,9 @@ impl MacroNode for Decl {
             Decl::ZtsEnum(..) => {
                 unreachable!("zts ZtsEnumDecl must be lowered before emit")
             }
+            Decl::ZtsNewtype(..) => {
+                unreachable!("zts ZtsNewtypeDecl must be lowered before emit")
+            }
             #[cfg(swc_ast_unknown)]
             _ => return Err(unknown_error()),
         }

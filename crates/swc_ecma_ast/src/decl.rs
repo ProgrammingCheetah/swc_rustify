@@ -39,6 +39,11 @@ pub enum Decl {
     /// tagged-union type alias + factory object before codegen.
     #[tag("ZtsEnumDeclaration")]
     ZtsEnum(Box<ZtsEnumDecl>),
+
+    /// zts extension: `newtype AccountId = string;`. Must be lowered to a
+    /// branded type alias + factory function before codegen.
+    #[tag("ZtsNewtypeDeclaration")]
+    ZtsNewtype(Box<ZtsNewtypeDecl>),
 }
 
 boxed!(
@@ -309,4 +314,36 @@ pub struct ZtsEnumField {
 
     #[cfg_attr(feature = "serde-impl", serde(rename = "typeAnnotation"))]
     pub type_ann: Box<TsType>,
+}
+
+/// zts extension: `newtype AccountId = string;`
+///
+/// Never reaches codegen — the zts compiler lowers it to a branded type
+/// alias (`string & { readonly __ztsNewtype: "AccountId" }`) plus a
+/// factory function const of the same name.
+#[ast_node("ZtsNewtypeDeclaration")]
+#[derive(Eq, Hash, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsNewtypeDecl {
+    pub span: Span,
+
+    #[cfg_attr(feature = "serde-impl", serde(rename = "identifier"))]
+    pub ident: Ident,
+
+    #[cfg_attr(feature = "serde-impl", serde(rename = "typeAnnotation"))]
+    pub type_ann: Box<TsType>,
+}
+
+impl Take for ZtsNewtypeDecl {
+    fn dummy() -> Self {
+        Self {
+            span: DUMMY_SP,
+            ident: Take::dummy(),
+            type_ann: Box::new(TsType::TsKeywordType(crate::TsKeywordType {
+                span: DUMMY_SP,
+                kind: crate::TsKeywordTypeKind::TsAnyKeyword,
+            })),
+        }
+    }
 }

@@ -88,6 +88,9 @@ pub fn make_decl_declare(mut decl: Decl) -> Decl {
         Decl::ZtsEnum(..) => {
             unreachable!("ZtsEnum is not a valid declaration for `declare` keyword")
         }
+        Decl::ZtsNewtype(..) => {
+            unreachable!("ZtsNewtype is not a valid declaration for `declare` keyword")
+        }
         #[cfg(swc_ast_unknown)]
         _ => unreachable!(),
     }

@@ -552,6 +552,13 @@ impl<I: Tokens> Parser<I> {
                     enum_decl.ident.span,
                 );
             }
+            Decl::ZtsNewtype(newtype_decl) => {
+                self.record_exported_name(
+                    exported,
+                    newtype_decl.ident.sym.clone(),
+                    newtype_decl.ident.span,
+                );
+            }
             Decl::TsModule(module_decl) => {
                 if let TsModuleName::Ident(ident) = &module_decl.id {
                     self.record_exported_name(exported, ident.sym.clone(), ident.span);
