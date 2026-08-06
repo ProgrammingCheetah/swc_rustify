@@ -259,6 +259,7 @@ impl StartsWithAlphaNum for Expr {
             // none reach codegen anyway.
             Expr::Match(..) | Expr::ZtsIf(..) => true,
             Expr::ZtsExprBlock(..) => false,
+            Expr::ZtsTry(..) => false,
             #[cfg(swc_ast_unknown)]
             _ => false,
         }

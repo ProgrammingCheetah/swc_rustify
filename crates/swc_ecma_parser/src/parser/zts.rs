@@ -897,6 +897,67 @@ mod tests {
     }
 
     #[test]
+    fn try_operator_parses_before_all_four_terminators() {
+        // `?` commits only before `;` `)` `,` `]`.
+        let e = parse_expr("(f()?)");
+        assert!(e.expect_paren().expr.is_zts_try());
+
+        let module = test_parser("const x = f()?;", zts(), |p| p.parse_module());
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let init = decl.as_var().unwrap().decls[0].init.as_ref().unwrap();
+        assert!(init.is_zts_try());
+
+        let e = parse_expr("g(a, f()?)");
+        let call = e.expect_call();
+        assert!(call.args[1].expr.is_zts_try());
+
+        let e = parse_expr("[f()?]");
+        let arr = e.expect_array();
+        assert!(arr.elems[0].as_ref().unwrap().expr.is_zts_try());
+    }
+
+    #[test]
+    fn try_operand_is_the_whole_cond_expr() {
+        let module = test_parser("const x = a + f()?;", zts(), |p| p.parse_module());
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let init = decl.as_var().unwrap().decls[0].init.as_ref().unwrap();
+        let t = init.as_zts_try().unwrap();
+        assert!(t.expr.is_bin(), "operand must be the whole `a + f()`");
+    }
+
+    #[test]
+    fn ternary_and_optional_chaining_survive() {
+        assert!(parse_expr("a ? b : c").is_cond());
+        assert!(parse_expr("a?.b").is_opt_chain());
+        assert!(parse_expr("a ?? b").is_bin());
+        // Ternary whose alternate ends in a try, inside parens.
+        let e = parse_expr("(c ? a : f()?)");
+        assert!(e.expect_paren().expr.is_cond());
+    }
+
+    #[test]
+    fn optional_arrow_params_survive() {
+        // `(a, b?) => a` — the `?` here is an optional parameter, not a
+        // try operator; the dedicated args-or-pats path must win.
+        let e = parse_expr("(a, b?) => a");
+        assert!(e.is_arrow(), "optional param arrow must still parse");
+    }
+
+    #[test]
+    fn try_without_flag_stays_an_error() {
+        let (is_err, had) = test_parser(
+            "const x = f()?;",
+            Syntax::Typescript(Default::default()),
+            |p| {
+                let res = p.parse_module();
+                let errs = p.take_errors();
+                Ok((res.is_err(), !errs.is_empty()))
+            },
+        );
+        assert!(is_err || had, "vanilla TS must reject a bare postfix `?`");
+    }
+
+    #[test]
     fn match_disabled_without_flag() {
         let e = test_parser(
             "match (x) { A { a } => a }",

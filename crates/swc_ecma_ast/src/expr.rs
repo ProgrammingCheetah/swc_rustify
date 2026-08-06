@@ -183,6 +183,11 @@ pub enum Expr {
     /// always consumed by the lowering of its parent construct.
     #[tag("ZtsExprBlock")]
     ZtsExprBlock(ZtsExprBlock),
+
+    /// zts extension: postfix `?` try operator (`f()?`). Must be lowered to
+    /// a statement-level hoist + early `Err` return before codegen.
+    #[tag("ZtsTryExpression")]
+    ZtsTry(ZtsTryExpr),
 }
 
 bridge_from!(Box<Expr>, Box<JSXElement>, JSXElement);
@@ -437,6 +442,7 @@ impl Expr {
             Expr::Match(e) => e.span = span,
             Expr::ZtsIf(e) => e.span = span,
             Expr::ZtsExprBlock(e) => e.span = span,
+            Expr::ZtsTry(e) => e.span = span,
             #[cfg(all(swc_ast_unknown, feature = "encoding-impl"))]
             _ => swc_common::unknown!(),
         }
@@ -492,6 +498,7 @@ impl Clone for Expr {
             Match(e) => Match(e.clone()),
             ZtsIf(e) => ZtsIf(e.clone()),
             ZtsExprBlock(e) => ZtsExprBlock(e.clone()),
+            ZtsTry(e) => ZtsTry(e.clone()),
         }
     }
 }
@@ -533,6 +540,7 @@ boxed_expr!(CondExpr);
 boxed_expr!(MatchExpr);
 boxed_expr!(ZtsIfExpr);
 boxed_expr!(ZtsExprBlock);
+boxed_expr!(ZtsTryExpr);
 boxed_expr!(CallExpr);
 boxed_expr!(NewExpr);
 boxed_expr!(SeqExpr);
@@ -1231,6 +1239,27 @@ impl Take for ZtsExprBlock {
             stmts: Vec::new(),
             tail: Take::dummy(),
         }
+    }
+}
+
+/// zts extension: `expr?` — propagate `Err` with an early return.
+///
+/// Never reaches codegen: the zts compiler hoists it to a statement-level
+/// `const __t = expr; if (__t.kind === "Err") return __t;` and replaces the
+/// expression with `__t.value`.
+#[ast_node("ZtsTryExpression")]
+#[derive(Eq, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsTryExpr {
+    pub span: Span,
+
+    pub expr: Box<Expr>,
+}
+
+impl Take for ZtsTryExpr {
+    fn dummy() -> Self {
+        Default::default()
     }
 }
 

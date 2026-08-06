@@ -1128,8 +1128,29 @@ impl<I: Tokens> Parser<I> {
     fn parse_cond_expr(&mut self) -> PResult<Box<Expr>> {
         trace_cur!(self, parse_cond_expr);
 
-        let test = self.parse_bin_expr()?;
+        let mut test = self.parse_bin_expr()?;
         return_if_arrow!(self, test);
+
+        // zts: postfix `?` try operator. Only where a ternary is impossible —
+        // `?` immediately followed by `;` `)` `,` or `]` can never start a
+        // conditional, so this is a deterministic one-token-lookahead commit
+        // (`?.` is its own token and stays optional chaining). The operand is
+        // the whole conditional-level expression, matching the statement-
+        // level lowering.
+        if self.input().syntax().zts() {
+            while self.input().is(Token::QuestionMark)
+                && self.input_mut().peek().is_some_and(|t| {
+                    matches!(
+                        t,
+                        Token::Semi | Token::RParen | Token::Comma | Token::RBracket
+                    )
+                })
+            {
+                self.bump();
+                let span = self.span(test.span_lo());
+                test = Box::new(Expr::ZtsTry(ZtsTryExpr { span, expr: test }));
+            }
+        }
 
         if self.input_mut().eat(Token::QuestionMark) {
             let start = test.span_lo();
@@ -2413,7 +2434,28 @@ impl<I: Tokens> Parser<I> {
 
             let optional = if self.input().syntax().typescript() {
                 if self.input().is(Token::QuestionMark) {
-                    if peek!(self).is_some_and(|peek| {
+                    // zts: `expr? ,` / `expr? )` on a NON-identifier can
+                    // never be an optional parameter (patterns are idents
+                    // here), so it is the postfix try operator. A bare
+                    // identifier keeps the optional-param reading — write
+                    // `(x)?` to try an identifier in this position.
+                    if self.input().syntax().zts()
+                        && arg.spread.is_none()
+                        && !matches!(*arg.expr, Expr::Ident(..))
+                        && peek!(self)
+                            .is_some_and(|peek| matches!(peek, Token::Comma | Token::RParen))
+                    {
+                        self.assert_and_bump(Token::QuestionMark);
+                        let span = self.span(arg.expr.span_lo());
+                        arg = ExprOrSpread {
+                            spread: None,
+                            expr: Box::new(Expr::ZtsTry(ZtsTryExpr {
+                                span,
+                                expr: arg.expr,
+                            })),
+                        };
+                        false
+                    } else if peek!(self).is_some_and(|peek| {
                         matches!(
                             peek,
                             Token::Comma | Token::Eq | Token::RParen | Token::Colon
