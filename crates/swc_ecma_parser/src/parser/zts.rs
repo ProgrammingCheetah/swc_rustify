@@ -983,6 +983,48 @@ mod tests {
     }
 
     #[test]
+    fn destructured_optional_params_match_vanilla_behavior() {
+        // Security round F6: `({x}?) =>` is a TS1048-class error in tsc and
+        // vanilla swc (optional binding pattern in an implementation). The
+        // try reading must not hijack it into a DIFFERENT error ("Not a
+        // pattern") — zts must fail the same way vanilla does.
+        for src in ["const f = ({ x }?) => x;", "const f = ([a]?) => a;"] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let (zts_err, zts_had) = parse_module_errs(src);
+            let (van_err, van_had) = test_parser(src, Syntax::Typescript(Default::default()), |p| {
+                let res = p.parse_module();
+                let errs = p.take_errors();
+                Ok((res.is_err(), !errs.is_empty()))
+            });
+            assert_eq!(
+                (zts_err || zts_had),
+                (van_err || van_had),
+                "{src:?}: zts and vanilla must agree"
+            );
+        }
+        // The escape hatch for trying a literal stays available.
+        let e = parse_expr("g(({ x })?)");
+        assert!(e.expect_call().args[0].expr.is_zts_try());
+    }
+
+    #[test]
+    fn deep_type_nesting_does_not_crash() {
+        // Security round F3: 30k-deep parenthesized type annotations used
+        // to SIGABRT (parse_ts_type had no maybe_grow). The semantic pass
+        // owns the LIMIT; the parser must survive to report.
+        let n = 30_000;
+        let src: &'static str = Box::leak(
+            format!("declare const y: {}string{};", "(".repeat(n), ")".repeat(n)).into_boxed_str(),
+        );
+        let module = test_parser(src, zts(), |p| p.parse_module());
+        assert_eq!(module.body.len(), 1);
+        // Drop for TsType recurses without stack protection — leak the
+        // over-deep AST instead of aborting the (small) test thread. The
+        // zts semantic pass is what rejects such inputs with a diagnostic.
+        std::mem::forget(module);
+    }
+
+    #[test]
     fn try_without_flag_stays_an_error() {
         let (is_err, had) = test_parser(
             "const x = f()?;",

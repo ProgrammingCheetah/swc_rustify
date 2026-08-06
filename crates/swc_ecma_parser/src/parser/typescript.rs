@@ -3649,6 +3649,19 @@ impl<I: Tokens> Parser<I> {
     pub(crate) fn parse_ts_type(&mut self) -> PResult<Box<TsType>> {
         trace_cur!(self, parse_ts_type);
 
+        // zts: type recursion rides on maybe_grow like expression/statement
+        // recursion — deep `((((...string...))))` annotations must not
+        // SIGABRT the host (napi/Vite). Same wasm32/arm caveat as
+        // parse_assignment_expr. The zts semantic pass enforces the actual
+        // nesting limit with a real diagnostic.
+        if self.input().syntax().zts() {
+            return crate::maybe_grow(256 * 1024, 1024 * 1024, || self.parse_ts_type_inner());
+        }
+
+        self.parse_ts_type_inner()
+    }
+
+    fn parse_ts_type_inner(&mut self) -> PResult<Box<TsType>> {
         debug_assert!(self.input().syntax().typescript());
 
         // Need to set `state.inType` so that we don't parse JSX in a type context.

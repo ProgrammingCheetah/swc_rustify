@@ -2434,14 +2434,18 @@ impl<I: Tokens> Parser<I> {
 
             let optional = if self.input().syntax().typescript() {
                 if self.input().is(Token::QuestionMark) {
-                    // zts: `expr? ,` / `expr? )` on a NON-identifier can
-                    // never be an optional parameter (patterns are idents
-                    // here), so it is the postfix try operator. A bare
-                    // identifier keeps the optional-param reading — write
-                    // `(x)?` to try an identifier in this position.
+                    // zts: `expr? ,` / `expr? )` on a NON-pattern expression
+                    // can never be an optional parameter, so it is the
+                    // postfix try operator. Idents keep the optional-param
+                    // reading, and object/array literals are destructuring
+                    // patterns (`({x}?) =>` is valid TS) — write `(x)?` /
+                    // `({x})?` to try those shapes in this position.
                     if self.input().syntax().zts()
                         && arg.spread.is_none()
-                        && !matches!(*arg.expr, Expr::Ident(..))
+                        && !matches!(
+                            *arg.expr,
+                            Expr::Ident(..) | Expr::Object(..) | Expr::Array(..)
+                        )
                         && peek!(self)
                             .is_some_and(|peek| matches!(peek, Token::Comma | Token::RParen))
                     {
