@@ -125,6 +125,9 @@ impl MacroNode for Decl {
             Decl::ZtsUnion(..) => {
                 unreachable!("zts ZtsUnionDecl must be lowered before emit")
             }
+            Decl::ZtsImpl(..) => {
+                unreachable!("zts ZtsImplDecl must be lowered before emit")
+            }
             #[cfg(swc_ast_unknown)]
             _ => return Err(unknown_error()),
         }

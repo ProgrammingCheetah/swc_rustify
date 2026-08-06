@@ -66,6 +66,12 @@ pub enum SyntaxError {
     ZtsDeclareUnion,
     /// zts: a union member that is not a string literal.
     ZtsUnionMember,
+    /// zts: `declare impl`.
+    ZtsDeclareImpl,
+    /// zts: an impl member that does not start with `fn`.
+    ZtsImplMethodExpected,
+    /// zts: an impl method whose first parameter is not `self`.
+    ZtsImplSelfExpected,
 
     DeclNotAllowed,
 
@@ -707,6 +713,18 @@ impl SyntaxError {
                 .into(),
             SyntaxError::ZtsUnionMember => "zts `union` members must be string literals in v1 \
                                             (`union Level = 'info' | 'warn';`)"
+                .into(),
+            SyntaxError::ZtsDeclareImpl => "`declare impl` is not supported in zts; impls lower \
+                                            into the type's factory const — declare that shape \
+                                            instead"
+                .into(),
+            SyntaxError::ZtsImplMethodExpected => "expected a method: every member of a zts \
+                                                   `impl` block is `fn name(self, ...) -> Type \
+                                                   { ... }`"
+                .into(),
+            SyntaxError::ZtsImplSelfExpected => "the first parameter of a zts impl method must \
+                                                 be `self` (it receives the value the trait is \
+                                                 implemented for)"
                 .into(),
             SyntaxError::TS1114 => "Duplicate label".into(),
             SyntaxError::TS1115 => "A 'continue' statement can only jump to a label of an \

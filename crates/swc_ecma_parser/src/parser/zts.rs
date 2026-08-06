@@ -285,6 +285,102 @@ impl<I: Tokens> Parser<I> {
         })))
     }
 
+    /// `impl Display for Shape { fn fmt(self): string { ... } }`
+    ///
+    /// Same commit rule as `newtype`/`union`: the caller (parse_ts_decl)
+    /// consumed the `impl` word with a same-line identifier following, so
+    /// `impl` stays a valid identifier everywhere else. The trait is a
+    /// plain TS interface name; the `for` type must be a bare identifier
+    /// (the orphan rule — checked by the zts semantic pass — requires it
+    /// to be declared in the same module). Members are
+    /// `fn name(self, ...): Type { body }` — TS-style return annotation,
+    /// `self` receiver required first.
+    pub(super) fn parse_zts_impl_decl(&mut self, start: BytePos) -> PResult<Decl> {
+        if self.ctx().contains(Context::InDeclare) {
+            return Err(Error::new(self.span(start), SyntaxError::ZtsDeclareImpl));
+        }
+
+        let trait_ident = self.parse_ident_name()?;
+        let trait_ident = Ident::new_no_ctxt(trait_ident.sym, trait_ident.span);
+
+        expect!(self, Token::For);
+
+        let for_ident = self.parse_ident_name()?;
+        let for_ident = Ident::new_no_ctxt(for_ident.sym, for_ident.span);
+
+        expect!(self, Token::LBrace);
+        let mut methods = Vec::new();
+        while !self.input().is(Token::RBrace) {
+            // Class-style: stray semicolons between members are tolerated.
+            if self.input_mut().eat(Token::Semi) {
+                continue;
+            }
+            methods.push(self.parse_zts_impl_method()?);
+        }
+        expect!(self, Token::RBrace);
+
+        Ok(Decl::ZtsImpl(Box::new(ZtsImplDecl {
+            span: self.span(start),
+            trait_ident,
+            for_ident,
+            methods,
+        })))
+    }
+
+    /// One impl member: `fn name(self, ...): Type { body }`.
+    fn parse_zts_impl_method(&mut self) -> PResult<ZtsImplMethod> {
+        let start = self.input().cur_pos();
+
+        // `fn` is contextual: exactly this word starts a member.
+        let is_fn = self.input().cur().is_word()
+            && self.input().cur().take_word(&self.input) == atom!("fn");
+        if !is_fn {
+            return Err(Error::new(
+                self.input().cur_span(),
+                SyntaxError::ZtsImplMethodExpected,
+            ));
+        }
+        self.bump();
+
+        let name = self.parse_ident_name()?;
+        let name = Ident::new_no_ctxt(name.sym, name.span);
+
+        let function = self.parse_fn_args_body(
+            Vec::new(),
+            start,
+            Self::parse_unique_formal_params,
+            /* is_async */ false,
+            /* is_generator */ false,
+        )?;
+
+        // First parameter must be a bare `self` receiver: the zts lowering
+        // owns its type annotation (the `for` type).
+        let self_ok = matches!(
+            function.params.first().map(|p| &p.pat),
+            Some(Pat::Ident(b)) if b.id.sym == "self" && b.type_ann.is_none()
+        );
+        if !self_ok {
+            let span = function
+                .params
+                .first()
+                .map(|p| p.span)
+                .unwrap_or_else(|| self.span(start));
+            return Err(Error::new(span, SyntaxError::ZtsImplSelfExpected));
+        }
+        if function.body.is_none() {
+            return Err(Error::new(
+                self.span(start),
+                SyntaxError::ZtsImplMethodExpected,
+            ));
+        }
+
+        Ok(ZtsImplMethod {
+            span: self.span(start),
+            name,
+            function,
+        })
+    }
+
     /// `Variant { field: Type, ... }` — braces required, fields optional.
     fn parse_zts_enum_variant(&mut self) -> PResult<ZtsEnumVariant> {
         let start = self.input().cur_pos();
@@ -962,6 +1058,109 @@ mod tests {
                 "{src:?} must not parse as a union decl"
             );
         }
+    }
+
+    #[test]
+    fn impl_decl_parses() {
+        let module = test_parser(
+            "impl Display for Shape { fn fmt(self): string { return ''; } }",
+            zts(),
+            |p| p.parse_module(),
+        );
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let i = decl.as_zts_impl().unwrap();
+        assert_eq!(i.trait_ident.sym, "Display");
+        assert_eq!(i.for_ident.sym, "Shape");
+        assert_eq!(i.methods.len(), 1);
+        let m = &i.methods[0];
+        assert_eq!(m.name.sym, "fmt");
+        assert_eq!(m.function.params.len(), 1);
+        assert!(m.function.return_type.is_some());
+        assert!(m.function.body.is_some());
+    }
+
+    #[test]
+    fn impl_decl_multi_method_and_params_parse() {
+        let module = test_parser(
+            "impl Ops for Shape {\n  fn area(self): number { return 1; }\n  fn scaled(self, k: number): number { return k; }\n}",
+            zts(),
+            |p| p.parse_module(),
+        );
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let i = decl.as_zts_impl().unwrap();
+        assert_eq!(i.methods.len(), 2);
+        assert_eq!(i.methods[1].function.params.len(), 2);
+    }
+
+    #[test]
+    fn export_impl_decl_parses() {
+        // `export impl` parses; the zts semantic pass decides its meaning
+        // (the factory const owns the actual export).
+        let module = test_parser(
+            "export impl D for S { fn f(self): number { return 1; } }",
+            zts(),
+            |p| p.parse_module(),
+        );
+        let export = module.body[0]
+            .as_module_decl()
+            .unwrap()
+            .as_export_decl()
+            .unwrap();
+        assert!(export.decl.is_zts_impl());
+    }
+
+    #[test]
+    fn impl_stays_an_identifier_elsewhere() {
+        for src in [
+            "const impl = 1;",
+            "impl = 5;",
+            "impl(x);",
+            "impl.foo;",
+            "impl\nDisplay;",
+        ] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let module = test_parser(src, zts(), |p| p.parse_module());
+            assert!(
+                !matches!(
+                    module.body[0].as_stmt(),
+                    Some(Stmt::Decl(Decl::ZtsImpl(..)))
+                ),
+                "{src:?} must not parse as an impl decl"
+            );
+        }
+    }
+
+    #[test]
+    fn impl_without_self_is_an_error() {
+        for src in [
+            "impl D for S { fn f(): number { return 1; } }",
+            "impl D for S { fn f(x: number): number { return x; } }",
+            "impl D for S { fn f(self: S): number { return 1; } }",
+        ] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let (is_err, had) = parse_module_errs(src);
+            assert!(is_err || had, "{src:?} must error (bare `self` first)");
+        }
+    }
+
+    #[test]
+    fn impl_non_fn_member_is_an_error() {
+        for src in [
+            "impl D for S { x: number }",
+            "impl D for S { const x = 1; }",
+            "impl D for S { f(self): number { return 1; } }",
+        ] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let (is_err, had) = parse_module_errs(src);
+            assert!(is_err || had, "{src:?} must error (fn members only)");
+        }
+    }
+
+    #[test]
+    fn declare_impl_is_an_error() {
+        let (is_err, had) =
+            parse_module_errs("declare impl D for S { fn f(self): number { return 1; } }");
+        assert!(is_err || had, "`declare impl` must error");
     }
 
     #[test]

@@ -373,7 +373,8 @@ impl StartsWithAlphaNum for Decl {
             | Decl::Using(..)
             | Decl::ZtsEnum(..)
             | Decl::ZtsNewtype(..)
-            | Decl::ZtsUnion(..) => true,
+            | Decl::ZtsUnion(..)
+            | Decl::ZtsImpl(..) => true,
             #[cfg(swc_ast_unknown)]
             _ => false,
         }

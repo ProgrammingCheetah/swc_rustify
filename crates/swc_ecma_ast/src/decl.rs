@@ -51,6 +51,12 @@ pub enum Decl {
     /// before codegen.
     #[tag("ZtsUnionDeclaration")]
     ZtsUnion(Box<ZtsUnionDecl>),
+
+    /// zts extension: `impl Display for Shape { fn fmt(self) -> string {
+    /// ... } }`. Must be lowered (methods merged into the type's factory
+    /// const, `satisfies` conformance appended) before codegen.
+    #[tag("ZtsImplDeclaration")]
+    ZtsImpl(Box<ZtsImplDecl>),
 }
 
 boxed!(
@@ -352,6 +358,60 @@ impl Take for ZtsNewtypeDecl {
                 kind: crate::TsKeywordTypeKind::TsAnyKeyword,
             })),
         }
+    }
+}
+
+/// zts extension: `impl Display for Shape { fn fmt(self) -> string { ... } }`
+///
+/// Never reaches codegen — the zts compiler merges the methods into the
+/// factory const of the type named after `for` (which must be declared in
+/// the same module) and appends a `satisfies Trait<Type>` conformance
+/// clause. The trait itself is a plain TS interface, not a zts node.
+#[ast_node("ZtsImplDeclaration")]
+#[derive(Eq, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsImplDecl {
+    pub span: Span,
+
+    /// The trait being implemented (`Display`).
+    #[cfg_attr(feature = "serde-impl", serde(rename = "traitIdentifier"))]
+    pub trait_ident: Ident,
+
+    /// The type receiving the impl (`Shape`).
+    #[cfg_attr(feature = "serde-impl", serde(rename = "forIdentifier"))]
+    pub for_ident: Ident,
+
+    #[cfg_attr(feature = "serde-impl", serde(default))]
+    pub methods: Vec<ZtsImplMethod>,
+}
+
+impl Take for ZtsImplDecl {
+    fn dummy() -> Self {
+        Default::default()
+    }
+}
+
+/// One method of a [ZtsImplDecl]: `fn fmt(self) -> string { ... }`.
+///
+/// The `self` receiver is `function.params[0]`, an untyped binding ident —
+/// the zts lowering annotates it with the `for` type. The `->` return type
+/// is stored as the function's ordinary return type annotation.
+#[ast_node("ZtsImplMethod")]
+#[derive(Eq, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsImplMethod {
+    pub span: Span,
+
+    pub name: Ident,
+
+    pub function: Box<Function>,
+}
+
+impl Take for ZtsImplMethod {
+    fn dummy() -> Self {
+        Default::default()
     }
 }
 

@@ -94,6 +94,9 @@ pub fn make_decl_declare(mut decl: Decl) -> Decl {
         Decl::ZtsUnion(..) => {
             unreachable!("ZtsUnion is not a valid declaration for `declare` keyword")
         }
+        Decl::ZtsImpl(..) => {
+            unreachable!("ZtsImpl is not a valid declaration for `declare` keyword")
+        }
         #[cfg(swc_ast_unknown)]
         _ => unreachable!(),
     }

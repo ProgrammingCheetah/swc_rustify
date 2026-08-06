@@ -571,7 +571,12 @@ impl<I: Tokens> Parser<I> {
                     self.record_exported_name(exported, ident.sym.clone(), ident.span);
                 }
             }
-            Decl::TsInterface(..) | Decl::TsTypeAlias(..) | Decl::Using(..) => {}
+            // ZtsImpl binds no name of its own — the factory const of the
+            // `for` type carries the methods (and its export status).
+            Decl::TsInterface(..)
+            | Decl::TsTypeAlias(..)
+            | Decl::Using(..)
+            | Decl::ZtsImpl(..) => {}
             #[cfg(swc_ast_unknown)]
             _ => {}
         }
