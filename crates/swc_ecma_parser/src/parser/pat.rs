@@ -481,6 +481,20 @@ impl<I: Tokens> Parser<I> {
     pub(crate) fn parse_binding_pat_or_ident(&mut self, disallow_let: bool) -> PResult<Pat> {
         trace_cur!(self, parse_binding_pat_or_ident);
 
+        // zts: pattern recursion (`{a:{a:{...}}}` / `[[[...]]]`) rides on
+        // maybe_grow like expressions, statements and types — 70k-deep
+        // binding patterns must not SIGABRT the host (napi/Vite). The zts
+        // semantic pass enforces the actual limit with a diagnostic.
+        if self.input().syntax().zts() {
+            return crate::maybe_grow(256 * 1024, 1024 * 1024, || {
+                self.parse_binding_pat_or_ident_inner(disallow_let)
+            });
+        }
+
+        self.parse_binding_pat_or_ident_inner(disallow_let)
+    }
+
+    fn parse_binding_pat_or_ident_inner(&mut self, disallow_let: bool) -> PResult<Pat> {
         let cur = self.input().cur();
         if cur.is_word() {
             self.parse_binding_ident(disallow_let).map(Pat::from)

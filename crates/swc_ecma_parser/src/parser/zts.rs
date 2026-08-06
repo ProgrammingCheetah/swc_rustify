@@ -1025,6 +1025,20 @@ mod tests {
     }
 
     #[test]
+    fn deep_binding_pattern_does_not_crash() {
+        // Security verification V1: 70k-deep nested object patterns used
+        // to SIGABRT at parse time. The zts semantic pass owns the limit.
+        let n = 70_000;
+        let src: &'static str = Box::leak(
+            format!("const {}a{} = z;", "{a:".repeat(n), "}".repeat(n)).into_boxed_str(),
+        );
+        let module = test_parser(src, zts(), |p| p.parse_module());
+        assert_eq!(module.body.len(), 1);
+        // Drop recurses without stack protection — leak the over-deep AST.
+        std::mem::forget(module);
+    }
+
+    #[test]
     fn try_without_flag_stays_an_error() {
         let (is_err, had) = test_parser(
             "const x = f()?;",
