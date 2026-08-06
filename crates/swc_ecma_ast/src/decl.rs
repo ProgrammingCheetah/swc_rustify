@@ -5,6 +5,7 @@ use swc_common::{ast_node, util::take::Take, EqIgnoreSpan, Span, SyntaxContext, 
 use crate::{
     class::Class,
     expr::Expr,
+    lit::Str,
     function::Function,
     ident::{Ident, IdentName},
     pat::Pat,
@@ -44,6 +45,12 @@ pub enum Decl {
     /// branded type alias + factory function before codegen.
     #[tag("ZtsNewtypeDeclaration")]
     ZtsNewtype(Box<ZtsNewtypeDecl>),
+
+    /// zts extension: `union Level = 'a' | 'b';` — a closed string-literal
+    /// vocabulary. Must be lowered to a type alias + values/has object
+    /// before codegen.
+    #[tag("ZtsUnionDeclaration")]
+    ZtsUnion(Box<ZtsUnionDecl>),
 }
 
 boxed!(
@@ -345,5 +352,29 @@ impl Take for ZtsNewtypeDecl {
                 kind: crate::TsKeywordTypeKind::TsAnyKeyword,
             })),
         }
+    }
+}
+
+/// zts extension: `union Level = 'a' | 'b';`
+///
+/// Never reaches codegen — the zts compiler lowers it to a string-literal
+/// union type alias plus a `{ values, has }` const of the same name.
+#[ast_node("ZtsUnionDeclaration")]
+#[derive(Eq, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsUnionDecl {
+    pub span: Span,
+
+    #[cfg_attr(feature = "serde-impl", serde(rename = "identifier"))]
+    pub ident: Ident,
+
+    #[cfg_attr(feature = "serde-impl", serde(default))]
+    pub members: Vec<Str>,
+}
+
+impl Take for ZtsUnionDecl {
+    fn dummy() -> Self {
+        Default::default()
     }
 }

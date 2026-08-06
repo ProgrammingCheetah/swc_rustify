@@ -242,6 +242,49 @@ impl<I: Tokens> Parser<I> {
         })))
     }
 
+    /// `union Level = 'info' | 'warn';`
+    ///
+    /// Same commit rule as `newtype`: the caller (parse_ts_decl) consumed
+    /// the `union` word with a same-line identifier following. Members are
+    /// string literals only in v1; a leading `|` is allowed, Rust-style.
+    pub(super) fn parse_zts_union_decl(&mut self, start: BytePos) -> PResult<Decl> {
+        if self.ctx().contains(Context::InDeclare) {
+            return Err(Error::new(self.span(start), SyntaxError::ZtsDeclareUnion));
+        }
+
+        let ident = self.parse_ident_name()?;
+        let ident = Ident::new_no_ctxt(ident.sym, ident.span);
+        expect!(self, Token::Eq);
+
+        // Optional leading `|`.
+        let _ = self.input_mut().eat(Token::Pipe);
+
+        let mut members: Vec<Str> = Vec::new();
+        loop {
+            if !self.input().is(Token::Str) {
+                return Err(Error::new(
+                    self.input().cur_span(),
+                    SyntaxError::ZtsUnionMember,
+                ));
+            }
+            let lit = self.parse_lit()?;
+            let Lit::Str(s) = lit else {
+                unreachable!("Token::Str parses to Lit::Str")
+            };
+            members.push(s);
+            if !self.input_mut().eat(Token::Pipe) {
+                break;
+            }
+        }
+        self.expect_general_semi()?;
+
+        Ok(Decl::ZtsUnion(Box::new(ZtsUnionDecl {
+            span: self.span(start),
+            ident,
+            members,
+        })))
+    }
+
     /// `Variant { field: Type, ... }` — braces required, fields optional.
     fn parse_zts_enum_variant(&mut self) -> PResult<ZtsEnumVariant> {
         let start = self.input().cur_pos();
@@ -870,6 +913,75 @@ mod tests {
     fn undefined_arm_gets_a_real_diagnostic() {
         let (is_err, had) = parse_module_errs("const r = match (x) { undefined => 1, _ => 0 };");
         assert!(is_err || had, "`undefined =>` must error");
+    }
+
+    #[test]
+    fn union_decl_parses() {
+        let module = test_parser("union Level = 'info' | 'warn' | 'error';", zts(), |p| {
+            p.parse_module()
+        });
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let u = decl.as_zts_union().unwrap();
+        assert_eq!(u.ident.sym, "Level");
+        assert_eq!(u.members.len(), 3);
+        assert_eq!(u.members[0].value, "info");
+
+        // Leading pipe, Rust-style.
+        let module = test_parser("union L = | 'a' | 'b';", zts(), |p| p.parse_module());
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        assert_eq!(decl.as_zts_union().unwrap().members.len(), 2);
+    }
+
+    #[test]
+    fn export_union_decl_parses() {
+        let module = test_parser("export union L = 'a';", zts(), |p| p.parse_module());
+        let export = module.body[0]
+            .as_module_decl()
+            .unwrap()
+            .as_export_decl()
+            .unwrap();
+        assert!(export.decl.is_zts_union());
+    }
+
+    #[test]
+    fn union_stays_an_identifier_elsewhere() {
+        for src in [
+            "const union = 1;",
+            "union = 5;",
+            "union(x);",
+            "union.foo;",
+            "union\nLevel;",
+        ] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let module = test_parser(src, zts(), |p| p.parse_module());
+            assert!(
+                !matches!(
+                    module.body[0].as_stmt(),
+                    Some(Stmt::Decl(Decl::ZtsUnion(..)))
+                ),
+                "{src:?} must not parse as a union decl"
+            );
+        }
+    }
+
+    #[test]
+    fn union_non_string_member_is_an_error() {
+        for src in [
+            "union L = 1 | 2;",
+            "union L = 'a' | 2;",
+            "union L = 'a' | true;",
+            "union L = string;",
+        ] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let (is_err, had) = parse_module_errs(src);
+            assert!(is_err || had, "{src:?} must error (string literals only)");
+        }
+    }
+
+    #[test]
+    fn declare_union_is_an_error() {
+        let (is_err, had) = parse_module_errs("declare union L = 'a';");
+        assert!(is_err || had, "`declare union` must error");
     }
 
     #[test]

@@ -1338,6 +1338,12 @@ pub trait Visit {
     fn visit_str(&mut self, node: &Str) {
         <Str as VisitWith<Self>>::visit_children_with(node, self)
     }
+    #[doc = "Visit a node of type `Vec < Str >`.\n\nBy default, this method calls [`Vec < Str \
+             >::visit_children_with`]. If you want to recurse, you need to call it manually."]
+    #[inline]
+    fn visit_strs(&mut self, node: &[Str]) {
+        <[Str] as VisitWith<Self>>::visit_children_with(node, self)
+    }
     #[doc = "Visit a node of type `Super`.\n\nBy default, this method calls \
              [`Super::visit_children_with`]. If you want to recurse, you need to call it manually."]
     #[inline]
@@ -2166,6 +2172,13 @@ pub trait Visit {
     #[inline]
     fn visit_zts_try_expr(&mut self, node: &ZtsTryExpr) {
         <ZtsTryExpr as VisitWith<Self>>::visit_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsUnionDecl`.\n\nBy default, this method calls \
+             [`ZtsUnionDecl::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_zts_union_decl(&mut self, node: &ZtsUnionDecl) {
+        <ZtsUnionDecl as VisitWith<Self>>::visit_children_with(node, self)
     }
 }
 impl<V> Visit for &mut V
@@ -3146,6 +3159,11 @@ where
     }
 
     #[inline]
+    fn visit_strs(&mut self, node: &[Str]) {
+        <V as Visit>::visit_strs(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_super(&mut self, node: &Super) {
         <V as Visit>::visit_super(&mut **self, node)
     }
@@ -3738,6 +3756,11 @@ where
     #[inline]
     fn visit_zts_try_expr(&mut self, node: &ZtsTryExpr) {
         <V as Visit>::visit_zts_try_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_union_decl(&mut self, node: &ZtsUnionDecl) {
+        <V as Visit>::visit_zts_union_decl(&mut **self, node)
     }
 }
 impl<V> Visit for Box<V>
@@ -4718,6 +4741,11 @@ where
     }
 
     #[inline]
+    fn visit_strs(&mut self, node: &[Str]) {
+        <V as Visit>::visit_strs(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_super(&mut self, node: &Super) {
         <V as Visit>::visit_super(&mut **self, node)
     }
@@ -5310,6 +5338,11 @@ where
     #[inline]
     fn visit_zts_try_expr(&mut self, node: &ZtsTryExpr) {
         <V as Visit>::visit_zts_try_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_union_decl(&mut self, node: &ZtsUnionDecl) {
+        <V as Visit>::visit_zts_union_decl(&mut **self, node)
     }
 }
 impl<A, B> Visit for ::swc_visit::Either<A, B>
@@ -6903,6 +6936,14 @@ where
     }
 
     #[inline]
+    fn visit_strs(&mut self, node: &[Str]) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_strs(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_strs(visitor, node),
+        }
+    }
+
+    #[inline]
     fn visit_super(&mut self, node: &Super) {
         match self {
             swc_visit::Either::Left(visitor) => Visit::visit_super(visitor, node),
@@ -7873,6 +7914,14 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Visit::visit_zts_try_expr(visitor, node),
             swc_visit::Either::Right(visitor) => Visit::visit_zts_try_expr(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_zts_union_decl(&mut self, node: &ZtsUnionDecl) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_union_decl(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_union_decl(visitor, node),
         }
     }
 }
@@ -9436,6 +9485,14 @@ where
     }
 
     #[inline]
+    fn visit_strs(&mut self, node: &[Str]) {
+        if self.enabled {
+            <V as Visit>::visit_strs(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
     fn visit_super(&mut self, node: &Super) {
         if self.enabled {
             <V as Visit>::visit_super(&mut self.visitor, node)
@@ -10383,6 +10440,14 @@ where
     fn visit_zts_try_expr(&mut self, node: &ZtsTryExpr) {
         if self.enabled {
             <V as Visit>::visit_zts_try_expr(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_union_decl(&mut self, node: &ZtsUnionDecl) {
+        if self.enabled {
+            <V as Visit>::visit_zts_union_decl(&mut self.visitor, node)
         } else {
         }
     }
@@ -11363,6 +11428,9 @@ impl<V: ?Sized + Visit> VisitWith<V> for Decl {
             }
             Decl::ZtsNewtype { 0: _field_0 } => {
                 <Box<ZtsNewtypeDecl> as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
+            Decl::ZtsUnion { 0: _field_0 } => {
+                <Box<ZtsUnionDecl> as VisitWith<V>>::visit_with(_field_0, visitor);
             }
             #[cfg(swc_ast_unknown)]
             _ => (),
@@ -16624,6 +16692,32 @@ impl<V: ?Sized + Visit> VisitWith<V> for ZtsTryExpr {
         }
     }
 }
+impl<V: ?Sized + Visit> VisitWith<V> for ZtsUnionDecl {
+    #[doc = "Calls [Visit`::visit_zts_union_decl`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_union_decl(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            ZtsUnionDecl {
+                span,
+                ident,
+                members,
+            } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <Ident as VisitWith<V>>::visit_with(ident, visitor)
+                };
+                {
+                    <Vec<Str> as VisitWith<V>>::visit_with(members, visitor)
+                };
+            }
+        }
+    }
+}
 impl<V: ?Sized + Visit> VisitWith<V> for swc_atoms::Atom {
     #[doc = "Calls [Visit`::visit_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -17312,6 +17406,19 @@ impl<V: ?Sized + Visit> VisitWith<V> for [Stmt] {
     fn visit_children_with(&self, visitor: &mut V) {
         self.iter()
             .for_each(|item| <Stmt as VisitWith<V>>::visit_with(item, visitor))
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for [Str] {
+    #[doc = "Calls [Visit`::visit_strs`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_strs(visitor, self)
+    }
+
+    #[inline]
+    fn visit_children_with(&self, visitor: &mut V) {
+        self.iter()
+            .for_each(|item| <Str as VisitWith<V>>::visit_with(item, visitor))
     }
 }
 impl<V: ?Sized + Visit> VisitWith<V> for [SwitchCase] {
@@ -19801,6 +19908,13 @@ pub trait VisitAstPath {
     fn visit_str<'ast: 'r, 'r>(&mut self, node: &'ast Str, __ast_path: &mut AstNodePath<'r>) {
         <Str as VisitWithAstPath<Self>>::visit_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `Vec < Str >`.\n\nBy default, this method calls [`Vec < Str \
+             >::visit_children_with_ast_path`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_strs<'ast: 'r, 'r>(&mut self, node: &'ast [Str], __ast_path: &mut AstNodePath<'r>) {
+        <[Str] as VisitWithAstPath<Self>>::visit_children_with_ast_path(node, self, __ast_path)
+    }
     #[doc = "Visit a node of type `Super`.\n\nBy default, this method calls \
              [`Super::visit_children_with_ast_path`]. If you want to recurse, you need to call it \
              manually."]
@@ -21267,6 +21381,19 @@ pub trait VisitAstPath {
         __ast_path: &mut AstNodePath<'r>,
     ) {
         <ZtsTryExpr as VisitWithAstPath<Self>>::visit_children_with_ast_path(node, self, __ast_path)
+    }
+    #[doc = "Visit a node of type `ZtsUnionDecl`.\n\nBy default, this method calls \
+             [`ZtsUnionDecl::visit_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_zts_union_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsUnionDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <ZtsUnionDecl as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -22938,6 +23065,11 @@ where
     }
 
     #[inline]
+    fn visit_strs<'ast: 'r, 'r>(&mut self, node: &'ast [Str], __ast_path: &mut AstNodePath<'r>) {
+        <V as VisitAstPath>::visit_strs(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_super<'ast: 'r, 'r>(&mut self, node: &'ast Super, __ast_path: &mut AstNodePath<'r>) {
         <V as VisitAstPath>::visit_super(&mut **self, node, __ast_path)
     }
@@ -23994,6 +24126,15 @@ where
         __ast_path: &mut AstNodePath<'r>,
     ) {
         <V as VisitAstPath>::visit_zts_try_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_union_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsUnionDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_union_decl(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -25665,6 +25806,11 @@ where
     }
 
     #[inline]
+    fn visit_strs<'ast: 'r, 'r>(&mut self, node: &'ast [Str], __ast_path: &mut AstNodePath<'r>) {
+        <V as VisitAstPath>::visit_strs(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_super<'ast: 'r, 'r>(&mut self, node: &'ast Super, __ast_path: &mut AstNodePath<'r>) {
         <V as VisitAstPath>::visit_super(&mut **self, node, __ast_path)
     }
@@ -26721,6 +26867,15 @@ where
         __ast_path: &mut AstNodePath<'r>,
     ) {
         <V as VisitAstPath>::visit_zts_try_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_union_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsUnionDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_union_decl(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -29717,6 +29872,16 @@ where
     }
 
     #[inline]
+    fn visit_strs<'ast: 'r, 'r>(&mut self, node: &'ast [Str], __ast_path: &mut AstNodePath<'r>) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitAstPath::visit_strs(visitor, node, __ast_path),
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_strs(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
     fn visit_super<'ast: 'r, 'r>(&mut self, node: &'ast Super, __ast_path: &mut AstNodePath<'r>) {
         match self {
             swc_visit::Either::Left(visitor) => {
@@ -31600,6 +31765,22 @@ where
             }
             swc_visit::Either::Right(visitor) => {
                 VisitAstPath::visit_zts_try_expr(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_zts_union_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsUnionDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_union_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_union_decl(visitor, node, __ast_path)
             }
         }
     }
@@ -33867,6 +34048,14 @@ where
     }
 
     #[inline]
+    fn visit_strs<'ast: 'r, 'r>(&mut self, node: &'ast [Str], __ast_path: &mut AstNodePath<'r>) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_strs(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
     fn visit_super<'ast: 'r, 'r>(&mut self, node: &'ast Super, __ast_path: &mut AstNodePath<'r>) {
         if self.enabled {
             <V as VisitAstPath>::visit_super(&mut self.visitor, node, __ast_path)
@@ -35294,6 +35483,18 @@ where
     ) {
         if self.enabled {
             <V as VisitAstPath>::visit_zts_try_expr(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_union_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsUnionDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_union_decl(&mut self.visitor, node, __ast_path)
         } else {
         }
     }
@@ -37593,6 +37794,17 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for Decl {
                     self::fields::DeclField::ZtsNewtype,
                 ));
                 <Box<ZtsNewtypeDecl> as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Decl::ZtsUnion { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::Decl(
+                    self,
+                    self::fields::DeclField::ZtsUnion,
+                ));
+                <Box<ZtsUnionDecl> as VisitWithAstPath<V>>::visit_with_ast_path(
                     _field_0,
                     visitor,
                     &mut *__ast_path,
@@ -50294,6 +50506,66 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsTryExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsUnionDecl {
+    #[doc = "Calls [VisitAstPath`::visit_zts_union_decl`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_union_decl(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            ZtsUnionDecl {
+                span,
+                ident,
+                members,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsUnionDecl(
+                        self,
+                        self::fields::ZtsUnionDeclField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsUnionDecl(
+                        self,
+                        self::fields::ZtsUnionDeclField::Ident,
+                    ));
+                    <Ident as VisitWithAstPath<V>>::visit_with_ast_path(
+                        ident,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsUnionDecl(
+                        self,
+                        self::fields::ZtsUnionDeclField::Members(usize::MAX),
+                    ));
+                    <Vec<Str> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        members,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitAstPath`::visit_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -51614,6 +51886,31 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for [Stmt] {
         self.iter().enumerate().for_each(|(__idx, item)| {
             let mut __ast_path = __ast_path.with_index_guard(__idx);
             <Stmt as VisitWithAstPath<V>>::visit_with_ast_path(item, visitor, &mut *__ast_path)
+        })
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for [Str] {
+    #[doc = "Calls [VisitAstPath`::visit_strs`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_strs(visitor, self, __ast_path)
+    }
+
+    #[inline]
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        self.iter().enumerate().for_each(|(__idx, item)| {
+            let mut __ast_path = __ast_path.with_index_guard(__idx);
+            <Str as VisitWithAstPath<V>>::visit_with_ast_path(item, visitor, &mut *__ast_path)
         })
     }
 }
@@ -53423,6 +53720,12 @@ pub trait VisitMut {
     fn visit_mut_str(&mut self, node: &mut Str) {
         <Str as VisitMutWith<Self>>::visit_mut_children_with(node, self)
     }
+    #[doc = "Visit a node of type `Vec < Str >`.\n\nBy default, this method calls [`Vec < Str \
+             >::visit_mut_children_with`]. If you want to recurse, you need to call it manually."]
+    #[inline]
+    fn visit_mut_strs(&mut self, node: &mut Vec<Str>) {
+        <Vec<Str> as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
     #[doc = "Visit a node of type `Super`.\n\nBy default, this method calls \
              [`Super::visit_mut_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -54255,6 +54558,13 @@ pub trait VisitMut {
     #[inline]
     fn visit_mut_zts_try_expr(&mut self, node: &mut ZtsTryExpr) {
         <ZtsTryExpr as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsUnionDecl`.\n\nBy default, this method calls \
+             [`ZtsUnionDecl::visit_mut_children_with`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_mut_zts_union_decl(&mut self, node: &mut ZtsUnionDecl) {
+        <ZtsUnionDecl as VisitMutWith<Self>>::visit_mut_children_with(node, self)
     }
 }
 impl<V> VisitMut for &mut V
@@ -55235,6 +55545,11 @@ where
     }
 
     #[inline]
+    fn visit_mut_strs(&mut self, node: &mut Vec<Str>) {
+        <V as VisitMut>::visit_mut_strs(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_mut_super(&mut self, node: &mut Super) {
         <V as VisitMut>::visit_mut_super(&mut **self, node)
     }
@@ -55827,6 +56142,11 @@ where
     #[inline]
     fn visit_mut_zts_try_expr(&mut self, node: &mut ZtsTryExpr) {
         <V as VisitMut>::visit_mut_zts_try_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_union_decl(&mut self, node: &mut ZtsUnionDecl) {
+        <V as VisitMut>::visit_mut_zts_union_decl(&mut **self, node)
     }
 }
 impl<V> VisitMut for Box<V>
@@ -56807,6 +57127,11 @@ where
     }
 
     #[inline]
+    fn visit_mut_strs(&mut self, node: &mut Vec<Str>) {
+        <V as VisitMut>::visit_mut_strs(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_mut_super(&mut self, node: &mut Super) {
         <V as VisitMut>::visit_mut_super(&mut **self, node)
     }
@@ -57399,6 +57724,11 @@ where
     #[inline]
     fn visit_mut_zts_try_expr(&mut self, node: &mut ZtsTryExpr) {
         <V as VisitMut>::visit_mut_zts_try_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_union_decl(&mut self, node: &mut ZtsUnionDecl) {
+        <V as VisitMut>::visit_mut_zts_union_decl(&mut **self, node)
     }
 }
 impl<A, B> VisitMut for ::swc_visit::Either<A, B>
@@ -59156,6 +59486,14 @@ where
     }
 
     #[inline]
+    fn visit_mut_strs(&mut self, node: &mut Vec<Str>) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_strs(visitor, node),
+            swc_visit::Either::Right(visitor) => VisitMut::visit_mut_strs(visitor, node),
+        }
+    }
+
+    #[inline]
     fn visit_mut_super(&mut self, node: &mut Super) {
         match self {
             swc_visit::Either::Left(visitor) => VisitMut::visit_mut_super(visitor, node),
@@ -60286,6 +60624,14 @@ where
         match self {
             swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_try_expr(visitor, node),
             swc_visit::Either::Right(visitor) => VisitMut::visit_mut_zts_try_expr(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_union_decl(&mut self, node: &mut ZtsUnionDecl) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_union_decl(visitor, node),
+            swc_visit::Either::Right(visitor) => VisitMut::visit_mut_zts_union_decl(visitor, node),
         }
     }
 }
@@ -61849,6 +62195,14 @@ where
     }
 
     #[inline]
+    fn visit_mut_strs(&mut self, node: &mut Vec<Str>) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_strs(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
     fn visit_mut_super(&mut self, node: &mut Super) {
         if self.enabled {
             <V as VisitMut>::visit_mut_super(&mut self.visitor, node)
@@ -62796,6 +63150,14 @@ where
     fn visit_mut_zts_try_expr(&mut self, node: &mut ZtsTryExpr) {
         if self.enabled {
             <V as VisitMut>::visit_mut_zts_try_expr(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_union_decl(&mut self, node: &mut ZtsUnionDecl) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_union_decl(&mut self.visitor, node)
         } else {
         }
     }
@@ -63799,6 +64161,9 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for Decl {
             }
             Decl::ZtsNewtype { 0: _field_0 } => {
                 <Box<ZtsNewtypeDecl> as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
+            Decl::ZtsUnion { 0: _field_0 } => {
+                <Box<ZtsUnionDecl> as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
             }
             #[cfg(swc_ast_unknown)]
             _ => (),
@@ -69102,6 +69467,32 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsTryExpr {
         }
     }
 }
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsUnionDecl {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_union_decl`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_union_decl(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            ZtsUnionDecl {
+                span,
+                ident,
+                members,
+            } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <Ident as VisitMutWith<V>>::visit_mut_with(ident, visitor)
+                };
+                {
+                    <Vec<Str> as VisitMutWith<V>>::visit_mut_with(members, visitor)
+                };
+            }
+        }
+    }
+}
 impl<V: ?Sized + VisitMut> VisitMutWith<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitMut`::visit_mut_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -69794,6 +70185,19 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for Vec<Stmt> {
     fn visit_mut_children_with(&mut self, visitor: &mut V) {
         self.iter_mut()
             .for_each(|item| <Stmt as VisitMutWith<V>>::visit_mut_with(item, visitor))
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for Vec<Str> {
+    #[doc = "Calls [VisitMut`::visit_mut_strs`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_strs(visitor, self)
+    }
+
+    #[inline]
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        self.iter_mut()
+            .for_each(|item| <Str as VisitMutWith<V>>::visit_mut_with(item, visitor))
     }
 }
 impl<V: ?Sized + VisitMut> VisitMutWith<V> for Vec<SwitchCase> {
@@ -72000,6 +72404,15 @@ pub trait VisitMutAstPath {
     fn visit_mut_str(&mut self, node: &mut Str, __ast_path: &mut AstKindPath) {
         <Str as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `Vec < Str >`.\n\nBy default, this method calls [`Vec < Str \
+             >::visit_mut_children_with_ast_path`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_mut_strs(&mut self, node: &mut Vec<Str>, __ast_path: &mut AstKindPath) {
+        <Vec<Str> as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `Super`.\n\nBy default, this method calls \
              [`Super::visit_mut_children_with_ast_path`]. If you want to recurse, you need to call \
              it manually."]
@@ -73313,6 +73726,15 @@ pub trait VisitMutAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `ZtsUnionDecl`.\n\nBy default, this method calls \
+             [`ZtsUnionDecl::visit_mut_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_mut_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, __ast_path: &mut AstKindPath) {
+        <ZtsUnionDecl as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
@@ -74563,6 +74985,11 @@ where
     }
 
     #[inline]
+    fn visit_mut_strs(&mut self, node: &mut Vec<Str>, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_strs(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_mut_super(&mut self, node: &mut Super, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_super(&mut **self, node, __ast_path)
     }
@@ -75403,6 +75830,11 @@ where
     #[inline]
     fn visit_mut_zts_try_expr(&mut self, node: &mut ZtsTryExpr, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_zts_try_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_union_decl(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -76654,6 +77086,11 @@ where
     }
 
     #[inline]
+    fn visit_mut_strs(&mut self, node: &mut Vec<Str>, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_strs(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_mut_super(&mut self, node: &mut Super, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_super(&mut **self, node, __ast_path)
     }
@@ -77494,6 +77931,11 @@ where
     #[inline]
     fn visit_mut_zts_try_expr(&mut self, node: &mut ZtsTryExpr, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_zts_try_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_union_decl(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -80104,6 +80546,18 @@ where
     }
 
     #[inline]
+    fn visit_mut_strs(&mut self, node: &mut Vec<Str>, __ast_path: &mut AstKindPath) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_strs(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_strs(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
     fn visit_mut_super(&mut self, node: &mut Super, __ast_path: &mut AstKindPath) {
         match self {
             swc_visit::Either::Left(visitor) => {
@@ -81771,6 +82225,18 @@ where
             }
             swc_visit::Either::Right(visitor) => {
                 VisitMutAstPath::visit_mut_zts_try_expr(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, __ast_path: &mut AstKindPath) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_union_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_union_decl(visitor, node, __ast_path)
             }
         }
     }
@@ -83754,6 +84220,14 @@ where
     }
 
     #[inline]
+    fn visit_mut_strs(&mut self, node: &mut Vec<Str>, __ast_path: &mut AstKindPath) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_strs(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
     fn visit_mut_super(&mut self, node: &mut Super, __ast_path: &mut AstKindPath) {
         if self.enabled {
             <V as VisitMutAstPath>::visit_mut_super(&mut self.visitor, node, __ast_path)
@@ -85065,6 +85539,14 @@ where
     fn visit_mut_zts_try_expr(&mut self, node: &mut ZtsTryExpr, __ast_path: &mut AstKindPath) {
         if self.enabled {
             <V as VisitMutAstPath>::visit_mut_zts_try_expr(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, __ast_path: &mut AstKindPath) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_union_decl(&mut self.visitor, node, __ast_path)
         } else {
         }
     }
@@ -86901,6 +87383,15 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for Decl {
                 let mut __ast_path =
                     __ast_path.with_guard(AstParentKind::Decl(self::fields::DeclField::ZtsNewtype));
                 <Box<ZtsNewtypeDecl> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Decl::ZtsUnion { 0: _field_0 } => {
+                let mut __ast_path =
+                    __ast_path.with_guard(AstParentKind::Decl(self::fields::DeclField::ZtsUnion));
+                <Box<ZtsUnionDecl> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
                     _field_0,
                     visitor,
                     &mut *__ast_path,
@@ -97016,6 +97507,55 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsTryExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsUnionDecl {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_union_decl`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_union_decl(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            ZtsUnionDecl {
+                span,
+                ident,
+                members,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsUnionDecl(
+                        self::fields::ZtsUnionDeclField::Span,
+                    ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsUnionDecl(
+                        self::fields::ZtsUnionDeclField::Ident,
+                    ));
+                    <Ident as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        ident,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsUnionDecl(
+                        self::fields::ZtsUnionDeclField::Members(usize::MAX),
+                    ));
+                    <Vec<Str> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        members,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [VisitMutAstPath`::visit_mut_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -97971,6 +98511,27 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for Vec<Stmt> {
         self.iter_mut().enumerate().for_each(|(__idx, item)| {
             let mut __ast_path = __ast_path.with_index_guard(__idx);
             <Stmt as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                item,
+                visitor,
+                &mut *__ast_path,
+            )
+        })
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for Vec<Str> {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_strs`] with `self`. (Extra impl)"]
+    #[inline]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_strs(visitor, self, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        self.iter_mut().enumerate().for_each(|(__idx, item)| {
+            let mut __ast_path = __ast_path.with_index_guard(__idx);
+            <Str as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
                 item,
                 visitor,
                 &mut *__ast_path,
@@ -99647,6 +100208,12 @@ pub trait Fold {
     fn fold_str(&mut self, node: Str) -> Str {
         <Str as FoldWith<Self>>::fold_children_with(node, self)
     }
+    #[doc = "Visit a node of type `Vec < Str >`.\n\nBy default, this method calls [`Vec < Str \
+             >::fold_children_with`]. If you want to recurse, you need to call it manually."]
+    #[inline]
+    fn fold_strs(&mut self, node: Vec<Str>) -> Vec<Str> {
+        <Vec<Str> as FoldWith<Self>>::fold_children_with(node, self)
+    }
     #[doc = "Visit a node of type `Super`.\n\nBy default, this method calls \
              [`Super::fold_children_with`]. If you want to recurse, you need to call it manually."]
     #[inline]
@@ -100493,6 +101060,13 @@ pub trait Fold {
     #[inline]
     fn fold_zts_try_expr(&mut self, node: ZtsTryExpr) -> ZtsTryExpr {
         <ZtsTryExpr as FoldWith<Self>>::fold_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsUnionDecl`.\n\nBy default, this method calls \
+             [`ZtsUnionDecl::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_union_decl(&mut self, node: ZtsUnionDecl) -> ZtsUnionDecl {
+        <ZtsUnionDecl as FoldWith<Self>>::fold_children_with(node, self)
     }
 }
 impl<V> Fold for &mut V
@@ -101512,6 +102086,11 @@ where
     }
 
     #[inline]
+    fn fold_strs(&mut self, node: Vec<Str>) -> Vec<Str> {
+        <V as Fold>::fold_strs(&mut **self, node)
+    }
+
+    #[inline]
     fn fold_super(&mut self, node: Super) -> Super {
         <V as Fold>::fold_super(&mut **self, node)
     }
@@ -102125,6 +102704,11 @@ where
     #[inline]
     fn fold_zts_try_expr(&mut self, node: ZtsTryExpr) -> ZtsTryExpr {
         <V as Fold>::fold_zts_try_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_union_decl(&mut self, node: ZtsUnionDecl) -> ZtsUnionDecl {
+        <V as Fold>::fold_zts_union_decl(&mut **self, node)
     }
 }
 impl<V> Fold for Box<V>
@@ -103144,6 +103728,11 @@ where
     }
 
     #[inline]
+    fn fold_strs(&mut self, node: Vec<Str>) -> Vec<Str> {
+        <V as Fold>::fold_strs(&mut **self, node)
+    }
+
+    #[inline]
     fn fold_super(&mut self, node: Super) -> Super {
         <V as Fold>::fold_super(&mut **self, node)
     }
@@ -103757,6 +104346,11 @@ where
     #[inline]
     fn fold_zts_try_expr(&mut self, node: ZtsTryExpr) -> ZtsTryExpr {
         <V as Fold>::fold_zts_try_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_union_decl(&mut self, node: ZtsUnionDecl) -> ZtsUnionDecl {
+        <V as Fold>::fold_zts_union_decl(&mut **self, node)
     }
 }
 impl<A, B> Fold for ::swc_visit::Either<A, B>
@@ -105371,6 +105965,14 @@ where
     }
 
     #[inline]
+    fn fold_strs(&mut self, node: Vec<Str>) -> Vec<Str> {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_strs(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_strs(visitor, node),
+        }
+    }
+
+    #[inline]
     fn fold_super(&mut self, node: Super) -> Super {
         match self {
             swc_visit::Either::Left(visitor) => Fold::fold_super(visitor, node),
@@ -106354,6 +106956,14 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Fold::fold_zts_try_expr(visitor, node),
             swc_visit::Either::Right(visitor) => Fold::fold_zts_try_expr(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_union_decl(&mut self, node: ZtsUnionDecl) -> ZtsUnionDecl {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_union_decl(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_union_decl(visitor, node),
         }
     }
 }
@@ -108150,6 +108760,15 @@ where
     }
 
     #[inline]
+    fn fold_strs(&mut self, node: Vec<Str>) -> Vec<Str> {
+        if self.enabled {
+            <V as Fold>::fold_strs(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
     fn fold_super(&mut self, node: Super) -> Super {
         if self.enabled {
             <V as Fold>::fold_super(&mut self.visitor, node)
@@ -109240,6 +109859,15 @@ where
             node
         }
     }
+
+    #[inline]
+    fn fold_zts_union_decl(&mut self, node: ZtsUnionDecl) -> ZtsUnionDecl {
+        if self.enabled {
+            <V as Fold>::fold_zts_union_decl(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
 }
 #[doc = r" A trait implemented for types that can be visited using a visitor."]
 pub trait FoldWith<V: ?Sized + Fold> {
@@ -110203,6 +110831,10 @@ impl<V: ?Sized + Fold> FoldWith<V> for Decl {
             Decl::ZtsNewtype { 0: _field_0 } => {
                 let _field_0 = <Box<ZtsNewtypeDecl> as FoldWith<V>>::fold_with(_field_0, visitor);
                 Decl::ZtsNewtype { 0: _field_0 }
+            }
+            Decl::ZtsUnion { 0: _field_0 } => {
+                let _field_0 = <Box<ZtsUnionDecl> as FoldWith<V>>::fold_with(_field_0, visitor);
+                Decl::ZtsUnion { 0: _field_0 }
             }
             #[cfg(swc_ast_unknown)]
             _ => self,
@@ -115434,6 +116066,31 @@ impl<V: ?Sized + Fold> FoldWith<V> for ZtsTryExpr {
         }
     }
 }
+impl<V: ?Sized + Fold> FoldWith<V> for ZtsUnionDecl {
+    #[doc = "Calls [Fold`::fold_zts_union_decl`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_union_decl(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            ZtsUnionDecl {
+                span,
+                ident,
+                members,
+            } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let ident = { <Ident as FoldWith<V>>::fold_with(ident, visitor) };
+                let members = { <Vec<Str> as FoldWith<V>>::fold_with(members, visitor) };
+                ZtsUnionDecl {
+                    span,
+                    ident,
+                    members,
+                }
+            }
+        }
+    }
+}
 impl<V: ?Sized + Fold> FoldWith<V> for swc_atoms::Atom {
     #[doc = "Calls [Fold`::fold_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -116057,6 +116714,20 @@ impl<V: ?Sized + Fold> FoldWith<V> for Vec<Stmt> {
     fn fold_children_with(self, visitor: &mut V) -> Self {
         swc_visit::util::move_map::MoveMap::move_map(self, |item| {
             <Stmt as FoldWith<V>>::fold_with(item, visitor)
+        })
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for Vec<Str> {
+    #[doc = "Calls [Fold`::fold_strs`] with `self`. (Extra impl)"]
+    #[inline]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_strs(visitor, self)
+    }
+
+    #[inline]
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        swc_visit::util::move_map::MoveMap::move_map(self, |item| {
+            <Str as FoldWith<V>>::fold_with(item, visitor)
         })
     }
 }
@@ -118222,6 +118893,13 @@ pub trait FoldAstPath {
     fn fold_str(&mut self, node: Str, __ast_path: &mut AstKindPath) -> Str {
         <Str as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `Vec < Str >`.\n\nBy default, this method calls [`Vec < Str \
+             >::fold_children_with_ast_path`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_strs(&mut self, node: Vec<Str>, __ast_path: &mut AstKindPath) -> Vec<Str> {
+        <Vec<Str> as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
+    }
     #[doc = "Visit a node of type `Super`.\n\nBy default, this method calls \
              [`Super::fold_children_with_ast_path`]. If you want to recurse, you need to call it \
              manually."]
@@ -119526,6 +120204,17 @@ pub trait FoldAstPath {
     #[inline]
     fn fold_zts_try_expr(&mut self, node: ZtsTryExpr, __ast_path: &mut AstKindPath) -> ZtsTryExpr {
         <ZtsTryExpr as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
+    }
+    #[doc = "Visit a node of type `ZtsUnionDecl`.\n\nBy default, this method calls \
+             [`ZtsUnionDecl::fold_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_zts_union_decl(
+        &mut self,
+        node: ZtsUnionDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsUnionDecl {
+        <ZtsUnionDecl as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -120937,6 +121626,11 @@ where
     }
 
     #[inline]
+    fn fold_strs(&mut self, node: Vec<Str>, __ast_path: &mut AstKindPath) -> Vec<Str> {
+        <V as FoldAstPath>::fold_strs(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn fold_super(&mut self, node: Super, __ast_path: &mut AstKindPath) -> Super {
         <V as FoldAstPath>::fold_super(&mut **self, node, __ast_path)
     }
@@ -121869,6 +122563,15 @@ where
     #[inline]
     fn fold_zts_try_expr(&mut self, node: ZtsTryExpr, __ast_path: &mut AstKindPath) -> ZtsTryExpr {
         <V as FoldAstPath>::fold_zts_try_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_union_decl(
+        &mut self,
+        node: ZtsUnionDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsUnionDecl {
+        <V as FoldAstPath>::fold_zts_union_decl(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -123280,6 +123983,11 @@ where
     }
 
     #[inline]
+    fn fold_strs(&mut self, node: Vec<Str>, __ast_path: &mut AstKindPath) -> Vec<Str> {
+        <V as FoldAstPath>::fold_strs(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn fold_super(&mut self, node: Super, __ast_path: &mut AstKindPath) -> Super {
         <V as FoldAstPath>::fold_super(&mut **self, node, __ast_path)
     }
@@ -124212,6 +124920,15 @@ where
     #[inline]
     fn fold_zts_try_expr(&mut self, node: ZtsTryExpr, __ast_path: &mut AstKindPath) -> ZtsTryExpr {
         <V as FoldAstPath>::fold_zts_try_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_union_decl(
+        &mut self,
+        node: ZtsUnionDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsUnionDecl {
+        <V as FoldAstPath>::fold_zts_union_decl(&mut **self, node, __ast_path)
     }
 }
 #[cfg(any(docsrs, feature = "path"))]
@@ -126894,6 +127611,14 @@ where
     }
 
     #[inline]
+    fn fold_strs(&mut self, node: Vec<Str>, __ast_path: &mut AstKindPath) -> Vec<Str> {
+        match self {
+            swc_visit::Either::Left(visitor) => FoldAstPath::fold_strs(visitor, node, __ast_path),
+            swc_visit::Either::Right(visitor) => FoldAstPath::fold_strs(visitor, node, __ast_path),
+        }
+    }
+
+    #[inline]
     fn fold_super(&mut self, node: Super, __ast_path: &mut AstKindPath) -> Super {
         match self {
             swc_visit::Either::Left(visitor) => FoldAstPath::fold_super(visitor, node, __ast_path),
@@ -128647,6 +129372,22 @@ where
             }
             swc_visit::Either::Right(visitor) => {
                 FoldAstPath::fold_zts_try_expr(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_zts_union_decl(
+        &mut self,
+        node: ZtsUnionDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsUnionDecl {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_union_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_union_decl(visitor, node, __ast_path)
             }
         }
     }
@@ -130840,6 +131581,15 @@ where
     }
 
     #[inline]
+    fn fold_strs(&mut self, node: Vec<Str>, __ast_path: &mut AstKindPath) -> Vec<Str> {
+        if self.enabled {
+            <V as FoldAstPath>::fold_strs(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
     fn fold_super(&mut self, node: Super, __ast_path: &mut AstKindPath) -> Super {
         if self.enabled {
             <V as FoldAstPath>::fold_super(&mut self.visitor, node, __ast_path)
@@ -132257,6 +133007,19 @@ where
     fn fold_zts_try_expr(&mut self, node: ZtsTryExpr, __ast_path: &mut AstKindPath) -> ZtsTryExpr {
         if self.enabled {
             <V as FoldAstPath>::fold_zts_try_expr(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_union_decl(
+        &mut self,
+        node: ZtsUnionDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsUnionDecl {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_union_decl(&mut self.visitor, node, __ast_path)
         } else {
             node
         }
@@ -134246,6 +135009,16 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for Decl {
                     &mut *__ast_path,
                 );
                 Decl::ZtsNewtype { 0: _field_0 }
+            }
+            Decl::ZtsUnion { 0: _field_0 } => {
+                let mut __ast_path =
+                    __ast_path.with_guard(AstParentKind::Decl(self::fields::DeclField::ZtsUnion));
+                let _field_0 = <Box<ZtsUnionDecl> as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                Decl::ZtsUnion { 0: _field_0 }
             }
             #[cfg(swc_ast_unknown)]
             _ => self,
@@ -145132,6 +145905,60 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsTryExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsUnionDecl {
+    #[doc = "Calls [FoldAstPath`::fold_zts_union_decl`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_union_decl(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            ZtsUnionDecl {
+                span,
+                ident,
+                members,
+            } => {
+                let span = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsUnionDecl(
+                        self::fields::ZtsUnionDeclField::Span,
+                    ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let ident = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsUnionDecl(
+                        self::fields::ZtsUnionDeclField::Ident,
+                    ));
+                    <Ident as FoldWithAstPath<V>>::fold_with_ast_path(
+                        ident,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let members = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsUnionDecl(
+                        self::fields::ZtsUnionDeclField::Members(usize::MAX),
+                    ));
+                    <Vec<Str> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        members,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                ZtsUnionDecl {
+                    span,
+                    ident,
+                    members,
+                }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for swc_atoms::Atom {
     #[doc = "Calls [FoldAstPath`::fold_atom`] with `self`. (Extra impl)"]
     #[inline]
@@ -146056,6 +146883,26 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for Vec<Stmt> {
             .map(|(__idx, item)| {
                 let mut __ast_path = __ast_path.with_index_guard(__idx);
                 <Stmt as FoldWithAstPath<V>>::fold_with_ast_path(item, visitor, &mut *__ast_path)
+            })
+            .collect()
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for Vec<Str> {
+    #[doc = "Calls [FoldAstPath`::fold_strs`] with `self`. (Extra impl)"]
+    #[inline]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_strs(visitor, self, __ast_path)
+    }
+
+    #[inline]
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        self.into_iter()
+            .enumerate()
+            .map(|(__idx, item)| {
+                let mut __ast_path = __ast_path.with_index_guard(__idx);
+                <Str as FoldWithAstPath<V>>::fold_with_ast_path(item, visitor, &mut *__ast_path)
             })
             .collect()
     }
@@ -147219,6 +148066,8 @@ pub mod fields {
         ZtsEnum,
         #[doc = "Represents [`Decl::ZtsNewtype`]"]
         ZtsNewtype,
+        #[doc = "Represents [`Decl::ZtsUnion`]"]
+        ZtsUnion,
     }
     impl DecoratorField {
         pub(crate) fn set_index(&mut self, index: usize) {
@@ -151241,6 +152090,27 @@ pub mod fields {
         #[doc = "Represents [`ZtsTryExpr::expr`]"]
         Expr,
     }
+    impl ZtsUnionDeclField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                Self::Members(idx) => {
+                    assert_initial_index(*idx, index);
+                    *idx = index;
+                }
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum ZtsUnionDeclField {
+        #[doc = "Represents [`ZtsUnionDecl::span`]"]
+        Span,
+        #[doc = "Represents [`ZtsUnionDecl::ident`]"]
+        Ident,
+        #[doc = "Represents [`ZtsUnionDecl::members`]"]
+        Members(usize),
+    }
     #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
     pub enum AstParentKind {
@@ -151494,6 +152364,7 @@ pub mod fields {
         ZtsIfExpr(ZtsIfExprField),
         ZtsNewtypeDecl(ZtsNewtypeDeclField),
         ZtsTryExpr(ZtsTryExprField),
+        ZtsUnionDecl(ZtsUnionDeclField),
     }
     impl ::swc_visit::ParentKind for AstParentKind {
         #[inline]
@@ -151749,6 +152620,7 @@ pub mod fields {
                 Self::ZtsIfExpr(v) => v.set_index(index),
                 Self::ZtsNewtypeDecl(v) => v.set_index(index),
                 Self::ZtsTryExpr(v) => v.set_index(index),
+                Self::ZtsUnionDecl(v) => v.set_index(index),
             }
         }
     }
@@ -152016,6 +152888,7 @@ pub mod fields {
         ZtsIfExpr(&'ast ZtsIfExpr, ZtsIfExprField),
         ZtsNewtypeDecl(&'ast ZtsNewtypeDecl, ZtsNewtypeDeclField),
         ZtsTryExpr(&'ast ZtsTryExpr, ZtsTryExprField),
+        ZtsUnionDecl(&'ast ZtsUnionDecl, ZtsUnionDeclField),
     }
     impl<'ast> ::swc_visit::NodeRef for AstParentNodeRef<'ast> {
         type ParentKind = AstParentKind;
@@ -152277,6 +153150,7 @@ pub mod fields {
                 Self::ZtsIfExpr(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsNewtypeDecl(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsTryExpr(_, __field_kind) => __field_kind.set_index(index),
+                Self::ZtsUnionDecl(_, __field_kind) => __field_kind.set_index(index),
             }
         }
     }
@@ -152683,6 +153557,7 @@ pub mod fields {
                     AstParentKind::ZtsNewtypeDecl(*__field_kind)
                 }
                 Self::ZtsTryExpr(_, __field_kind) => AstParentKind::ZtsTryExpr(*__field_kind),
+                Self::ZtsUnionDecl(_, __field_kind) => AstParentKind::ZtsUnionDecl(*__field_kind),
             }
         }
     }
@@ -153937,6 +154812,11 @@ impl<'ast> From<&'ast ZtsTryExpr> for NodeRef<'ast> {
         NodeRef::ZtsTryExpr(node)
     }
 }
+impl<'ast> From<&'ast ZtsUnionDecl> for NodeRef<'ast> {
+    fn from(node: &'ast ZtsUnionDecl) -> Self {
+        NodeRef::ZtsUnionDecl(node)
+    }
+}
 #[derive(Debug, Clone, Copy)]
 pub enum NodeRef<'ast> {
     Accessibility(&'ast Accessibility),
@@ -154189,6 +155069,7 @@ pub enum NodeRef<'ast> {
     ZtsIfExpr(&'ast ZtsIfExpr),
     ZtsNewtypeDecl(&'ast ZtsNewtypeDecl),
     ZtsTryExpr(&'ast ZtsTryExpr),
+    ZtsUnionDecl(&'ast ZtsUnionDecl),
 }
 impl<'ast> NodeRef<'ast> {
     #[doc = r" This is not a part of semver-stable API. It is experimental and subject to change."]
@@ -154592,6 +155473,7 @@ impl<'ast> NodeRef<'ast> {
                 Decl::TsModule(v0) => Box::new(::std::iter::once(NodeRef::TsModuleDecl(v0))),
                 Decl::ZtsEnum(v0) => Box::new(::std::iter::once(NodeRef::ZtsEnumDecl(v0))),
                 Decl::ZtsNewtype(v0) => Box::new(::std::iter::once(NodeRef::ZtsNewtypeDecl(v0))),
+                Decl::ZtsUnion(v0) => Box::new(::std::iter::once(NodeRef::ZtsUnionDecl(v0))),
                 _ => Box::new(::std::iter::empty::<NodeRef<'ast>>()),
             },
             NodeRef::Decorator(node) => {
@@ -156669,6 +157551,16 @@ impl<'ast> NodeRef<'ast> {
                     let item = &*node.expr;
                     ::std::iter::once(NodeRef::Expr(&item))
                 });
+                Box::new(iterator)
+            }
+            NodeRef::ZtsUnionDecl(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>()
+                    .chain(::std::iter::once(NodeRef::Ident(&node.ident)))
+                    .chain(
+                        node.members
+                            .iter()
+                            .flat_map(|item| ::std::iter::once(NodeRef::Str(&item))),
+                    );
                 Box::new(iterator)
             }
         }

@@ -559,6 +559,13 @@ impl<I: Tokens> Parser<I> {
                     newtype_decl.ident.span,
                 );
             }
+            Decl::ZtsUnion(union_decl) => {
+                self.record_exported_name(
+                    exported,
+                    union_decl.ident.sym.clone(),
+                    union_decl.ident.span,
+                );
+            }
             Decl::TsModule(module_decl) => {
                 if let TsModuleName::Ident(ident) = &module_decl.id {
                     self.record_exported_name(exported, ident.sym.clone(), ident.span);

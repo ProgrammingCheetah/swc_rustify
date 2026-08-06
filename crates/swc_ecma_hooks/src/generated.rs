@@ -1657,6 +1657,14 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_str(&mut self, node: &Str, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Vec < Str >` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_strs(&mut self, node: &[Str], ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Vec < Str >` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_strs(&mut self, node: &[Str], ctx: &mut C) {}
     #[doc = "Called when entering a node of type `Super` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -2654,6 +2662,14 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_try_expr(&mut self, node: &ZtsTryExpr, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsUnionDecl` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_union_decl(&mut self, node: &ZtsUnionDecl, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsUnionDecl` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_union_decl(&mut self, node: &ZtsUnionDecl, ctx: &mut C) {}
 }
 #[doc = r" A composable hook that combines two hooks (immutable version)."]
 #[doc = r""]
@@ -5010,6 +5026,18 @@ where
     }
 
     #[inline]
+    fn enter_strs(&mut self, node: &[Str], ctx: &mut C) {
+        self.first.enter_strs(node, ctx);
+        self.second.enter_strs(node, ctx);
+    }
+
+    #[inline]
+    fn exit_strs(&mut self, node: &[Str], ctx: &mut C) {
+        self.second.exit_strs(node, ctx);
+        self.first.exit_strs(node, ctx);
+    }
+
+    #[inline]
     fn enter_super(&mut self, node: &Super, ctx: &mut C) {
         self.first.enter_super(node, ctx);
         self.second.enter_super(node, ctx);
@@ -6443,6 +6471,18 @@ where
     fn exit_zts_try_expr(&mut self, node: &ZtsTryExpr, ctx: &mut C) {
         self.second.exit_zts_try_expr(node, ctx);
         self.first.exit_zts_try_expr(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_union_decl(&mut self, node: &ZtsUnionDecl, ctx: &mut C) {
+        self.first.enter_zts_union_decl(node, ctx);
+        self.second.enter_zts_union_decl(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_union_decl(&mut self, node: &ZtsUnionDecl, ctx: &mut C) {
+        self.second.exit_zts_union_decl(node, ctx);
+        self.first.exit_zts_union_decl(node, ctx);
     }
 }
 impl<L, R, C> VisitHook<C> for swc_common::pass::Either<L, R>
@@ -9567,6 +9607,22 @@ where
     }
 
     #[inline]
+    fn enter_strs(&mut self, node: &[Str], ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_strs(node, ctx),
+            Self::Right(hook) => hook.enter_strs(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_strs(&mut self, node: &[Str], ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_strs(node, ctx),
+            Self::Right(hook) => hook.exit_strs(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_super(&mut self, node: &Super, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_super(node, ctx),
@@ -11475,6 +11531,22 @@ where
         match self {
             Self::Left(hook) => hook.exit_zts_try_expr(node, ctx),
             Self::Right(hook) => hook.exit_zts_try_expr(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_union_decl(&mut self, node: &ZtsUnionDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_union_decl(node, ctx),
+            Self::Right(hook) => hook.enter_zts_union_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_union_decl(&mut self, node: &ZtsUnionDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_union_decl(node, ctx),
+            Self::Right(hook) => hook.exit_zts_union_decl(node, ctx),
         }
     }
 }
@@ -14211,6 +14283,20 @@ where
     }
 
     #[inline]
+    fn enter_strs(&mut self, node: &[Str], ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_strs(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_strs(&mut self, node: &[Str], ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_strs(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_super(&mut self, node: &Super, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_super(node, ctx);
@@ -15883,6 +15969,20 @@ where
             hook.exit_zts_try_expr(node, ctx);
         }
     }
+
+    #[inline]
+    fn enter_zts_union_decl(&mut self, node: &ZtsUnionDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_union_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_union_decl(&mut self, node: &ZtsUnionDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_union_decl(node, ctx);
+        }
+    }
 }
 #[doc = r" An adapter that implements Visit using a VisitHook."]
 #[doc = r""]
@@ -17517,6 +17617,14 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.exit_str(node, &mut self.context);
     }
 
+    #[doc = "Visits a node of type `Vec < Str >` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_strs(&mut self, node: &[Str]) {
+        self.hook.enter_strs(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_strs(node, &mut self.context);
+    }
+
     #[doc = "Visits a node of type `Super` using the hook's enter and exit methods."]
     #[inline]
     fn visit_super(&mut self, node: &Super) {
@@ -18508,6 +18616,14 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.enter_zts_try_expr(node, &mut self.context);
         node.visit_children_with(self);
         self.hook.exit_zts_try_expr(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsUnionDecl` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_union_decl(&mut self, node: &ZtsUnionDecl) {
+        self.hook.enter_zts_union_decl(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_union_decl(node, &mut self.context);
     }
 }
 #[doc = r" A hook trait for composable AST visitors."]
@@ -20190,6 +20306,14 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_str(&mut self, node: &mut Str, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Vec < Str >` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_strs(&mut self, node: &mut Vec<Str>, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Vec < Str >` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_strs(&mut self, node: &mut Vec<Str>, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `Super` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -21207,6 +21331,14 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_try_expr(&mut self, node: &mut ZtsTryExpr, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsUnionDecl` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsUnionDecl` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, ctx: &mut C) {}
 }
 #[doc = r" A composable hook that combines two hooks."]
 #[doc = r""]
@@ -23583,6 +23715,18 @@ where
     }
 
     #[inline]
+    fn enter_strs(&mut self, node: &mut Vec<Str>, ctx: &mut C) {
+        self.first.enter_strs(node, ctx);
+        self.second.enter_strs(node, ctx);
+    }
+
+    #[inline]
+    fn exit_strs(&mut self, node: &mut Vec<Str>, ctx: &mut C) {
+        self.second.exit_strs(node, ctx);
+        self.first.exit_strs(node, ctx);
+    }
+
+    #[inline]
     fn enter_super(&mut self, node: &mut Super, ctx: &mut C) {
         self.first.enter_super(node, ctx);
         self.second.enter_super(node, ctx);
@@ -25032,6 +25176,18 @@ where
     fn exit_zts_try_expr(&mut self, node: &mut ZtsTryExpr, ctx: &mut C) {
         self.second.exit_zts_try_expr(node, ctx);
         self.first.exit_zts_try_expr(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, ctx: &mut C) {
+        self.first.enter_zts_union_decl(node, ctx);
+        self.second.enter_zts_union_decl(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, ctx: &mut C) {
+        self.second.exit_zts_union_decl(node, ctx);
+        self.first.exit_zts_union_decl(node, ctx);
     }
 }
 impl<L, R, C> VisitMutHook<C> for swc_common::pass::Either<L, R>
@@ -28176,6 +28332,22 @@ where
     }
 
     #[inline]
+    fn enter_strs(&mut self, node: &mut Vec<Str>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_strs(node, ctx),
+            Self::Right(hook) => hook.enter_strs(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_strs(&mut self, node: &mut Vec<Str>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_strs(node, ctx),
+            Self::Right(hook) => hook.exit_strs(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_super(&mut self, node: &mut Super, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_super(node, ctx),
@@ -30100,6 +30272,22 @@ where
         match self {
             Self::Left(hook) => hook.exit_zts_try_expr(node, ctx),
             Self::Right(hook) => hook.exit_zts_try_expr(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_union_decl(node, ctx),
+            Self::Right(hook) => hook.enter_zts_union_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_union_decl(node, ctx),
+            Self::Right(hook) => hook.exit_zts_union_decl(node, ctx),
         }
     }
 }
@@ -32856,6 +33044,20 @@ where
     }
 
     #[inline]
+    fn enter_strs(&mut self, node: &mut Vec<Str>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_strs(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_strs(&mut self, node: &mut Vec<Str>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_strs(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_super(&mut self, node: &mut Super, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_super(node, ctx);
@@ -34544,6 +34746,20 @@ where
             hook.exit_zts_try_expr(node, ctx);
         }
     }
+
+    #[inline]
+    fn enter_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_union_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_union_decl(&mut self, node: &mut ZtsUnionDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_union_decl(node, ctx);
+        }
+    }
 }
 #[doc = r" An adapter that implements VisitMut using a VisitMutHook."]
 #[doc = r""]
@@ -36178,6 +36394,14 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.exit_str(node, &mut self.context);
     }
 
+    #[doc = "Visits a node of type `Vec < Str >` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_strs(&mut self, node: &mut Vec<Str>) {
+        self.hook.enter_strs(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_strs(node, &mut self.context);
+    }
+
     #[doc = "Visits a node of type `Super` using the hook's enter and exit methods."]
     #[inline]
     fn visit_mut_super(&mut self, node: &mut Super) {
@@ -37169,5 +37393,13 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.enter_zts_try_expr(node, &mut self.context);
         node.visit_mut_children_with(self);
         self.hook.exit_zts_try_expr(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsUnionDecl` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_union_decl(&mut self, node: &mut ZtsUnionDecl) {
+        self.hook.enter_zts_union_decl(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_union_decl(node, &mut self.context);
     }
 }

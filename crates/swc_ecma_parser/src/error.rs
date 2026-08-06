@@ -62,6 +62,10 @@ pub enum SyntaxError {
     ZtsDeclareNewtype,
     /// zts: `undefined` as a match arm pattern.
     ZtsUndefinedArm,
+    /// zts: `declare union`.
+    ZtsDeclareUnion,
+    /// zts: a union member that is not a string literal.
+    ZtsUnionMember,
 
     DeclNotAllowed,
 
@@ -696,6 +700,13 @@ impl SyntaxError {
                                              (supported: variants, string/number/bigint/boolean \
                                              literals, `null`, and `_`); model absence explicitly \
                                              or use a `_` arm"
+                .into(),
+            SyntaxError::ZtsDeclareUnion => "`declare union` is not supported in zts; declare \
+                                             the lowered shape instead (a literal-union type \
+                                             alias + a values/has object)"
+                .into(),
+            SyntaxError::ZtsUnionMember => "zts `union` members must be string literals in v1 \
+                                            (`union Level = 'info' | 'warn';`)"
                 .into(),
             SyntaxError::TS1114 => "Duplicate label".into(),
             SyntaxError::TS1115 => "A 'continue' statement can only jump to a label of an \
