@@ -123,7 +123,13 @@ impl<I: Tokens> Parser<I> {
                 t.is_word()
                     || matches!(
                         t,
-                        Token::Str | Token::Num | Token::Minus | Token::True | Token::False
+                        Token::Str
+                            | Token::Num
+                            | Token::BigInt
+                            | Token::Minus
+                            | Token::True
+                            | Token::False
+                            | Token::Null
                     )
             });
             if !arm_starter {
@@ -332,10 +338,21 @@ impl<I: Tokens> Parser<I> {
             }));
         }
 
+        // `undefined =>` — a realistic mistake given `null` works; give it
+        // a real diagnostic instead of the variant path's "Expected '{'".
+        if cur.is_word()
+            && self.input().cur().take_word(&self.input) == atom!("undefined")
+            && self.input_mut().peek() == Some(Token::Arrow)
+        {
+            // No token has been consumed yet — span(start) would be
+            // inverted (start > end); anchor on the current token instead.
+            syntax_error!(self, self.input().cur_span(), SyntaxError::ZtsUndefinedArm);
+        }
+
         // Literal patterns.
         if matches!(
             cur,
-            Token::Str | Token::Num | Token::True | Token::False | Token::Null
+            Token::Str | Token::Num | Token::BigInt | Token::True | Token::False | Token::Null
         ) {
             let lit = self.parse_lit()?;
             return Ok(MatchPat::Lit(MatchLitPat {
@@ -346,7 +363,7 @@ impl<I: Tokens> Parser<I> {
         }
         if cur == Token::Minus {
             self.bump();
-            if !self.input().is(Token::Num) {
+            if !matches!(self.input().cur(), Token::Num | Token::BigInt) {
                 syntax_error!(self, self.span(start), SyntaxError::TS1109);
             }
             let lit = self.parse_lit()?;
@@ -831,6 +848,28 @@ mod tests {
         // Only the `{` must share a line with `)`; arms can wrap freely.
         let e = parse_expr("match (x) { A { a } =>\n  a,\n  B { b } => b\n}");
         assert_eq!(e.expect_match_expr().arms.len(), 2);
+    }
+
+    #[test]
+    fn null_and_bigint_literal_arms_parse() {
+        let e = parse_expr("match (x) { null => 0, 1n => 1, -2n => 2, _ => 3 }");
+        let m = e.expect_match_expr();
+        assert_eq!(m.arms.len(), 4);
+        assert!(m.arms[0].pattern.is_lit());
+        assert!(m.arms[1].pattern.is_lit());
+        let neg = m.arms[2].pattern.as_lit().unwrap();
+        assert!(neg.neg && matches!(neg.lit, Lit::BigInt(..)));
+        // `null` / bigint must also commit the header when FIRST.
+        let e = parse_expr("match (x) { null => 0, _ => 1 }");
+        assert_eq!(e.expect_match_expr().arms.len(), 2);
+        let e = parse_expr("match (x) { 1n => 0, _ => 1 }");
+        assert_eq!(e.expect_match_expr().arms.len(), 2);
+    }
+
+    #[test]
+    fn undefined_arm_gets_a_real_diagnostic() {
+        let (is_err, had) = parse_module_errs("const r = match (x) { undefined => 1, _ => 0 };");
+        assert!(is_err || had, "`undefined =>` must error");
     }
 
     #[test]

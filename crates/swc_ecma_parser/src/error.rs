@@ -60,6 +60,8 @@ pub enum SyntaxError {
     ZtsAmbiguousArmBody,
     /// zts: `declare newtype`.
     ZtsDeclareNewtype,
+    /// zts: `undefined` as a match arm pattern.
+    ZtsUndefinedArm,
 
     DeclNotAllowed,
 
@@ -689,6 +691,11 @@ impl SyntaxError {
             SyntaxError::ZtsDeclareNewtype => "`declare newtype` is not supported in zts; declare \
                                                the lowered shape instead (a branded type alias + a \
                                                factory function)"
+                .into(),
+            SyntaxError::ZtsUndefinedArm => "`undefined` is not a supported match arm pattern \
+                                             (supported: variants, string/number/bigint/boolean \
+                                             literals, `null`, and `_`); model absence explicitly \
+                                             or use a `_` arm"
                 .into(),
             SyntaxError::TS1114 => "Duplicate label".into(),
             SyntaxError::TS1115 => "A 'continue' statement can only jump to a label of an \
