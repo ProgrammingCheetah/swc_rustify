@@ -769,6 +769,34 @@ pub trait Visit {
     fn visit_match_expr(&mut self, node: &MatchExpr) {
         <MatchExpr as VisitWith<Self>>::visit_children_with(node, self)
     }
+    #[doc = "Visit a node of type `MatchLitPat`.\n\nBy default, this method calls \
+             [`MatchLitPat::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_match_lit_pat(&mut self, node: &MatchLitPat) {
+        <MatchLitPat as VisitWith<Self>>::visit_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `MatchPat`.\n\nBy default, this method calls \
+             [`MatchPat::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_match_pat(&mut self, node: &MatchPat) {
+        <MatchPat as VisitWith<Self>>::visit_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
+             [`MatchVariantPat::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_match_variant_pat(&mut self, node: &MatchVariantPat) {
+        <MatchVariantPat as VisitWith<Self>>::visit_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `MatchWildcardPat`.\n\nBy default, this method calls \
+             [`MatchWildcardPat::visit_children_with`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_match_wildcard_pat(&mut self, node: &MatchWildcardPat) {
+        <MatchWildcardPat as VisitWith<Self>>::visit_children_with(node, self)
+    }
     #[doc = "Visit a node of type `MemberExpr`.\n\nBy default, this method calls \
              [`MemberExpr::visit_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -2686,6 +2714,26 @@ where
     }
 
     #[inline]
+    fn visit_match_lit_pat(&mut self, node: &MatchLitPat) {
+        <V as Visit>::visit_match_lit_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_match_pat(&mut self, node: &MatchPat) {
+        <V as Visit>::visit_match_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_match_variant_pat(&mut self, node: &MatchVariantPat) {
+        <V as Visit>::visit_match_variant_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_match_wildcard_pat(&mut self, node: &MatchWildcardPat) {
+        <V as Visit>::visit_match_wildcard_pat(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_member_expr(&mut self, node: &MemberExpr) {
         <V as Visit>::visit_member_expr(&mut **self, node)
     }
@@ -4225,6 +4273,26 @@ where
     #[inline]
     fn visit_match_expr(&mut self, node: &MatchExpr) {
         <V as Visit>::visit_match_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_match_lit_pat(&mut self, node: &MatchLitPat) {
+        <V as Visit>::visit_match_lit_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_match_pat(&mut self, node: &MatchPat) {
+        <V as Visit>::visit_match_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_match_variant_pat(&mut self, node: &MatchVariantPat) {
+        <V as Visit>::visit_match_variant_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_match_wildcard_pat(&mut self, node: &MatchWildcardPat) {
+        <V as Visit>::visit_match_wildcard_pat(&mut **self, node)
     }
 
     #[inline]
@@ -6116,6 +6184,38 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Visit::visit_match_expr(visitor, node),
             swc_visit::Either::Right(visitor) => Visit::visit_match_expr(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_match_lit_pat(&mut self, node: &MatchLitPat) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_match_lit_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_match_lit_pat(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_match_pat(&mut self, node: &MatchPat) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_match_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_match_pat(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_match_variant_pat(&mut self, node: &MatchVariantPat) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_match_variant_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_match_variant_pat(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_match_wildcard_pat(&mut self, node: &MatchWildcardPat) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_match_wildcard_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_match_wildcard_pat(visitor, node),
         }
     }
 
@@ -8614,6 +8714,38 @@ where
     fn visit_match_expr(&mut self, node: &MatchExpr) {
         if self.enabled {
             <V as Visit>::visit_match_expr(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_match_lit_pat(&mut self, node: &MatchLitPat) {
+        if self.enabled {
+            <V as Visit>::visit_match_lit_pat(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_match_pat(&mut self, node: &MatchPat) {
+        if self.enabled {
+            <V as Visit>::visit_match_pat(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_match_variant_pat(&mut self, node: &MatchVariantPat) {
+        if self.enabled {
+            <V as Visit>::visit_match_variant_pat(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_match_wildcard_pat(&mut self, node: &MatchWildcardPat) {
+        if self.enabled {
+            <V as Visit>::visit_match_wildcard_pat(&mut self.visitor, node)
         } else {
         }
     }
@@ -12669,18 +12801,14 @@ impl<V: ?Sized + Visit> VisitWith<V> for MatchArm {
         match self {
             MatchArm {
                 span,
-                variant,
-                binding,
+                pattern,
                 body,
             } => {
                 {
                     <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
                 };
                 {
-                    <Ident as VisitWith<V>>::visit_with(variant, visitor)
-                };
-                {
-                    <Option<ObjectPat> as VisitWith<V>>::visit_with(binding, visitor)
+                    <MatchPat as VisitWith<V>>::visit_with(pattern, visitor)
                 };
                 {
                     <Box<Expr> as VisitWith<V>>::visit_with(body, visitor)
@@ -12710,6 +12838,89 @@ impl<V: ?Sized + Visit> VisitWith<V> for MatchExpr {
                 };
                 {
                     <Vec<MatchArm> as VisitWith<V>>::visit_with(arms, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for MatchLitPat {
+    #[doc = "Calls [Visit`::visit_match_lit_pat`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_match_lit_pat(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            MatchLitPat { span, lit, neg } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <Lit as VisitWith<V>>::visit_with(lit, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for MatchPat {
+    #[doc = "Calls [Visit`::visit_match_pat`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_match_pat(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            MatchPat::Variant { 0: _field_0 } => {
+                <MatchVariantPat as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
+            MatchPat::Lit { 0: _field_0 } => {
+                <MatchLitPat as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
+            MatchPat::Wildcard { 0: _field_0 } => {
+                <MatchWildcardPat as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for MatchVariantPat {
+    #[doc = "Calls [Visit`::visit_match_variant_pat`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_match_variant_pat(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            MatchVariantPat {
+                span,
+                name,
+                binding,
+            } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <Ident as VisitWith<V>>::visit_with(name, visitor)
+                };
+                {
+                    <Option<ObjectPat> as VisitWith<V>>::visit_with(binding, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for MatchWildcardPat {
+    #[doc = "Calls [Visit`::visit_match_wildcard_pat`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_match_wildcard_pat(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            MatchWildcardPat { span } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
                 };
             }
         }
@@ -18505,6 +18716,56 @@ pub trait VisitAstPath {
     ) {
         <MatchExpr as VisitWithAstPath<Self>>::visit_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `MatchLitPat`.\n\nBy default, this method calls \
+             [`MatchLitPat::visit_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_match_lit_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchLitPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <MatchLitPat as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `MatchPat`.\n\nBy default, this method calls \
+             [`MatchPat::visit_children_with_ast_path`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_match_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <MatchPat as VisitWithAstPath<Self>>::visit_children_with_ast_path(node, self, __ast_path)
+    }
+    #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
+             [`MatchVariantPat::visit_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_match_variant_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchVariantPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <MatchVariantPat as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `MatchWildcardPat`.\n\nBy default, this method calls \
+             [`MatchWildcardPat::visit_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_match_wildcard_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchWildcardPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <MatchWildcardPat as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `MemberExpr`.\n\nBy default, this method calls \
              [`MemberExpr::visit_children_with_ast_path`]. If you want to recurse, you need to \
              call it manually."]
@@ -21837,6 +22098,42 @@ where
     }
 
     #[inline]
+    fn visit_match_lit_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchLitPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_lit_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_match_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_match_variant_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchVariantPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_variant_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_match_wildcard_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchWildcardPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_wildcard_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_member_expr<'ast: 'r, 'r>(
         &mut self,
         node: &'ast MemberExpr,
@@ -24507,6 +24804,42 @@ where
         __ast_path: &mut AstNodePath<'r>,
     ) {
         <V as VisitAstPath>::visit_match_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_match_lit_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchLitPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_lit_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_match_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_match_variant_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchVariantPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_variant_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_match_wildcard_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchWildcardPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_wildcard_pat(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -27940,6 +28273,70 @@ where
             }
             swc_visit::Either::Right(visitor) => {
                 VisitAstPath::visit_match_expr(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_match_lit_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchLitPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_match_lit_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_match_lit_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_match_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_match_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_match_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_match_variant_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchVariantPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_match_variant_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_match_variant_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_match_wildcard_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchWildcardPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_match_wildcard_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_match_wildcard_pat(visitor, node, __ast_path)
             }
         }
     }
@@ -32300,6 +32697,54 @@ where
     ) {
         if self.enabled {
             <V as VisitAstPath>::visit_match_expr(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_match_lit_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchLitPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_match_lit_pat(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_match_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_match_pat(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_match_variant_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchVariantPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_match_variant_pat(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_match_wildcard_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchWildcardPat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_match_wildcard_pat(&mut self.visitor, node, __ast_path)
         } else {
         }
     }
@@ -40621,8 +41066,7 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for MatchArm {
         match self {
             MatchArm {
                 span,
-                variant,
-                binding,
+                pattern,
                 body,
             } => {
                 {
@@ -40639,21 +41083,10 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for MatchArm {
                 {
                     let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchArm(
                         self,
-                        self::fields::MatchArmField::Variant,
+                        self::fields::MatchArmField::Pattern,
                     ));
-                    <Ident as VisitWithAstPath<V>>::visit_with_ast_path(
-                        variant,
-                        visitor,
-                        &mut *__ast_path,
-                    )
-                };
-                {
-                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchArm(
-                        self,
-                        self::fields::MatchArmField::Binding,
-                    ));
-                    <Option<ObjectPat> as VisitWithAstPath<V>>::visit_with_ast_path(
-                        binding,
+                    <MatchPat as VisitWithAstPath<V>>::visit_with_ast_path(
+                        pattern,
                         visitor,
                         &mut *__ast_path,
                     )
@@ -40725,6 +41158,201 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for MatchExpr {
                     ));
                     <Vec<MatchArm> as VisitWithAstPath<V>>::visit_with_ast_path(
                         arms,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for MatchLitPat {
+    #[doc = "Calls [VisitAstPath`::visit_match_lit_pat`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_lit_pat(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            MatchLitPat { span, lit, neg } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchLitPat(
+                        self,
+                        self::fields::MatchLitPatField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchLitPat(
+                        self,
+                        self::fields::MatchLitPatField::Lit,
+                    ));
+                    <Lit as VisitWithAstPath<V>>::visit_with_ast_path(
+                        lit,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for MatchPat {
+    #[doc = "Calls [VisitAstPath`::visit_match_pat`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_pat(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            MatchPat::Variant { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchPat(
+                    self,
+                    self::fields::MatchPatField::Variant,
+                ));
+                <MatchVariantPat as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            MatchPat::Lit { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchPat(
+                    self,
+                    self::fields::MatchPatField::Lit,
+                ));
+                <MatchLitPat as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            MatchPat::Wildcard { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchPat(
+                    self,
+                    self::fields::MatchPatField::Wildcard,
+                ));
+                <MatchWildcardPat as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for MatchVariantPat {
+    #[doc = "Calls [VisitAstPath`::visit_match_variant_pat`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_variant_pat(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            MatchVariantPat {
+                span,
+                name,
+                binding,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchVariantPat(
+                        self,
+                        self::fields::MatchVariantPatField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchVariantPat(
+                        self,
+                        self::fields::MatchVariantPatField::Name,
+                    ));
+                    <Ident as VisitWithAstPath<V>>::visit_with_ast_path(
+                        name,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchVariantPat(
+                        self,
+                        self::fields::MatchVariantPatField::Binding,
+                    ));
+                    <Option<ObjectPat> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        binding,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for MatchWildcardPat {
+    #[doc = "Calls [VisitAstPath`::visit_match_wildcard_pat`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_wildcard_pat(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            MatchWildcardPat { span } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchWildcardPat(
+                        self,
+                        self::fields::MatchWildcardPatField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
                         visitor,
                         &mut *__ast_path,
                     )
@@ -51852,6 +52480,34 @@ pub trait VisitMut {
     fn visit_mut_match_expr(&mut self, node: &mut MatchExpr) {
         <MatchExpr as VisitMutWith<Self>>::visit_mut_children_with(node, self)
     }
+    #[doc = "Visit a node of type `MatchLitPat`.\n\nBy default, this method calls \
+             [`MatchLitPat::visit_mut_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_mut_match_lit_pat(&mut self, node: &mut MatchLitPat) {
+        <MatchLitPat as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `MatchPat`.\n\nBy default, this method calls \
+             [`MatchPat::visit_mut_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_mut_match_pat(&mut self, node: &mut MatchPat) {
+        <MatchPat as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
+             [`MatchVariantPat::visit_mut_children_with`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_mut_match_variant_pat(&mut self, node: &mut MatchVariantPat) {
+        <MatchVariantPat as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `MatchWildcardPat`.\n\nBy default, this method calls \
+             [`MatchWildcardPat::visit_mut_children_with`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_mut_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat) {
+        <MatchWildcardPat as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
     #[doc = "Visit a node of type `MemberExpr`.\n\nBy default, this method calls \
              [`MemberExpr::visit_mut_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -53787,6 +54443,26 @@ where
     }
 
     #[inline]
+    fn visit_mut_match_lit_pat(&mut self, node: &mut MatchLitPat) {
+        <V as VisitMut>::visit_mut_match_lit_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_match_pat(&mut self, node: &mut MatchPat) {
+        <V as VisitMut>::visit_mut_match_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_match_variant_pat(&mut self, node: &mut MatchVariantPat) {
+        <V as VisitMut>::visit_mut_match_variant_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat) {
+        <V as VisitMut>::visit_mut_match_wildcard_pat(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_mut_member_expr(&mut self, node: &mut MemberExpr) {
         <V as VisitMut>::visit_mut_member_expr(&mut **self, node)
     }
@@ -55326,6 +56002,26 @@ where
     #[inline]
     fn visit_mut_match_expr(&mut self, node: &mut MatchExpr) {
         <V as VisitMut>::visit_mut_match_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_match_lit_pat(&mut self, node: &mut MatchLitPat) {
+        <V as VisitMut>::visit_mut_match_lit_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_match_pat(&mut self, node: &mut MatchPat) {
+        <V as VisitMut>::visit_mut_match_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_match_variant_pat(&mut self, node: &mut MatchVariantPat) {
+        <V as VisitMut>::visit_mut_match_variant_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat) {
+        <V as VisitMut>::visit_mut_match_wildcard_pat(&mut **self, node)
     }
 
     #[inline]
@@ -57311,6 +58007,46 @@ where
         match self {
             swc_visit::Either::Left(visitor) => VisitMut::visit_mut_match_expr(visitor, node),
             swc_visit::Either::Right(visitor) => VisitMut::visit_mut_match_expr(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_lit_pat(&mut self, node: &mut MatchLitPat) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_match_lit_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => VisitMut::visit_mut_match_lit_pat(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_pat(&mut self, node: &mut MatchPat) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_match_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => VisitMut::visit_mut_match_pat(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_variant_pat(&mut self, node: &mut MatchVariantPat) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMut::visit_mut_match_variant_pat(visitor, node)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMut::visit_mut_match_variant_pat(visitor, node)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMut::visit_mut_match_wildcard_pat(visitor, node)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMut::visit_mut_match_wildcard_pat(visitor, node)
+            }
         }
     }
 
@@ -60029,6 +60765,38 @@ where
     fn visit_mut_match_expr(&mut self, node: &mut MatchExpr) {
         if self.enabled {
             <V as VisitMut>::visit_mut_match_expr(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_lit_pat(&mut self, node: &mut MatchLitPat) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_match_lit_pat(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_pat(&mut self, node: &mut MatchPat) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_match_pat(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_variant_pat(&mut self, node: &mut MatchVariantPat) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_match_variant_pat(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_match_wildcard_pat(&mut self.visitor, node)
         } else {
         }
     }
@@ -64113,18 +64881,14 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for MatchArm {
         match self {
             MatchArm {
                 span,
-                variant,
-                binding,
+                pattern,
                 body,
             } => {
                 {
                     <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
                 };
                 {
-                    <Ident as VisitMutWith<V>>::visit_mut_with(variant, visitor)
-                };
-                {
-                    <Option<ObjectPat> as VisitMutWith<V>>::visit_mut_with(binding, visitor)
+                    <MatchPat as VisitMutWith<V>>::visit_mut_with(pattern, visitor)
                 };
                 {
                     <Box<Expr> as VisitMutWith<V>>::visit_mut_with(body, visitor)
@@ -64154,6 +64918,89 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for MatchExpr {
                 };
                 {
                     <Vec<MatchArm> as VisitMutWith<V>>::visit_mut_with(arms, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for MatchLitPat {
+    #[doc = "Calls [VisitMut`::visit_mut_match_lit_pat`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_match_lit_pat(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            MatchLitPat { span, lit, neg } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <Lit as VisitMutWith<V>>::visit_mut_with(lit, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for MatchPat {
+    #[doc = "Calls [VisitMut`::visit_mut_match_pat`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_match_pat(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            MatchPat::Variant { 0: _field_0 } => {
+                <MatchVariantPat as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
+            MatchPat::Lit { 0: _field_0 } => {
+                <MatchLitPat as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
+            MatchPat::Wildcard { 0: _field_0 } => {
+                <MatchWildcardPat as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for MatchVariantPat {
+    #[doc = "Calls [VisitMut`::visit_mut_match_variant_pat`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_match_variant_pat(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            MatchVariantPat {
+                span,
+                name,
+                binding,
+            } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <Ident as VisitMutWith<V>>::visit_mut_with(name, visitor)
+                };
+                {
+                    <Option<ObjectPat> as VisitMutWith<V>>::visit_mut_with(binding, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for MatchWildcardPat {
+    #[doc = "Calls [VisitMut`::visit_mut_match_wildcard_pat`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_match_wildcard_pat(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            MatchWildcardPat { span } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
                 };
             }
         }
@@ -69802,6 +70649,50 @@ pub trait VisitMutAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `MatchLitPat`.\n\nBy default, this method calls \
+             [`MatchLitPat::visit_mut_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_mut_match_lit_pat(&mut self, node: &mut MatchLitPat, __ast_path: &mut AstKindPath) {
+        <MatchLitPat as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `MatchPat`.\n\nBy default, this method calls \
+             [`MatchPat::visit_mut_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_mut_match_pat(&mut self, node: &mut MatchPat, __ast_path: &mut AstKindPath) {
+        <MatchPat as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
+             [`MatchVariantPat::visit_mut_children_with_ast_path`]. If you want to recurse, you \
+             need to call it manually."]
+    #[inline]
+    fn visit_mut_match_variant_pat(
+        &mut self,
+        node: &mut MatchVariantPat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <MatchVariantPat as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `MatchWildcardPat`.\n\nBy default, this method calls \
+             [`MatchWildcardPat::visit_mut_children_with_ast_path`]. If you want to recurse, you \
+             need to call it manually."]
+    #[inline]
+    fn visit_mut_match_wildcard_pat(
+        &mut self,
+        node: &mut MatchWildcardPat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <MatchWildcardPat as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `MemberExpr`.\n\nBy default, this method calls \
              [`MemberExpr::visit_mut_children_with_ast_path`]. If you want to recurse, you need to \
              call it manually."]
@@ -72620,6 +73511,34 @@ where
     }
 
     #[inline]
+    fn visit_mut_match_lit_pat(&mut self, node: &mut MatchLitPat, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_match_lit_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_match_pat(&mut self, node: &mut MatchPat, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_match_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_match_variant_pat(
+        &mut self,
+        node: &mut MatchVariantPat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_match_variant_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_match_wildcard_pat(
+        &mut self,
+        node: &mut MatchWildcardPat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_match_wildcard_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_mut_member_expr(&mut self, node: &mut MemberExpr, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_member_expr(&mut **self, node, __ast_path)
     }
@@ -74666,6 +75585,34 @@ where
     #[inline]
     fn visit_mut_match_expr(&mut self, node: &mut MatchExpr, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_match_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_match_lit_pat(&mut self, node: &mut MatchLitPat, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_match_lit_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_match_pat(&mut self, node: &mut MatchPat, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_match_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_match_variant_pat(
+        &mut self,
+        node: &mut MatchVariantPat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_match_variant_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_match_wildcard_pat(
+        &mut self,
+        node: &mut MatchWildcardPat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_match_wildcard_pat(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -77491,6 +78438,62 @@ where
             }
             swc_visit::Either::Right(visitor) => {
                 VisitMutAstPath::visit_mut_match_expr(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_lit_pat(&mut self, node: &mut MatchLitPat, __ast_path: &mut AstKindPath) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_match_lit_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_match_lit_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_pat(&mut self, node: &mut MatchPat, __ast_path: &mut AstKindPath) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_match_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_match_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_variant_pat(
+        &mut self,
+        node: &mut MatchVariantPat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_match_variant_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_match_variant_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_wildcard_pat(
+        &mut self,
+        node: &mut MatchWildcardPat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_match_wildcard_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_match_wildcard_pat(visitor, node, __ast_path)
             }
         }
     }
@@ -81321,6 +82324,50 @@ where
     fn visit_mut_match_expr(&mut self, node: &mut MatchExpr, __ast_path: &mut AstKindPath) {
         if self.enabled {
             <V as VisitMutAstPath>::visit_mut_match_expr(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_lit_pat(&mut self, node: &mut MatchLitPat, __ast_path: &mut AstKindPath) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_match_lit_pat(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_pat(&mut self, node: &mut MatchPat, __ast_path: &mut AstKindPath) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_match_pat(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_variant_pat(
+        &mut self,
+        node: &mut MatchVariantPat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_match_variant_pat(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_wildcard_pat(
+        &mut self,
+        node: &mut MatchWildcardPat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_match_wildcard_pat(
+                &mut self.visitor,
+                node,
+                __ast_path,
+            )
         } else {
         }
     }
@@ -88234,8 +89281,7 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for MatchArm {
         match self {
             MatchArm {
                 span,
-                variant,
-                binding,
+                pattern,
                 body,
             } => {
                 {
@@ -88249,20 +89295,10 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for MatchArm {
                 };
                 {
                     let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchArm(
-                        self::fields::MatchArmField::Variant,
+                        self::fields::MatchArmField::Pattern,
                     ));
-                    <Ident as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
-                        variant,
-                        visitor,
-                        &mut *__ast_path,
-                    )
-                };
-                {
-                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchArm(
-                        self::fields::MatchArmField::Binding,
-                    ));
-                    <Option<ObjectPat> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
-                        binding,
+                    <MatchPat as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        pattern,
                         visitor,
                         &mut *__ast_path,
                     )
@@ -88320,6 +89356,159 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for MatchExpr {
                     ));
                     <Vec<MatchArm> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
                         arms,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for MatchLitPat {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_match_lit_pat`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_match_lit_pat(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            MatchLitPat { span, lit, neg } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchLitPat(
+                        self::fields::MatchLitPatField::Span,
+                    ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchLitPat(
+                        self::fields::MatchLitPatField::Lit,
+                    ));
+                    <Lit as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        lit,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for MatchPat {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_match_pat`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_match_pat(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            MatchPat::Variant { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchPat(
+                    self::fields::MatchPatField::Variant,
+                ));
+                <MatchVariantPat as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            MatchPat::Lit { 0: _field_0 } => {
+                let mut __ast_path = __ast_path
+                    .with_guard(AstParentKind::MatchPat(self::fields::MatchPatField::Lit));
+                <MatchLitPat as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            MatchPat::Wildcard { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchPat(
+                    self::fields::MatchPatField::Wildcard,
+                ));
+                <MatchWildcardPat as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for MatchVariantPat {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_match_variant_pat`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_match_variant_pat(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            MatchVariantPat {
+                span,
+                name,
+                binding,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchVariantPat(
+                        self::fields::MatchVariantPatField::Span,
+                    ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchVariantPat(
+                        self::fields::MatchVariantPatField::Name,
+                    ));
+                    <Ident as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        name,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchVariantPat(
+                        self::fields::MatchVariantPatField::Binding,
+                    ));
+                    <Option<ObjectPat> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        binding,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for MatchWildcardPat {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_match_wildcard_pat`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_match_wildcard_pat(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            MatchWildcardPat { span } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchWildcardPat(
+                        self::fields::MatchWildcardPatField::Span,
+                    ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
                         visitor,
                         &mut *__ast_path,
                     )
@@ -97188,6 +98377,34 @@ pub trait Fold {
     fn fold_match_expr(&mut self, node: MatchExpr) -> MatchExpr {
         <MatchExpr as FoldWith<Self>>::fold_children_with(node, self)
     }
+    #[doc = "Visit a node of type `MatchLitPat`.\n\nBy default, this method calls \
+             [`MatchLitPat::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_match_lit_pat(&mut self, node: MatchLitPat) -> MatchLitPat {
+        <MatchLitPat as FoldWith<Self>>::fold_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `MatchPat`.\n\nBy default, this method calls \
+             [`MatchPat::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_match_pat(&mut self, node: MatchPat) -> MatchPat {
+        <MatchPat as FoldWith<Self>>::fold_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
+             [`MatchVariantPat::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_match_variant_pat(&mut self, node: MatchVariantPat) -> MatchVariantPat {
+        <MatchVariantPat as FoldWith<Self>>::fold_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `MatchWildcardPat`.\n\nBy default, this method calls \
+             [`MatchWildcardPat::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_match_wildcard_pat(&mut self, node: MatchWildcardPat) -> MatchWildcardPat {
+        <MatchWildcardPat as FoldWith<Self>>::fold_children_with(node, self)
+    }
     #[doc = "Visit a node of type `MemberExpr`.\n\nBy default, this method calls \
              [`MemberExpr::fold_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -99157,6 +100374,26 @@ where
     }
 
     #[inline]
+    fn fold_match_lit_pat(&mut self, node: MatchLitPat) -> MatchLitPat {
+        <V as Fold>::fold_match_lit_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_match_pat(&mut self, node: MatchPat) -> MatchPat {
+        <V as Fold>::fold_match_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_match_variant_pat(&mut self, node: MatchVariantPat) -> MatchVariantPat {
+        <V as Fold>::fold_match_variant_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_match_wildcard_pat(&mut self, node: MatchWildcardPat) -> MatchWildcardPat {
+        <V as Fold>::fold_match_wildcard_pat(&mut **self, node)
+    }
+
+    #[inline]
     fn fold_member_expr(&mut self, node: MemberExpr) -> MemberExpr {
         <V as Fold>::fold_member_expr(&mut **self, node)
     }
@@ -100756,6 +101993,26 @@ where
     #[inline]
     fn fold_match_expr(&mut self, node: MatchExpr) -> MatchExpr {
         <V as Fold>::fold_match_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_match_lit_pat(&mut self, node: MatchLitPat) -> MatchLitPat {
+        <V as Fold>::fold_match_lit_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_match_pat(&mut self, node: MatchPat) -> MatchPat {
+        <V as Fold>::fold_match_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_match_variant_pat(&mut self, node: MatchVariantPat) -> MatchVariantPat {
+        <V as Fold>::fold_match_variant_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_match_wildcard_pat(&mut self, node: MatchWildcardPat) -> MatchWildcardPat {
+        <V as Fold>::fold_match_wildcard_pat(&mut **self, node)
     }
 
     #[inline]
@@ -102695,6 +103952,38 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Fold::fold_match_expr(visitor, node),
             swc_visit::Either::Right(visitor) => Fold::fold_match_expr(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_match_lit_pat(&mut self, node: MatchLitPat) -> MatchLitPat {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_match_lit_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_match_lit_pat(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_match_pat(&mut self, node: MatchPat) -> MatchPat {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_match_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_match_pat(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_match_variant_pat(&mut self, node: MatchVariantPat) -> MatchVariantPat {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_match_variant_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_match_variant_pat(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_match_wildcard_pat(&mut self, node: MatchWildcardPat) -> MatchWildcardPat {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_match_wildcard_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_match_wildcard_pat(visitor, node),
         }
     }
 
@@ -105349,6 +106638,42 @@ where
     fn fold_match_expr(&mut self, node: MatchExpr) -> MatchExpr {
         if self.enabled {
             <V as Fold>::fold_match_expr(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_match_lit_pat(&mut self, node: MatchLitPat) -> MatchLitPat {
+        if self.enabled {
+            <V as Fold>::fold_match_lit_pat(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_match_pat(&mut self, node: MatchPat) -> MatchPat {
+        if self.enabled {
+            <V as Fold>::fold_match_pat(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_match_variant_pat(&mut self, node: MatchVariantPat) -> MatchVariantPat {
+        if self.enabled {
+            <V as Fold>::fold_match_variant_pat(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_match_wildcard_pat(&mut self, node: MatchWildcardPat) -> MatchWildcardPat {
+        if self.enabled {
+            <V as Fold>::fold_match_wildcard_pat(&mut self.visitor, node)
         } else {
             node
         }
@@ -109621,18 +110946,15 @@ impl<V: ?Sized + Fold> FoldWith<V> for MatchArm {
         match self {
             MatchArm {
                 span,
-                variant,
-                binding,
+                pattern,
                 body,
             } => {
                 let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
-                let variant = { <Ident as FoldWith<V>>::fold_with(variant, visitor) };
-                let binding = { <Option<ObjectPat> as FoldWith<V>>::fold_with(binding, visitor) };
+                let pattern = { <MatchPat as FoldWith<V>>::fold_with(pattern, visitor) };
                 let body = { <Box<Expr> as FoldWith<V>>::fold_with(body, visitor) };
                 MatchArm {
                     span,
-                    variant,
-                    binding,
+                    pattern,
                     body,
                 }
             }
@@ -109660,6 +110982,87 @@ impl<V: ?Sized + Fold> FoldWith<V> for MatchExpr {
                     discriminant,
                     arms,
                 }
+            }
+        }
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for MatchLitPat {
+    #[doc = "Calls [Fold`::fold_match_lit_pat`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_match_lit_pat(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            MatchLitPat { span, lit, neg } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let lit = { <Lit as FoldWith<V>>::fold_with(lit, visitor) };
+                MatchLitPat { span, lit, neg }
+            }
+        }
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for MatchPat {
+    #[doc = "Calls [Fold`::fold_match_pat`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_match_pat(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            MatchPat::Variant { 0: _field_0 } => {
+                let _field_0 = <MatchVariantPat as FoldWith<V>>::fold_with(_field_0, visitor);
+                MatchPat::Variant { 0: _field_0 }
+            }
+            MatchPat::Lit { 0: _field_0 } => {
+                let _field_0 = <MatchLitPat as FoldWith<V>>::fold_with(_field_0, visitor);
+                MatchPat::Lit { 0: _field_0 }
+            }
+            MatchPat::Wildcard { 0: _field_0 } => {
+                let _field_0 = <MatchWildcardPat as FoldWith<V>>::fold_with(_field_0, visitor);
+                MatchPat::Wildcard { 0: _field_0 }
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => self,
+        }
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for MatchVariantPat {
+    #[doc = "Calls [Fold`::fold_match_variant_pat`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_match_variant_pat(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            MatchVariantPat {
+                span,
+                name,
+                binding,
+            } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let name = { <Ident as FoldWith<V>>::fold_with(name, visitor) };
+                let binding = { <Option<ObjectPat> as FoldWith<V>>::fold_with(binding, visitor) };
+                MatchVariantPat {
+                    span,
+                    name,
+                    binding,
+                }
+            }
+        }
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for MatchWildcardPat {
+    #[doc = "Calls [Fold`::fold_match_wildcard_pat`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_match_wildcard_pat(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            MatchWildcardPat { span } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                MatchWildcardPat { span }
             }
         }
     }
@@ -115157,6 +116560,50 @@ pub trait FoldAstPath {
     fn fold_match_expr(&mut self, node: MatchExpr, __ast_path: &mut AstKindPath) -> MatchExpr {
         <MatchExpr as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `MatchLitPat`.\n\nBy default, this method calls \
+             [`MatchLitPat::fold_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_match_lit_pat(
+        &mut self,
+        node: MatchLitPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchLitPat {
+        <MatchLitPat as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
+    }
+    #[doc = "Visit a node of type `MatchPat`.\n\nBy default, this method calls \
+             [`MatchPat::fold_children_with_ast_path`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn fold_match_pat(&mut self, node: MatchPat, __ast_path: &mut AstKindPath) -> MatchPat {
+        <MatchPat as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
+    }
+    #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
+             [`MatchVariantPat::fold_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_match_variant_pat(
+        &mut self,
+        node: MatchVariantPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchVariantPat {
+        <MatchVariantPat as FoldWithAstPath<Self>>::fold_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `MatchWildcardPat`.\n\nBy default, this method calls \
+             [`MatchWildcardPat::fold_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn fold_match_wildcard_pat(
+        &mut self,
+        node: MatchWildcardPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchWildcardPat {
+        <MatchWildcardPat as FoldWithAstPath<Self>>::fold_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `MemberExpr`.\n\nBy default, this method calls \
              [`MemberExpr::fold_children_with_ast_path`]. If you want to recurse, you need to call \
              it manually."]
@@ -118055,6 +119502,38 @@ where
     }
 
     #[inline]
+    fn fold_match_lit_pat(
+        &mut self,
+        node: MatchLitPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchLitPat {
+        <V as FoldAstPath>::fold_match_lit_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_match_pat(&mut self, node: MatchPat, __ast_path: &mut AstKindPath) -> MatchPat {
+        <V as FoldAstPath>::fold_match_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_match_variant_pat(
+        &mut self,
+        node: MatchVariantPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchVariantPat {
+        <V as FoldAstPath>::fold_match_variant_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_match_wildcard_pat(
+        &mut self,
+        node: MatchWildcardPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchWildcardPat {
+        <V as FoldAstPath>::fold_match_wildcard_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn fold_member_expr(&mut self, node: MemberExpr, __ast_path: &mut AstKindPath) -> MemberExpr {
         <V as FoldAstPath>::fold_member_expr(&mut **self, node, __ast_path)
     }
@@ -120349,6 +121828,38 @@ where
     #[inline]
     fn fold_match_expr(&mut self, node: MatchExpr, __ast_path: &mut AstKindPath) -> MatchExpr {
         <V as FoldAstPath>::fold_match_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_match_lit_pat(
+        &mut self,
+        node: MatchLitPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchLitPat {
+        <V as FoldAstPath>::fold_match_lit_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_match_pat(&mut self, node: MatchPat, __ast_path: &mut AstKindPath) -> MatchPat {
+        <V as FoldAstPath>::fold_match_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_match_variant_pat(
+        &mut self,
+        node: MatchVariantPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchVariantPat {
+        <V as FoldAstPath>::fold_match_variant_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_match_wildcard_pat(
+        &mut self,
+        node: MatchWildcardPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchWildcardPat {
+        <V as FoldAstPath>::fold_match_wildcard_pat(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -123382,6 +124893,66 @@ where
             }
             swc_visit::Either::Right(visitor) => {
                 FoldAstPath::fold_match_expr(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_match_lit_pat(
+        &mut self,
+        node: MatchLitPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchLitPat {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_match_lit_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_match_lit_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_match_pat(&mut self, node: MatchPat, __ast_path: &mut AstKindPath) -> MatchPat {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_match_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_match_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_match_variant_pat(
+        &mut self,
+        node: MatchVariantPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchVariantPat {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_match_variant_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_match_variant_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_match_wildcard_pat(
+        &mut self,
+        node: MatchWildcardPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchWildcardPat {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_match_wildcard_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_match_wildcard_pat(visitor, node, __ast_path)
             }
         }
     }
@@ -127436,6 +129007,54 @@ where
     fn fold_match_expr(&mut self, node: MatchExpr, __ast_path: &mut AstKindPath) -> MatchExpr {
         if self.enabled {
             <V as FoldAstPath>::fold_match_expr(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_match_lit_pat(
+        &mut self,
+        node: MatchLitPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchLitPat {
+        if self.enabled {
+            <V as FoldAstPath>::fold_match_lit_pat(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_match_pat(&mut self, node: MatchPat, __ast_path: &mut AstKindPath) -> MatchPat {
+        if self.enabled {
+            <V as FoldAstPath>::fold_match_pat(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_match_variant_pat(
+        &mut self,
+        node: MatchVariantPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchVariantPat {
+        if self.enabled {
+            <V as FoldAstPath>::fold_match_variant_pat(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_match_wildcard_pat(
+        &mut self,
+        node: MatchWildcardPat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchWildcardPat {
+        if self.enabled {
+            <V as FoldAstPath>::fold_match_wildcard_pat(&mut self.visitor, node, __ast_path)
         } else {
             node
         }
@@ -134901,8 +136520,7 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for MatchArm {
         match self {
             MatchArm {
                 span,
-                variant,
-                binding,
+                pattern,
                 body,
             } => {
                 let span = {
@@ -134914,22 +136532,12 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for MatchArm {
                         &mut *__ast_path,
                     )
                 };
-                let variant = {
+                let pattern = {
                     let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchArm(
-                        self::fields::MatchArmField::Variant,
+                        self::fields::MatchArmField::Pattern,
                     ));
-                    <Ident as FoldWithAstPath<V>>::fold_with_ast_path(
-                        variant,
-                        visitor,
-                        &mut *__ast_path,
-                    )
-                };
-                let binding = {
-                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchArm(
-                        self::fields::MatchArmField::Binding,
-                    ));
-                    <Option<ObjectPat> as FoldWithAstPath<V>>::fold_with_ast_path(
-                        binding,
+                    <MatchPat as FoldWithAstPath<V>>::fold_with_ast_path(
+                        pattern,
                         visitor,
                         &mut *__ast_path,
                     )
@@ -134945,8 +136553,7 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for MatchArm {
                 };
                 MatchArm {
                     span,
-                    variant,
-                    binding,
+                    pattern,
                     body,
                 }
             }
@@ -135002,6 +136609,165 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for MatchExpr {
                     discriminant,
                     arms,
                 }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for MatchLitPat {
+    #[doc = "Calls [FoldAstPath`::fold_match_lit_pat`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_match_lit_pat(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            MatchLitPat { span, lit, neg } => {
+                let span = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchLitPat(
+                        self::fields::MatchLitPatField::Span,
+                    ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let lit = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchLitPat(
+                        self::fields::MatchLitPatField::Lit,
+                    ));
+                    <Lit as FoldWithAstPath<V>>::fold_with_ast_path(lit, visitor, &mut *__ast_path)
+                };
+                MatchLitPat { span, lit, neg }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for MatchPat {
+    #[doc = "Calls [FoldAstPath`::fold_match_pat`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_match_pat(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            MatchPat::Variant { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchPat(
+                    self::fields::MatchPatField::Variant,
+                ));
+                let _field_0 = <MatchVariantPat as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                MatchPat::Variant { 0: _field_0 }
+            }
+            MatchPat::Lit { 0: _field_0 } => {
+                let mut __ast_path = __ast_path
+                    .with_guard(AstParentKind::MatchPat(self::fields::MatchPatField::Lit));
+                let _field_0 = <MatchLitPat as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                MatchPat::Lit { 0: _field_0 }
+            }
+            MatchPat::Wildcard { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchPat(
+                    self::fields::MatchPatField::Wildcard,
+                ));
+                let _field_0 = <MatchWildcardPat as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                MatchPat::Wildcard { 0: _field_0 }
+            }
+            #[cfg(swc_ast_unknown)]
+            _ => self,
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for MatchVariantPat {
+    #[doc = "Calls [FoldAstPath`::fold_match_variant_pat`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_match_variant_pat(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            MatchVariantPat {
+                span,
+                name,
+                binding,
+            } => {
+                let span = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchVariantPat(
+                        self::fields::MatchVariantPatField::Span,
+                    ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let name = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchVariantPat(
+                        self::fields::MatchVariantPatField::Name,
+                    ));
+                    <Ident as FoldWithAstPath<V>>::fold_with_ast_path(
+                        name,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let binding = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchVariantPat(
+                        self::fields::MatchVariantPatField::Binding,
+                    ));
+                    <Option<ObjectPat> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        binding,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                MatchVariantPat {
+                    span,
+                    name,
+                    binding,
+                }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for MatchWildcardPat {
+    #[doc = "Calls [FoldAstPath`::fold_match_wildcard_pat`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_match_wildcard_pat(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            MatchWildcardPat { span } => {
+                let span = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchWildcardPat(
+                        self::fields::MatchWildcardPatField::Span,
+                    ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                MatchWildcardPat { span }
             }
         }
     }
@@ -145576,10 +147342,8 @@ pub mod fields {
     pub enum MatchArmField {
         #[doc = "Represents [`MatchArm::span`]"]
         Span,
-        #[doc = "Represents [`MatchArm::variant`]"]
-        Variant,
-        #[doc = "Represents [`MatchArm::binding`]"]
-        Binding,
+        #[doc = "Represents [`MatchArm::pattern`]"]
+        Pattern,
         #[doc = "Represents [`MatchArm::body`]"]
         Body,
     }
@@ -145603,6 +147367,69 @@ pub mod fields {
         Discriminant,
         #[doc = "Represents [`MatchExpr::arms`]"]
         Arms(usize),
+    }
+    impl MatchLitPatField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum MatchLitPatField {
+        #[doc = "Represents [`MatchLitPat::span`]"]
+        Span,
+        #[doc = "Represents [`MatchLitPat::lit`]"]
+        Lit,
+        #[doc = "Represents [`MatchLitPat::neg`]"]
+        Neg,
+    }
+    impl MatchPatField {
+        #[inline(always)]
+        pub(crate) fn set_index(&mut self, _: usize) {
+            swc_visit::wrong_ast_path();
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum MatchPatField {
+        #[doc = "Represents [`MatchPat::Variant`]"]
+        Variant,
+        #[doc = "Represents [`MatchPat::Lit`]"]
+        Lit,
+        #[doc = "Represents [`MatchPat::Wildcard`]"]
+        Wildcard,
+    }
+    impl MatchVariantPatField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum MatchVariantPatField {
+        #[doc = "Represents [`MatchVariantPat::span`]"]
+        Span,
+        #[doc = "Represents [`MatchVariantPat::name`]"]
+        Name,
+        #[doc = "Represents [`MatchVariantPat::binding`]"]
+        Binding,
+    }
+    impl MatchWildcardPatField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum MatchWildcardPatField {
+        #[doc = "Represents [`MatchWildcardPat::span`]"]
+        Span,
     }
     impl MemberExprField {
         pub(crate) fn set_index(&mut self, index: usize) {
@@ -148476,6 +150303,10 @@ pub mod fields {
         Lit(LitField),
         MatchArm(MatchArmField),
         MatchExpr(MatchExprField),
+        MatchLitPat(MatchLitPatField),
+        MatchPat(MatchPatField),
+        MatchVariantPat(MatchVariantPatField),
+        MatchWildcardPat(MatchWildcardPatField),
         MemberExpr(MemberExprField),
         MemberProp(MemberPropField),
         MetaPropExpr(MetaPropExprField),
@@ -148725,6 +150556,10 @@ pub mod fields {
                 Self::Lit(v) => v.set_index(index),
                 Self::MatchArm(v) => v.set_index(index),
                 Self::MatchExpr(v) => v.set_index(index),
+                Self::MatchLitPat(v) => v.set_index(index),
+                Self::MatchPat(v) => v.set_index(index),
+                Self::MatchVariantPat(v) => v.set_index(index),
+                Self::MatchWildcardPat(v) => v.set_index(index),
                 Self::MemberExpr(v) => v.set_index(index),
                 Self::MemberProp(v) => v.set_index(index),
                 Self::MetaPropExpr(v) => v.set_index(index),
@@ -148977,6 +150812,10 @@ pub mod fields {
         Lit(&'ast Lit, LitField),
         MatchArm(&'ast MatchArm, MatchArmField),
         MatchExpr(&'ast MatchExpr, MatchExprField),
+        MatchLitPat(&'ast MatchLitPat, MatchLitPatField),
+        MatchPat(&'ast MatchPat, MatchPatField),
+        MatchVariantPat(&'ast MatchVariantPat, MatchVariantPatField),
+        MatchWildcardPat(&'ast MatchWildcardPat, MatchWildcardPatField),
         MemberExpr(&'ast MemberExpr, MemberExprField),
         MemberProp(&'ast MemberProp, MemberPropField),
         MetaPropExpr(&'ast MetaPropExpr, MetaPropExprField),
@@ -149241,6 +151080,10 @@ pub mod fields {
                 Self::Lit(_, __field_kind) => __field_kind.set_index(index),
                 Self::MatchArm(_, __field_kind) => __field_kind.set_index(index),
                 Self::MatchExpr(_, __field_kind) => __field_kind.set_index(index),
+                Self::MatchLitPat(_, __field_kind) => __field_kind.set_index(index),
+                Self::MatchPat(_, __field_kind) => __field_kind.set_index(index),
+                Self::MatchVariantPat(_, __field_kind) => __field_kind.set_index(index),
+                Self::MatchWildcardPat(_, __field_kind) => __field_kind.set_index(index),
                 Self::MemberExpr(_, __field_kind) => __field_kind.set_index(index),
                 Self::MemberProp(_, __field_kind) => __field_kind.set_index(index),
                 Self::MetaPropExpr(_, __field_kind) => __field_kind.set_index(index),
@@ -149543,6 +151386,14 @@ pub mod fields {
                 Self::Lit(_, __field_kind) => AstParentKind::Lit(*__field_kind),
                 Self::MatchArm(_, __field_kind) => AstParentKind::MatchArm(*__field_kind),
                 Self::MatchExpr(_, __field_kind) => AstParentKind::MatchExpr(*__field_kind),
+                Self::MatchLitPat(_, __field_kind) => AstParentKind::MatchLitPat(*__field_kind),
+                Self::MatchPat(_, __field_kind) => AstParentKind::MatchPat(*__field_kind),
+                Self::MatchVariantPat(_, __field_kind) => {
+                    AstParentKind::MatchVariantPat(*__field_kind)
+                }
+                Self::MatchWildcardPat(_, __field_kind) => {
+                    AstParentKind::MatchWildcardPat(*__field_kind)
+                }
                 Self::MemberExpr(_, __field_kind) => AstParentKind::MemberExpr(*__field_kind),
                 Self::MemberProp(_, __field_kind) => AstParentKind::MemberProp(*__field_kind),
                 Self::MetaPropExpr(_, __field_kind) => AstParentKind::MetaPropExpr(*__field_kind),
@@ -150277,6 +152128,26 @@ impl<'ast> From<&'ast MatchArm> for NodeRef<'ast> {
 impl<'ast> From<&'ast MatchExpr> for NodeRef<'ast> {
     fn from(node: &'ast MatchExpr) -> Self {
         NodeRef::MatchExpr(node)
+    }
+}
+impl<'ast> From<&'ast MatchLitPat> for NodeRef<'ast> {
+    fn from(node: &'ast MatchLitPat) -> Self {
+        NodeRef::MatchLitPat(node)
+    }
+}
+impl<'ast> From<&'ast MatchPat> for NodeRef<'ast> {
+    fn from(node: &'ast MatchPat) -> Self {
+        NodeRef::MatchPat(node)
+    }
+}
+impl<'ast> From<&'ast MatchVariantPat> for NodeRef<'ast> {
+    fn from(node: &'ast MatchVariantPat) -> Self {
+        NodeRef::MatchVariantPat(node)
+    }
+}
+impl<'ast> From<&'ast MatchWildcardPat> for NodeRef<'ast> {
+    fn from(node: &'ast MatchWildcardPat) -> Self {
+        NodeRef::MatchWildcardPat(node)
     }
 }
 impl<'ast> From<&'ast MemberExpr> for NodeRef<'ast> {
@@ -151105,6 +152976,10 @@ pub enum NodeRef<'ast> {
     Lit(&'ast Lit),
     MatchArm(&'ast MatchArm),
     MatchExpr(&'ast MatchExpr),
+    MatchLitPat(&'ast MatchLitPat),
+    MatchPat(&'ast MatchPat),
+    MatchVariantPat(&'ast MatchVariantPat),
+    MatchWildcardPat(&'ast MatchWildcardPat),
     MemberExpr(&'ast MemberExpr),
     MemberProp(&'ast MemberProp),
     MetaPropExpr(&'ast MetaPropExpr),
@@ -152236,12 +154111,7 @@ impl<'ast> NodeRef<'ast> {
             },
             NodeRef::MatchArm(node) => {
                 let iterator = ::std::iter::empty::<NodeRef<'ast>>()
-                    .chain(::std::iter::once(NodeRef::Ident(&node.variant)))
-                    .chain(
-                        node.binding
-                            .iter()
-                            .flat_map(|item| ::std::iter::once(NodeRef::ObjectPat(&item))),
-                    )
+                    .chain(::std::iter::once(NodeRef::MatchPat(&node.pattern)))
                     .chain({
                         let item = &*node.body;
                         ::std::iter::once(NodeRef::Expr(&item))
@@ -152259,6 +154129,33 @@ impl<'ast> NodeRef<'ast> {
                             .iter()
                             .flat_map(|item| ::std::iter::once(NodeRef::MatchArm(&item))),
                     );
+                Box::new(iterator)
+            }
+            NodeRef::MatchLitPat(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>()
+                    .chain(::std::iter::once(NodeRef::Lit(&node.lit)));
+                Box::new(iterator)
+            }
+            NodeRef::MatchPat(node) => match node {
+                MatchPat::Variant(v0) => Box::new(::std::iter::once(NodeRef::MatchVariantPat(v0))),
+                MatchPat::Lit(v0) => Box::new(::std::iter::once(NodeRef::MatchLitPat(v0))),
+                MatchPat::Wildcard(v0) => {
+                    Box::new(::std::iter::once(NodeRef::MatchWildcardPat(v0)))
+                }
+                _ => Box::new(::std::iter::empty::<NodeRef<'ast>>()),
+            },
+            NodeRef::MatchVariantPat(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>()
+                    .chain(::std::iter::once(NodeRef::Ident(&node.name)))
+                    .chain(
+                        node.binding
+                            .iter()
+                            .flat_map(|item| ::std::iter::once(NodeRef::ObjectPat(&item))),
+                    );
+                Box::new(iterator)
+            }
+            NodeRef::MatchWildcardPat(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>();
                 Box::new(iterator)
             }
             NodeRef::MemberExpr(node) => {

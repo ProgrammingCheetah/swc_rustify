@@ -920,6 +920,38 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_match_expr(&mut self, node: &MatchExpr, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchLitPat` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_lit_pat(&mut self, node: &MatchLitPat, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchLitPat` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_lit_pat(&mut self, node: &MatchLitPat, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchPat` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_pat(&mut self, node: &MatchPat, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchPat` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_pat(&mut self, node: &MatchPat, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchVariantPat` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_variant_pat(&mut self, node: &MatchVariantPat, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchVariantPat` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_variant_pat(&mut self, node: &MatchVariantPat, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchWildcardPat` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_wildcard_pat(&mut self, node: &MatchWildcardPat, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchWildcardPat` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_wildcard_pat(&mut self, node: &MatchWildcardPat, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `MemberExpr` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -3951,6 +3983,54 @@ where
     fn exit_match_expr(&mut self, node: &MatchExpr, ctx: &mut C) {
         self.second.exit_match_expr(node, ctx);
         self.first.exit_match_expr(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_lit_pat(&mut self, node: &MatchLitPat, ctx: &mut C) {
+        self.first.enter_match_lit_pat(node, ctx);
+        self.second.enter_match_lit_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_lit_pat(&mut self, node: &MatchLitPat, ctx: &mut C) {
+        self.second.exit_match_lit_pat(node, ctx);
+        self.first.exit_match_lit_pat(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_pat(&mut self, node: &MatchPat, ctx: &mut C) {
+        self.first.enter_match_pat(node, ctx);
+        self.second.enter_match_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_pat(&mut self, node: &MatchPat, ctx: &mut C) {
+        self.second.exit_match_pat(node, ctx);
+        self.first.exit_match_pat(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_variant_pat(&mut self, node: &MatchVariantPat, ctx: &mut C) {
+        self.first.enter_match_variant_pat(node, ctx);
+        self.second.enter_match_variant_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_variant_pat(&mut self, node: &MatchVariantPat, ctx: &mut C) {
+        self.second.exit_match_variant_pat(node, ctx);
+        self.first.exit_match_variant_pat(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_wildcard_pat(&mut self, node: &MatchWildcardPat, ctx: &mut C) {
+        self.first.enter_match_wildcard_pat(node, ctx);
+        self.second.enter_match_wildcard_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_wildcard_pat(&mut self, node: &MatchWildcardPat, ctx: &mut C) {
+        self.second.exit_match_wildcard_pat(node, ctx);
+        self.first.exit_match_wildcard_pat(node, ctx);
     }
 
     #[inline]
@@ -8103,6 +8183,70 @@ where
         match self {
             Self::Left(hook) => hook.exit_match_expr(node, ctx),
             Self::Right(hook) => hook.exit_match_expr(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_lit_pat(&mut self, node: &MatchLitPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_lit_pat(node, ctx),
+            Self::Right(hook) => hook.enter_match_lit_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_lit_pat(&mut self, node: &MatchLitPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_lit_pat(node, ctx),
+            Self::Right(hook) => hook.exit_match_lit_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_pat(&mut self, node: &MatchPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_pat(node, ctx),
+            Self::Right(hook) => hook.enter_match_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_pat(&mut self, node: &MatchPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_pat(node, ctx),
+            Self::Right(hook) => hook.exit_match_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_variant_pat(&mut self, node: &MatchVariantPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_variant_pat(node, ctx),
+            Self::Right(hook) => hook.enter_match_variant_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_variant_pat(&mut self, node: &MatchVariantPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_variant_pat(node, ctx),
+            Self::Right(hook) => hook.exit_match_variant_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_wildcard_pat(&mut self, node: &MatchWildcardPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_wildcard_pat(node, ctx),
+            Self::Right(hook) => hook.enter_match_wildcard_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_wildcard_pat(&mut self, node: &MatchWildcardPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_wildcard_pat(node, ctx),
+            Self::Right(hook) => hook.exit_match_wildcard_pat(node, ctx),
         }
     }
 
@@ -12821,6 +12965,62 @@ where
     }
 
     #[inline]
+    fn enter_match_lit_pat(&mut self, node: &MatchLitPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_lit_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_lit_pat(&mut self, node: &MatchLitPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_lit_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_match_pat(&mut self, node: &MatchPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_pat(&mut self, node: &MatchPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_match_variant_pat(&mut self, node: &MatchVariantPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_variant_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_variant_pat(&mut self, node: &MatchVariantPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_variant_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_match_wildcard_pat(&mut self, node: &MatchWildcardPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_wildcard_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_wildcard_pat(&mut self, node: &MatchWildcardPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_wildcard_pat(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_member_expr(&mut self, node: &MemberExpr, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_member_expr(node, ctx);
@@ -16504,6 +16704,38 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.exit_match_expr(node, &mut self.context);
     }
 
+    #[doc = "Visits a node of type `MatchLitPat` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_match_lit_pat(&mut self, node: &MatchLitPat) {
+        self.hook.enter_match_lit_pat(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_match_lit_pat(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `MatchPat` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_match_pat(&mut self, node: &MatchPat) {
+        self.hook.enter_match_pat(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_match_pat(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `MatchVariantPat` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_match_variant_pat(&mut self, node: &MatchVariantPat) {
+        self.hook.enter_match_variant_pat(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_match_variant_pat(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `MatchWildcardPat` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_match_wildcard_pat(&mut self, node: &MatchWildcardPat) {
+        self.hook.enter_match_wildcard_pat(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_match_wildcard_pat(node, &mut self.context);
+    }
+
     #[doc = "Visits a node of type `MemberExpr` using the hook's enter and exit methods."]
     #[inline]
     fn visit_member_expr(&mut self, node: &MemberExpr) {
@@ -19089,6 +19321,38 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_match_expr(&mut self, node: &mut MatchExpr, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchLitPat` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_lit_pat(&mut self, node: &mut MatchLitPat, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchLitPat` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_lit_pat(&mut self, node: &mut MatchLitPat, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchPat` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_pat(&mut self, node: &mut MatchPat, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchPat` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_pat(&mut self, node: &mut MatchPat, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchVariantPat` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_variant_pat(&mut self, node: &mut MatchVariantPat, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchVariantPat` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_variant_pat(&mut self, node: &mut MatchVariantPat, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchWildcardPat` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchWildcardPat` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `MemberExpr` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -22164,6 +22428,54 @@ where
     fn exit_match_expr(&mut self, node: &mut MatchExpr, ctx: &mut C) {
         self.second.exit_match_expr(node, ctx);
         self.first.exit_match_expr(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_lit_pat(&mut self, node: &mut MatchLitPat, ctx: &mut C) {
+        self.first.enter_match_lit_pat(node, ctx);
+        self.second.enter_match_lit_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_lit_pat(&mut self, node: &mut MatchLitPat, ctx: &mut C) {
+        self.second.exit_match_lit_pat(node, ctx);
+        self.first.exit_match_lit_pat(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_pat(&mut self, node: &mut MatchPat, ctx: &mut C) {
+        self.first.enter_match_pat(node, ctx);
+        self.second.enter_match_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_pat(&mut self, node: &mut MatchPat, ctx: &mut C) {
+        self.second.exit_match_pat(node, ctx);
+        self.first.exit_match_pat(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_variant_pat(&mut self, node: &mut MatchVariantPat, ctx: &mut C) {
+        self.first.enter_match_variant_pat(node, ctx);
+        self.second.enter_match_variant_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_variant_pat(&mut self, node: &mut MatchVariantPat, ctx: &mut C) {
+        self.second.exit_match_variant_pat(node, ctx);
+        self.first.exit_match_variant_pat(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat, ctx: &mut C) {
+        self.first.enter_match_wildcard_pat(node, ctx);
+        self.second.enter_match_wildcard_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat, ctx: &mut C) {
+        self.second.exit_match_wildcard_pat(node, ctx);
+        self.first.exit_match_wildcard_pat(node, ctx);
     }
 
     #[inline]
@@ -26352,6 +26664,70 @@ where
         match self {
             Self::Left(hook) => hook.exit_match_expr(node, ctx),
             Self::Right(hook) => hook.exit_match_expr(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_lit_pat(&mut self, node: &mut MatchLitPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_lit_pat(node, ctx),
+            Self::Right(hook) => hook.enter_match_lit_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_lit_pat(&mut self, node: &mut MatchLitPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_lit_pat(node, ctx),
+            Self::Right(hook) => hook.exit_match_lit_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_pat(&mut self, node: &mut MatchPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_pat(node, ctx),
+            Self::Right(hook) => hook.enter_match_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_pat(&mut self, node: &mut MatchPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_pat(node, ctx),
+            Self::Right(hook) => hook.exit_match_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_variant_pat(&mut self, node: &mut MatchVariantPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_variant_pat(node, ctx),
+            Self::Right(hook) => hook.enter_match_variant_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_variant_pat(&mut self, node: &mut MatchVariantPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_variant_pat(node, ctx),
+            Self::Right(hook) => hook.exit_match_variant_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_wildcard_pat(node, ctx),
+            Self::Right(hook) => hook.enter_match_wildcard_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_wildcard_pat(node, ctx),
+            Self::Right(hook) => hook.exit_match_wildcard_pat(node, ctx),
         }
     }
 
@@ -31106,6 +31482,62 @@ where
     }
 
     #[inline]
+    fn enter_match_lit_pat(&mut self, node: &mut MatchLitPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_lit_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_lit_pat(&mut self, node: &mut MatchLitPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_lit_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_match_pat(&mut self, node: &mut MatchPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_pat(&mut self, node: &mut MatchPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_match_variant_pat(&mut self, node: &mut MatchVariantPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_variant_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_variant_pat(&mut self, node: &mut MatchVariantPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_variant_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_wildcard_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_wildcard_pat(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_member_expr(&mut self, node: &mut MemberExpr, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_member_expr(node, ctx);
@@ -34815,6 +35247,38 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.enter_match_expr(node, &mut self.context);
         node.visit_mut_children_with(self);
         self.hook.exit_match_expr(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `MatchLitPat` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_match_lit_pat(&mut self, node: &mut MatchLitPat) {
+        self.hook.enter_match_lit_pat(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_match_lit_pat(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `MatchPat` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_match_pat(&mut self, node: &mut MatchPat) {
+        self.hook.enter_match_pat(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_match_pat(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `MatchVariantPat` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_match_variant_pat(&mut self, node: &mut MatchVariantPat) {
+        self.hook.enter_match_variant_pat(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_match_variant_pat(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `MatchWildcardPat` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_match_wildcard_pat(&mut self, node: &mut MatchWildcardPat) {
+        self.hook.enter_match_wildcard_pat(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_match_wildcard_pat(node, &mut self.context);
     }
 
     #[doc = "Visits a node of type `MemberExpr` using the hook's enter and exit methods."]

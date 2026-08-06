@@ -119,7 +119,14 @@ impl<I: Tokens> Parser<I> {
             if !self.input().is(Token::LBrace) || self.input_mut().had_line_break_before_cur() {
                 return Ok(None);
             }
-            if !self.input_mut().peek().is_some_and(|t| t.is_word()) {
+            let arm_starter = self.input_mut().peek().is_some_and(|t| {
+                t.is_word()
+                    || matches!(
+                        t,
+                        Token::Str | Token::Num | Token::Minus | Token::True | Token::False
+                    )
+            });
+            if !arm_starter {
                 return Ok(None);
             }
             Ok(Some(discriminant))
@@ -251,7 +258,7 @@ impl<I: Tokens> Parser<I> {
         })
     }
 
-    /// `Variant { bindings } => body`
+    /// `<pattern> => body`
     ///
     /// The body is an assignment expression, or — mirroring arrow-function
     /// bodies — a block expression when it opens with `{` (a block's value
@@ -259,14 +266,7 @@ impl<I: Tokens> Parser<I> {
     fn parse_zts_match_arm(&mut self) -> PResult<MatchArm> {
         let arm_start = self.input().cur_pos();
 
-        let variant = self.parse_ident_name()?;
-        let variant = Ident::new_no_ctxt(variant.sym, variant.span);
-
-        self.expect_without_advance(Token::LBrace)?;
-        let binding = match self.parse_object_pat()? {
-            Pat::Object(o) => Some(o),
-            _ => unreachable!("parse_object_pat always returns Pat::Object"),
-        };
+        let pattern = self.parse_zts_match_pattern()?;
 
         expect!(self, Token::Arrow);
         let body = if self.input().is(Token::LBrace) {
@@ -284,10 +284,68 @@ impl<I: Tokens> Parser<I> {
 
         Ok(MatchArm {
             span: self.span(arm_start),
-            variant,
-            binding,
+            pattern,
             body,
         })
+    }
+
+    /// Wildcard `_`, a literal (`"active"`, `404`, `-1`, `true`, `null`),
+    /// or `Variant { bindings }`. Mode consistency (no mixing) is the
+    /// semantic pass's job.
+    fn parse_zts_match_pattern(&mut self) -> PResult<MatchPat> {
+        let start = self.input().cur_pos();
+        let cur = self.input().cur();
+
+        // `_ =>` — wildcard. (`_ { ... }` falls through to the variant
+        // path and is rejected there by the semantic pass.)
+        if cur.is_word()
+            && self.input().cur().take_word(&self.input) == atom!("_")
+            && self.input_mut().peek() == Some(Token::Arrow)
+        {
+            self.bump();
+            return Ok(MatchPat::Wildcard(MatchWildcardPat {
+                span: self.span(start),
+            }));
+        }
+
+        // Literal patterns.
+        if matches!(
+            cur,
+            Token::Str | Token::Num | Token::True | Token::False | Token::Null
+        ) {
+            let lit = self.parse_lit()?;
+            return Ok(MatchPat::Lit(MatchLitPat {
+                span: self.span(start),
+                lit,
+                neg: false,
+            }));
+        }
+        if cur == Token::Minus {
+            self.bump();
+            if !self.input().is(Token::Num) {
+                syntax_error!(self, self.span(start), SyntaxError::TS1109);
+            }
+            let lit = self.parse_lit()?;
+            return Ok(MatchPat::Lit(MatchLitPat {
+                span: self.span(start),
+                lit,
+                neg: true,
+            }));
+        }
+
+        // Variant pattern.
+        let name = self.parse_ident_name()?;
+        let name = Ident::new_no_ctxt(name.sym, name.span);
+        self.expect_without_advance(Token::LBrace)?;
+        let binding = match self.parse_object_pat()? {
+            Pat::Object(o) => Some(o),
+            _ => unreachable!("parse_object_pat always returns Pat::Object"),
+        };
+        Ok(MatchPat::Variant(MatchVariantPat {
+            span: self.span(start),
+            name,
+            binding,
+        }))
     }
 
     /// `if (test) { ... } else { ... }` in expression position. `else` is
@@ -509,6 +567,37 @@ mod tests {
     }
 
     #[test]
+    fn wildcard_arm_parses() {
+        let e = parse_expr("match (t) { K { v } => v, _ => 0 }");
+        let m = e.expect_match_expr();
+        assert!(m.arms[1].pattern.is_wildcard());
+    }
+
+    #[test]
+    fn literal_arms_parse() {
+        let e = parse_expr(
+            "match (s) { \"active\" => 1, 404 => 2, -1 => 3, true => 4, null => 5, _ => 0 }",
+        );
+        let m = e.expect_match_expr();
+        assert_eq!(m.arms.len(), 6);
+        assert!(m.arms[0].pattern.is_lit());
+        let neg = m.arms[2].pattern.as_lit().unwrap();
+        assert!(neg.neg);
+        assert!(m.arms[5].pattern.is_wildcard());
+    }
+
+    #[test]
+    fn underscore_stays_an_identifier_outside_arm_patterns() {
+        let m = test_parser("const _ = 1;\nconst x = _ + 1;", zts(), |p| {
+            p.parse_module()
+        });
+        assert_eq!(m.body.len(), 2);
+        // And `_` as a match DISCRIMINANT is just an identifier.
+        let e = parse_expr("match (_) { K { v } => v }");
+        assert!(e.expect_match_expr().discriminant.is_ident());
+    }
+
+    #[test]
     fn zts_enum_basic() {
         let module = test_parser(
             "enum Shape { Circle { radius: number }, Square { side: number } }",
@@ -582,9 +671,10 @@ mod tests {
         );
         let m = e.expect_match_expr();
         assert_eq!(m.arms.len(), 2);
-        assert_eq!(m.arms[0].variant.sym, "Circle");
-        assert!(m.arms[0].binding.is_some());
-        assert_eq!(m.arms[1].variant.sym, "Square");
+        let v0 = m.arms[0].pattern.as_variant().unwrap();
+        assert_eq!(v0.name.sym, "Circle");
+        assert!(v0.binding.is_some());
+        assert_eq!(m.arms[1].pattern.as_variant().unwrap().name.sym, "Square");
     }
 
     #[test]

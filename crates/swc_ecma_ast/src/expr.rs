@@ -1084,23 +1084,15 @@ impl Take for MatchExpr {
     }
 }
 
-/// zts extension: one arm of a [MatchExpr]: `Variant { bindings } => body`.
+/// zts extension: one arm of a [MatchExpr]: `<pattern> => body`.
 #[ast_node("MatchArm")]
-#[derive(Eq, Hash, EqIgnoreSpan, Default)]
+#[derive(Eq, Hash, EqIgnoreSpan)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 #[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
 pub struct MatchArm {
     pub span: Span,
 
-    /// The variant name matched against the `kind` discriminant.
-    pub variant: Ident,
-
-    /// The `{ bindings }` destructuring pattern, if present.
-    #[cfg_attr(
-        feature = "encoding-impl",
-        encoding(with = "cbor4ii::core::types::Maybe")
-    )]
-    pub binding: Option<ObjectPat>,
+    pub pattern: MatchPat,
 
     pub body: Box<Expr>,
 }
@@ -1109,11 +1101,72 @@ impl Take for MatchArm {
     fn dummy() -> Self {
         MatchArm {
             span: DUMMY_SP,
-            variant: Take::dummy(),
-            binding: None,
+            pattern: MatchPat::Wildcard(MatchWildcardPat { span: DUMMY_SP }),
             body: Take::dummy(),
         }
     }
+}
+
+/// zts extension: what a match arm matches against. A match is either
+/// variant-mode or literal-mode (never mixed); `_` is legal in both, LAST
+/// arm only, and is the explicit opt-out of the exhaustiveness keystone.
+#[ast_node]
+#[derive(Eq, Hash, Is, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub enum MatchPat {
+    /// `Variant { bindings }` against the `kind` discriminant.
+    #[tag("MatchVariantPattern")]
+    Variant(MatchVariantPat),
+    /// A string/number/boolean literal, compared with `===`.
+    #[tag("MatchLitPattern")]
+    Lit(MatchLitPat),
+    /// `_` — matches anything; disables the keystone.
+    #[tag("MatchWildcardPattern")]
+    Wildcard(MatchWildcardPat),
+}
+
+/// `Variant { bindings }`
+#[ast_node("MatchVariantPattern")]
+#[derive(Eq, Hash, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct MatchVariantPat {
+    pub span: Span,
+
+    /// The variant name matched against the `kind` discriminant.
+    pub name: Ident,
+
+    /// The `{ bindings }` destructuring pattern, if present.
+    #[cfg_attr(
+        feature = "encoding-impl",
+        encoding(with = "cbor4ii::core::types::Maybe")
+    )]
+    pub binding: Option<ObjectPat>,
+}
+
+/// A literal arm pattern. Negative numbers arrive with `neg: true`.
+#[ast_node("MatchLitPattern")]
+#[derive(Eq, Hash, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct MatchLitPat {
+    pub span: Span,
+
+    pub lit: Lit,
+
+    /// `-42 => ...` — the minus is part of the pattern, not the literal.
+    #[cfg_attr(feature = "serde-impl", serde(default))]
+    pub neg: bool,
+}
+
+/// `_`
+#[ast_node("MatchWildcardPattern")]
+#[derive(Copy, Eq, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct MatchWildcardPat {
+    pub span: Span,
 }
 
 /// zts extension: `if (test) { ... } else { ... }` in expression position.
