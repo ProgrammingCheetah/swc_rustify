@@ -5,9 +5,9 @@ use swc_common::{ast_node, util::take::Take, EqIgnoreSpan, Span, SyntaxContext, 
 use crate::{
     class::Class,
     expr::Expr,
-    lit::Str,
     function::Function,
     ident::{Ident, IdentName},
+    lit::Str,
     pat::Pat,
     typescript::{TsEnumDecl, TsInterfaceDecl, TsModuleDecl, TsType, TsTypeAliasDecl},
 };

@@ -693,17 +693,17 @@ impl SyntaxError {
                                             object)"
                 .into(),
             SyntaxError::ZtsDeclareNewtype => "`declare newtype` is not supported in zts; declare \
-                                               the lowered shape instead (a branded type alias + a \
-                                               factory function)"
+                                               the lowered shape instead (a branded type alias + \
+                                               a factory function)"
                 .into(),
             SyntaxError::ZtsUndefinedArm => "`undefined` is not a supported match arm pattern \
                                              (supported: variants, string/number/bigint/boolean \
                                              literals, `null`, and `_`); model absence explicitly \
                                              or use a `_` arm"
                 .into(),
-            SyntaxError::ZtsDeclareUnion => "`declare union` is not supported in zts; declare \
-                                             the lowered shape instead (a literal-union type \
-                                             alias + a values/has object)"
+            SyntaxError::ZtsDeclareUnion => "`declare union` is not supported in zts; declare the \
+                                             lowered shape instead (a literal-union type alias + \
+                                             a values/has object)"
                 .into(),
             SyntaxError::ZtsUnionMember => "zts `union` members must be string literals in v1 \
                                             (`union Level = 'info' | 'warn';`)"

@@ -985,6 +985,22 @@ mod tests {
     }
 
     #[test]
+    fn union_disabled_without_flag() {
+        // Without the zts flag, `union L = 'a';` stays what it is in
+        // vanilla TS: a syntax error (two identifiers), NOT a union decl.
+        let (is_err, had) = test_parser(
+            "union L = 'a';",
+            Syntax::Typescript(Default::default()),
+            |p| {
+                let res = p.parse_module();
+                let errs = p.take_errors();
+                Ok((res.is_err(), !errs.is_empty()))
+            },
+        );
+        assert!(is_err || had, "vanilla TS must reject `union L = ...`");
+    }
+
+    #[test]
     fn newtype_decl_parses() {
         let module = test_parser("newtype AccountId = string;", zts(), |p| p.parse_module());
         let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
@@ -995,7 +1011,9 @@ mod tests {
 
     #[test]
     fn export_newtype_decl_parses() {
-        let module = test_parser("export newtype UserId = string;", zts(), |p| p.parse_module());
+        let module = test_parser("export newtype UserId = string;", zts(), |p| {
+            p.parse_module()
+        });
         let item = &module.body[0];
         let export = item.as_module_decl().unwrap().as_export_decl().unwrap();
         assert!(export.decl.is_zts_newtype());
@@ -1103,11 +1121,12 @@ mod tests {
         for src in ["const f = ({ x }?) => x;", "const f = ([a]?) => a;"] {
             let src: &'static str = Box::leak(src.to_string().into_boxed_str());
             let (zts_err, zts_had) = parse_module_errs(src);
-            let (van_err, van_had) = test_parser(src, Syntax::Typescript(Default::default()), |p| {
-                let res = p.parse_module();
-                let errs = p.take_errors();
-                Ok((res.is_err(), !errs.is_empty()))
-            });
+            let (van_err, van_had) =
+                test_parser(src, Syntax::Typescript(Default::default()), |p| {
+                    let res = p.parse_module();
+                    let errs = p.take_errors();
+                    Ok((res.is_err(), !errs.is_empty()))
+                });
             assert_eq!(
                 (zts_err || zts_had),
                 (van_err || van_had),
@@ -1141,9 +1160,8 @@ mod tests {
         // Security verification V1: 70k-deep nested object patterns used
         // to SIGABRT at parse time. The zts semantic pass owns the limit.
         let n = 70_000;
-        let src: &'static str = Box::leak(
-            format!("const {}a{} = z;", "{a:".repeat(n), "}".repeat(n)).into_boxed_str(),
-        );
+        let src: &'static str =
+            Box::leak(format!("const {}a{} = z;", "{a:".repeat(n), "}".repeat(n)).into_boxed_str());
         let module = test_parser(src, zts(), |p| p.parse_module());
         assert_eq!(module.body.len(), 1);
         // Drop recurses without stack protection — leak the over-deep AST.
