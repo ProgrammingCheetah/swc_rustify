@@ -68,8 +68,10 @@ pub enum SyntaxError {
     ZtsUnionMember,
     /// zts: `declare impl`.
     ZtsDeclareImpl,
-    /// zts: an impl member that does not start with `fn`.
+    /// zts: an impl member that is not a method.
     ZtsImplMethodExpected,
+    /// zts: v1 `fn` member syntax inside an impl block (removed 0.4.0).
+    ZtsImplFnRemoved,
     /// zts: an impl method whose first parameter is not `self`.
     ZtsImplSelfExpected,
 
@@ -719,8 +721,12 @@ impl SyntaxError {
                                             instead"
                 .into(),
             SyntaxError::ZtsImplMethodExpected => "expected a method: every member of a zts \
-                                                   `impl` block is `fn name(self, ...) -> Type \
+                                                   `impl` block is `name(self, ...): Type \
                                                    { ... }`"
+                .into(),
+            SyntaxError::ZtsImplFnRemoved => "`fn` was removed in zts 0.4.0: impl members are \
+                                              TS-style methods — write `name(self, ...): Type \
+                                              { ... }` (drop the `fn`)"
                 .into(),
             SyntaxError::ZtsImplSelfExpected => "the first parameter of a zts impl method must \
                                                  be `self` (it receives the value the trait is \

@@ -2689,6 +2689,14 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsNotExpr` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_not_expr(&mut self, node: &ZtsNotExpr, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsNotExpr` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_not_expr(&mut self, node: &ZtsNotExpr, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `ZtsTryExpr` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -6542,6 +6550,18 @@ where
     fn exit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType, ctx: &mut C) {
         self.second.exit_zts_non_empty_array_type(node, ctx);
         self.first.exit_zts_non_empty_array_type(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_not_expr(&mut self, node: &ZtsNotExpr, ctx: &mut C) {
+        self.first.enter_zts_not_expr(node, ctx);
+        self.second.enter_zts_not_expr(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_not_expr(&mut self, node: &ZtsNotExpr, ctx: &mut C) {
+        self.second.exit_zts_not_expr(node, ctx);
+        self.first.exit_zts_not_expr(node, ctx);
     }
 
     #[inline]
@@ -11666,6 +11686,22 @@ where
     }
 
     #[inline]
+    fn enter_zts_not_expr(&mut self, node: &ZtsNotExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_not_expr(node, ctx),
+            Self::Right(hook) => hook.enter_zts_not_expr(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_not_expr(&mut self, node: &ZtsNotExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_not_expr(node, ctx),
+            Self::Right(hook) => hook.exit_zts_not_expr(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_zts_try_expr(&mut self, node: &ZtsTryExpr, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_zts_try_expr(node, ctx),
@@ -16160,6 +16196,20 @@ where
     }
 
     #[inline]
+    fn enter_zts_not_expr(&mut self, node: &ZtsNotExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_not_expr(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_not_expr(&mut self, node: &ZtsNotExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_not_expr(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_zts_try_expr(&mut self, node: &ZtsTryExpr, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_zts_try_expr(node, ctx);
@@ -18845,6 +18895,14 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         node.visit_children_with(self);
         self.hook
             .exit_zts_non_empty_array_type(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsNotExpr` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_not_expr(&mut self, node: &ZtsNotExpr) {
+        self.hook.enter_zts_not_expr(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_not_expr(node, &mut self.context);
     }
 
     #[doc = "Visits a node of type `ZtsTryExpr` using the hook's enter and exit methods."]
@@ -21595,6 +21653,14 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsNotExpr` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_not_expr(&mut self, node: &mut ZtsNotExpr, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsNotExpr` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_not_expr(&mut self, node: &mut ZtsNotExpr, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `ZtsTryExpr` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -25484,6 +25550,18 @@ where
     fn exit_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType, ctx: &mut C) {
         self.second.exit_zts_non_empty_array_type(node, ctx);
         self.first.exit_zts_non_empty_array_type(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_not_expr(&mut self, node: &mut ZtsNotExpr, ctx: &mut C) {
+        self.first.enter_zts_not_expr(node, ctx);
+        self.second.enter_zts_not_expr(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_not_expr(&mut self, node: &mut ZtsNotExpr, ctx: &mut C) {
+        self.second.exit_zts_not_expr(node, ctx);
+        self.first.exit_zts_not_expr(node, ctx);
     }
 
     #[inline]
@@ -30644,6 +30722,22 @@ where
     }
 
     #[inline]
+    fn enter_zts_not_expr(&mut self, node: &mut ZtsNotExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_not_expr(node, ctx),
+            Self::Right(hook) => hook.enter_zts_not_expr(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_not_expr(&mut self, node: &mut ZtsNotExpr, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_not_expr(node, ctx),
+            Self::Right(hook) => hook.exit_zts_not_expr(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_zts_try_expr(&mut self, node: &mut ZtsTryExpr, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_zts_try_expr(node, ctx),
@@ -35174,6 +35268,20 @@ where
     }
 
     #[inline]
+    fn enter_zts_not_expr(&mut self, node: &mut ZtsNotExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_not_expr(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_not_expr(&mut self, node: &mut ZtsNotExpr, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_not_expr(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_zts_try_expr(&mut self, node: &mut ZtsTryExpr, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_zts_try_expr(node, ctx);
@@ -37859,6 +37967,14 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         node.visit_mut_children_with(self);
         self.hook
             .exit_zts_non_empty_array_type(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsNotExpr` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_not_expr(&mut self, node: &mut ZtsNotExpr) {
+        self.hook.enter_zts_not_expr(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_not_expr(node, &mut self.context);
     }
 
     #[doc = "Visits a node of type `ZtsTryExpr` using the hook's enter and exit methods."]

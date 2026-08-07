@@ -1747,6 +1747,9 @@ impl MacroNode for Expr {
             Expr::ZtsTry(..) => {
                 unreachable!("zts ZtsTryExpr must be lowered before emit")
             }
+            Expr::ZtsNot(..) => {
+                unreachable!("zts ZtsNotExpr must be lowered before emit")
+            }
             #[cfg(swc_ast_unknown)]
             _ => return Err(unknown_error()),
         }

@@ -188,6 +188,12 @@ pub enum Expr {
     /// a statement-level hoist + early `Err` return before codegen.
     #[tag("ZtsTryExpression")]
     ZtsTry(ZtsTryExpr),
+
+    /// zts extension: `not expr` (Phase 7: `not` is a reserved word and a
+    /// real node so formatters can round-trip it). Must be lowered to
+    /// `!expr` before codegen.
+    #[tag("ZtsNotExpression")]
+    ZtsNot(ZtsNotExpr),
 }
 
 bridge_from!(Box<Expr>, Box<JSXElement>, JSXElement);
@@ -443,6 +449,7 @@ impl Expr {
             Expr::ZtsIf(e) => e.span = span,
             Expr::ZtsExprBlock(e) => e.span = span,
             Expr::ZtsTry(e) => e.span = span,
+            Expr::ZtsNot(e) => e.span = span,
             #[cfg(all(swc_ast_unknown, feature = "encoding-impl"))]
             _ => swc_common::unknown!(),
         }
@@ -499,6 +506,7 @@ impl Clone for Expr {
             ZtsIf(e) => ZtsIf(e.clone()),
             ZtsExprBlock(e) => ZtsExprBlock(e.clone()),
             ZtsTry(e) => ZtsTry(e.clone()),
+            ZtsNot(e) => ZtsNot(e.clone()),
         }
     }
 }
@@ -541,6 +549,7 @@ boxed_expr!(MatchExpr);
 boxed_expr!(ZtsIfExpr);
 boxed_expr!(ZtsExprBlock);
 boxed_expr!(ZtsTryExpr);
+boxed_expr!(ZtsNotExpr);
 boxed_expr!(CallExpr);
 boxed_expr!(NewExpr);
 boxed_expr!(SeqExpr);
@@ -1258,6 +1267,27 @@ pub struct ZtsTryExpr {
 }
 
 impl Take for ZtsTryExpr {
+    fn dummy() -> Self {
+        Default::default()
+    }
+}
+
+/// zts extension: `not expr` — loud negation, reserved word since 0.4.0.
+///
+/// Never reaches codegen: the zts compiler lowers it to `!expr`. Kept as
+/// a real node (not a parse-time desugar) so formatters print `not`
+/// verbatim instead of silently rewriting it to `!`.
+#[ast_node("ZtsNotExpression")]
+#[derive(Eq, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsNotExpr {
+    pub span: Span,
+
+    pub arg: Box<Expr>,
+}
+
+impl Take for ZtsNotExpr {
     fn dummy() -> Self {
         Default::default()
     }

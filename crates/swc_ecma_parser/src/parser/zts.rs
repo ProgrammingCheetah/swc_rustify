@@ -31,34 +31,21 @@ fn expr_is_bare_idents(e: &Expr) -> bool {
 }
 
 impl<I: Tokens> Parser<I> {
-    /// `not <operand>` — negation only when unambiguous with vanilla TS:
-    /// the operand token must be one that can NEVER legally follow an
-    /// identifier (a word or literal), on the same line (ASI: `not\nx` is
-    /// two statements). Everything else — `not(x)` calls, `not.foo`,
-    /// `not => x` arrows, `not instanceof F`, `not!` assertions, tagged
-    /// templates — keeps its vanilla meaning. Binary-operator words
-    /// (`in`, `instanceof`, `as`, `satisfies`, `of`) are excluded from
-    /// the operand set for the same reason.
+    /// `not <operand>` — since 0.4.0 `not` is a RESERVED word (Zuri,
+    /// 2026-08-07): in expression position it is ALWAYS the negation
+    /// operator, no operand-token gate. The v1 contextual carve-outs
+    /// (`not(x)` as a call, `not.foo`, `not` as an identifier, the ASI
+    /// two-statement reading of `not\nx`) are gone — `not(x)` negates
+    /// the parenthesized expression, and a `not` with no parseable
+    /// operand is a plain syntax error. Property names (`obj.not`) and
+    /// type positions never reach `parse_unary_expr` and stay legal,
+    /// exactly like ES reserved words. Binding positions are rejected by
+    /// the zts SEMANTIC pass (binding parser paths do not come through
+    /// here).
     pub(super) fn is_zts_not_operator(&mut self) -> bool {
-        if !self.input().syntax().zts() {
-            return false;
-        }
-        if !(self.input().cur().is_word()
-            && self.input().cur().take_word(&self.input) == atom!("not"))
-        {
-            return false;
-        }
-        if self.input_mut().has_linebreak_between_cur_and_peeked() {
-            return false;
-        }
-        match self.input_mut().peek() {
-            Some(Token::In | Token::InstanceOf | Token::As | Token::Satisfies | Token::Of) => false,
-            Some(
-                Token::Num | Token::Str | Token::BigInt | Token::True | Token::False | Token::Null,
-            ) => true,
-            Some(t) => t.is_word(),
-            None => false,
-        }
+        self.input().syntax().zts()
+            && self.input().cur().is_word()
+            && self.input().cur().take_word(&self.input) == atom!("not")
     }
 
     /// Cheap gate: zts enabled, cursor on the word `match`, `(` next.
@@ -285,7 +272,7 @@ impl<I: Tokens> Parser<I> {
         })))
     }
 
-    /// `impl Display for Shape { fn fmt(self): string { ... } }`
+    /// `impl Display for Shape { fmt(self): string { ... } }`
     ///
     /// Same commit rule as `newtype`/`union`: the caller (parse_ts_decl)
     /// consumed the `impl` word with a same-line identifier following, so
@@ -327,22 +314,23 @@ impl<I: Tokens> Parser<I> {
         })))
     }
 
-    /// One impl member: `fn name(self, ...): Type { body }`.
+    /// One impl member: `name(self, ...): Type { body }` — bare TS-style
+    /// method syntax (the v1 `fn` keyword was removed in 0.4.0; a member
+    /// starting with the word `fn` gets a migration diagnostic, unless
+    /// the method is literally NAMED fn: `fn(self): T`).
     fn parse_zts_impl_method(&mut self) -> PResult<ZtsImplMethod> {
         let start = self.input().cur_pos();
 
-        // `fn` is contextual: exactly this word starts a member.
-        let is_fn = self.input().cur().is_word()
-            && self.input().cur().take_word(&self.input) == atom!("fn");
-        if !is_fn {
+        if !self.input().cur().is_word() {
             return Err(Error::new(
                 self.input().cur_span(),
                 SyntaxError::ZtsImplMethodExpected,
             ));
         }
-        self.bump();
-
         let name = self.parse_ident_name()?;
+        if name.sym == "fn" && !self.input().is(Token::LParen) {
+            return Err(Error::new(name.span, SyntaxError::ZtsImplFnRemoved));
+        }
         let name = Ident::new_no_ctxt(name.sym, name.span);
 
         let function = self.parse_fn_args_body(
@@ -719,40 +707,42 @@ mod tests {
             ("not 0", "num literal"),
             ("not not x", "double negation"),
             ("not typeof x", "typeof operand"),
+            // Reserved since 0.4.0: these were v1 carve-outs, now negation.
+            ("not (1)", "parenthesized operand"),
+            ("not(1)", "no-space parenthesized operand"),
         ] {
             let e = parse_expr(Box::leak(src.to_string().into_boxed_str()));
-            assert!(e.is_unary(), "{desc}: expected unary, got {e:?}");
+            assert!(e.is_zts_not(), "{desc}: expected ZtsNot, got {e:?}");
         }
-        // Binds like `!`: `not a === b` is `(!a) === b`.
+        // Binds like `!`: `not a === b` is `(not a) === b`.
         let e = parse_expr("not a === b");
         let bin = e.as_bin().unwrap();
-        assert!(bin.left.is_unary());
-    }
-
-    #[test]
-    fn not_stays_an_identifier_in_vanilla_positions() {
-        assert!(parse_expr("not(1)").is_call(), "call");
-        assert!(parse_expr("not.foo").is_member(), "member");
-        assert!(parse_expr("not => not").is_arrow(), "arrow param");
-        assert!(parse_expr("not instanceof Foo").is_bin(), "instanceof");
-        assert!(parse_expr("not as string").is_ts_as(), "as-cast");
-        assert!(parse_expr("not + 1").is_bin(), "binop");
-        let m = test_parser("const not = 1;\nnot;\n", zts(), |p| p.parse_module());
-        assert_eq!(m.body.len(), 2, "binding named not");
-    }
-
-    #[test]
-    fn not_respects_asi() {
-        // `not\nx` must remain TWO expression statements.
+        assert!(bin.left.is_zts_not());
+        // `not\nx` is one negation now — `not` is reserved, ASI reading gone.
         let m = test_parser("not\nx", zts(), |p| p.parse_module());
-        assert_eq!(m.body.len(), 2);
-        assert!(m.body[0]
-            .as_stmt()
-            .unwrap()
-            .as_expr()
-            .unwrap()
-            .expr
-            .is_ident());
+        assert_eq!(m.body.len(), 1);
+    }
+
+    #[test]
+    fn not_reserved_rejects_identifier_uses() {
+        // Expression-position identifier uses are parse errors now
+        // (`not` consumes and demands an operand). Binding positions are
+        // the zts semantic pass's job, not the parser's.
+        for src in ["not.foo", "not => not", "f(not)"] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let (is_err, had) = parse_module_errs(src);
+            assert!(is_err || had, "{src:?} must error — not is reserved");
+        }
+        // `not + 1` reads as negation of unary-plus now (`not (+1)`).
+        assert!(parse_expr("not + 1").is_zts_not());
+    }
+
+    #[test]
+    fn not_still_a_property_name() {
+        // IdentifierName positions stay legal, like ES reserved words.
+        assert!(parse_expr("obj.not").is_member());
+        let e = parse_expr("({ not: 1 })");
+        assert!(e.is_paren());
     }
 
     #[test]
@@ -1150,7 +1140,7 @@ mod tests {
     #[test]
     fn impl_decl_parses() {
         let module = test_parser(
-            "impl Display for Shape { fn fmt(self): string { return ''; } }",
+            "impl Display for Shape { fmt(self): string { return ''; } }",
             zts(),
             |p| p.parse_module(),
         );
@@ -1169,7 +1159,7 @@ mod tests {
     #[test]
     fn impl_decl_multi_method_and_params_parse() {
         let module = test_parser(
-            "impl Ops for Shape {\n  fn area(self): number { return 1; }\n  fn scaled(self, k: number): number { return k; }\n}",
+            "impl Ops for Shape {\n  area(self): number { return 1; }\n  scaled(self, k: number): number { return k; }\n}",
             zts(),
             |p| p.parse_module(),
         );
@@ -1184,7 +1174,7 @@ mod tests {
         // `export impl` parses; the zts semantic pass decides its meaning
         // (the factory const owns the actual export).
         let module = test_parser(
-            "export impl D for S { fn f(self): number { return 1; } }",
+            "export impl D for S { f(self): number { return 1; } }",
             zts(),
             |p| p.parse_module(),
         );
@@ -1220,9 +1210,9 @@ mod tests {
     #[test]
     fn impl_without_self_is_an_error() {
         for src in [
-            "impl D for S { fn f(): number { return 1; } }",
-            "impl D for S { fn f(x: number): number { return x; } }",
-            "impl D for S { fn f(self: S): number { return 1; } }",
+            "impl D for S { f(): number { return 1; } }",
+            "impl D for S { f(x: number): number { return x; } }",
+            "impl D for S { f(self: S): number { return 1; } }",
         ] {
             let src: &'static str = Box::leak(src.to_string().into_boxed_str());
             let (is_err, had) = parse_module_errs(src);
@@ -1231,22 +1221,39 @@ mod tests {
     }
 
     #[test]
-    fn impl_non_fn_member_is_an_error() {
-        for src in [
-            "impl D for S { x: number }",
-            "impl D for S { const x = 1; }",
-            "impl D for S { f(self): number { return 1; } }",
-        ] {
+    fn impl_non_method_member_is_an_error() {
+        for src in ["impl D for S { x: number }", "impl D for S { const x = 1; }"] {
             let src: &'static str = Box::leak(src.to_string().into_boxed_str());
             let (is_err, had) = parse_module_errs(src);
-            assert!(is_err || had, "{src:?} must error (fn members only)");
+            assert!(is_err || had, "{src:?} must error (methods only)");
         }
+    }
+
+    #[test]
+    fn impl_fn_member_gets_migration_error() {
+        // v1 (0.3.x) syntax: dedicated diagnostic, not a generic one.
+        let (is_err, had) =
+            parse_module_errs("impl D for S { fn f(self): number { return 1; } }");
+        assert!(is_err || had, "v1 `fn` member must error with migration hint");
+    }
+
+    #[test]
+    fn impl_method_literally_named_fn_parses() {
+        // `fn` was a contextual marker, never reserved: a method NAMED fn
+        // (word + `(` directly) keeps working.
+        let module = test_parser(
+            "impl D for S { fn(self): number { return 1; } }",
+            zts(),
+            |p| p.parse_module(),
+        );
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        assert_eq!(decl.as_zts_impl().unwrap().methods[0].name.sym, "fn");
     }
 
     #[test]
     fn declare_impl_is_an_error() {
         let (is_err, had) =
-            parse_module_errs("declare impl D for S { fn f(self): number { return 1; } }");
+            parse_module_errs("declare impl D for S { f(self): number { return 1; } }");
         assert!(is_err || had, "`declare impl` must error");
     }
 
