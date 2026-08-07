@@ -1019,6 +1019,9 @@ impl MacroNode for TsType {
             TsType::TsTypeQuery(n) => emit!(n),
             TsType::TsTypeLit(n) => emit!(n),
             TsType::TsArrayType(n) => emit!(n),
+            TsType::ZtsNonEmptyArray(..) => {
+                unreachable!("zts ZtsNonEmptyArrayType must be lowered before emit")
+            }
             TsType::TsTupleType(n) => emit!(n),
             TsType::TsOptionalType(n) => emit!(n),
             TsType::TsRestType(n) => emit!(n),

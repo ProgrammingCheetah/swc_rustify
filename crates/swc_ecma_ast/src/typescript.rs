@@ -371,6 +371,12 @@ pub enum TsType {
 
     #[tag("TsImportType")]
     TsImportType(TsImportType),
+
+    /// zts extension (Phase 7): `T[+]` — a non-empty array. Must be
+    /// lowered to `[T, ...T[]]` before codegen. APPENDED for encoding
+    /// stability.
+    #[tag("ZtsNonEmptyArrayType")]
+    ZtsNonEmptyArray(ZtsNonEmptyArrayType),
 }
 
 // Implement Clone without inline to avoid multiple copies of the
@@ -401,6 +407,7 @@ impl Clone for TsType {
             TsLitType(t) => TsLitType(t.clone()),
             TsTypePredicate(t) => TsTypePredicate(t.clone()),
             TsImportType(t) => TsImportType(t.clone()),
+            ZtsNonEmptyArray(t) => ZtsNonEmptyArray(t.clone()),
         }
     }
 }
@@ -684,6 +691,17 @@ pub struct TsTypeLit {
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 #[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
 pub struct TsArrayType {
+    pub span: Span,
+    pub elem_type: Box<TsType>,
+}
+
+/// zts extension (Phase 7): `T[+]` — a non-empty array type. Never
+/// reaches codegen — the zts compiler lowers it to `[T, ...T[]]`.
+#[ast_node("ZtsNonEmptyArrayType")]
+#[derive(Eq, Hash, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsNonEmptyArrayType {
     pub span: Span,
     pub elem_type: Box<TsType>,
 }

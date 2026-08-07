@@ -2680,6 +2680,15 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsNonEmptyArrayType` before visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsNonEmptyArrayType` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `ZtsTryExpr` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -6521,6 +6530,18 @@ where
     fn exit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {
         self.second.exit_zts_newtype_decl(node, ctx);
         self.first.exit_zts_newtype_decl(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType, ctx: &mut C) {
+        self.first.enter_zts_non_empty_array_type(node, ctx);
+        self.second.enter_zts_non_empty_array_type(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType, ctx: &mut C) {
+        self.second.exit_zts_non_empty_array_type(node, ctx);
+        self.first.exit_zts_non_empty_array_type(node, ctx);
     }
 
     #[inline]
@@ -11629,6 +11650,22 @@ where
     }
 
     #[inline]
+    fn enter_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_non_empty_array_type(node, ctx),
+            Self::Right(hook) => hook.enter_zts_non_empty_array_type(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_non_empty_array_type(node, ctx),
+            Self::Right(hook) => hook.exit_zts_non_empty_array_type(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_zts_try_expr(&mut self, node: &ZtsTryExpr, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_zts_try_expr(node, ctx),
@@ -16109,6 +16146,20 @@ where
     }
 
     #[inline]
+    fn enter_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_non_empty_array_type(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_non_empty_array_type(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_zts_try_expr(&mut self, node: &ZtsTryExpr, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_zts_try_expr(node, ctx);
@@ -18784,6 +18835,16 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.enter_zts_newtype_decl(node, &mut self.context);
         node.visit_children_with(self);
         self.hook.exit_zts_newtype_decl(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsNonEmptyArrayType` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType) {
+        self.hook
+            .enter_zts_non_empty_array_type(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook
+            .exit_zts_non_empty_array_type(node, &mut self.context);
     }
 
     #[doc = "Visits a node of type `ZtsTryExpr` using the hook's enter and exit methods."]
@@ -21525,6 +21586,15 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsNonEmptyArrayType` before visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsNonEmptyArrayType` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `ZtsTryExpr` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -25402,6 +25472,18 @@ where
     fn exit_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {
         self.second.exit_zts_newtype_decl(node, ctx);
         self.first.exit_zts_newtype_decl(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType, ctx: &mut C) {
+        self.first.enter_zts_non_empty_array_type(node, ctx);
+        self.second.enter_zts_non_empty_array_type(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType, ctx: &mut C) {
+        self.second.exit_zts_non_empty_array_type(node, ctx);
+        self.first.exit_zts_non_empty_array_type(node, ctx);
     }
 
     #[inline]
@@ -30546,6 +30628,22 @@ where
     }
 
     #[inline]
+    fn enter_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_non_empty_array_type(node, ctx),
+            Self::Right(hook) => hook.enter_zts_non_empty_array_type(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_non_empty_array_type(node, ctx),
+            Self::Right(hook) => hook.exit_zts_non_empty_array_type(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_zts_try_expr(&mut self, node: &mut ZtsTryExpr, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_zts_try_expr(node, ctx),
@@ -35062,6 +35160,20 @@ where
     }
 
     #[inline]
+    fn enter_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_non_empty_array_type(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_non_empty_array_type(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_zts_try_expr(&mut self, node: &mut ZtsTryExpr, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_zts_try_expr(node, ctx);
@@ -37737,6 +37849,16 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.enter_zts_newtype_decl(node, &mut self.context);
         node.visit_mut_children_with(self);
         self.hook.exit_zts_newtype_decl(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsNonEmptyArrayType` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType) {
+        self.hook
+            .enter_zts_non_empty_array_type(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook
+            .exit_zts_non_empty_array_type(node, &mut self.context);
     }
 
     #[doc = "Visits a node of type `ZtsTryExpr` using the hook's enter and exit methods."]

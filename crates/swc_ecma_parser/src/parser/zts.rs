@@ -1070,6 +1070,49 @@ mod tests {
     }
 
     #[test]
+    fn non_empty_array_type_parses() {
+        let module = test_parser(
+            "declare const xs: number[+]; declare const deep: string[+][]; declare const ro: readonly boolean[+];",
+            zts(),
+            |p| p.parse_module(),
+        );
+        // number[+]
+        let d0 = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let ann = d0.as_var().unwrap().decls[0]
+            .name
+            .as_ident()
+            .unwrap()
+            .type_ann
+            .as_ref()
+            .unwrap();
+        assert!(matches!(&*ann.type_ann, TsType::ZtsNonEmptyArray(..)));
+        // string[+][] — suffixes compose left-to-right
+        let d1 = module.body[1].as_stmt().unwrap().as_decl().unwrap();
+        let ann = d1.as_var().unwrap().decls[0]
+            .name
+            .as_ident()
+            .unwrap()
+            .type_ann
+            .as_ref()
+            .unwrap();
+        let TsType::TsArrayType(outer) = &*ann.type_ann else {
+            panic!("expected array of non-empty");
+        };
+        assert!(matches!(
+            &*outer.elem_type,
+            TsType::ZtsNonEmptyArray(..)
+        ));
+    }
+
+    #[test]
+    fn non_empty_array_type_stays_error_shaped_elsewhere() {
+        // `[+` NOT followed by `]` keeps its vanilla meaning path (an
+        // indexed access needs a type — `+` alone still errors).
+        let (is_err, had) = parse_module_errs("declare const xs: number[+1];");
+        assert!(is_err || had, "`[+1]` must not parse as non-empty sugar");
+    }
+
+    #[test]
     fn mut_enum_field_parses() {
         let module = test_parser(
             "enum Counter { Cell { mut count: number, label: string } }",

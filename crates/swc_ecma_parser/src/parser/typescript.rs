@@ -3634,6 +3634,19 @@ impl<I: Tokens> Parser<I> {
                     span: self.span(ty.span_lo()),
                     elem_type: ty,
                 }));
+            } else if self.input().syntax().zts()
+                && self.input().is(Token::Plus)
+                && peek!(self).is_some_and(|peek| peek == Token::RBracket)
+            {
+                // zts `T[+]` — non-empty array (Phase 7). `+` is never a
+                // type, so this shape is a parse error in vanilla TS:
+                // free syntax space. Lowered to `[T, ...T[]]`.
+                self.bump(); // +
+                expect!(self, Token::RBracket);
+                ty = Box::new(TsType::ZtsNonEmptyArray(ZtsNonEmptyArrayType {
+                    span: self.span(ty.span_lo()),
+                    elem_type: ty,
+                }));
             } else {
                 let index_type = self.parse_ts_type()?;
                 expect!(self, Token::RBracket);

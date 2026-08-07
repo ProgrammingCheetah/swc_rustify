@@ -2187,6 +2187,13 @@ pub trait Visit {
     fn visit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl) {
         <ZtsNewtypeDecl as VisitWith<Self>>::visit_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsNonEmptyArrayType`.\n\nBy default, this method calls \
+             [`ZtsNonEmptyArrayType::visit_children_with`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType) {
+        <ZtsNonEmptyArrayType as VisitWith<Self>>::visit_children_with(node, self)
+    }
     #[doc = "Visit a node of type `ZtsTryExpr`.\n\nBy default, this method calls \
              [`ZtsTryExpr::visit_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -3790,6 +3797,11 @@ where
     }
 
     #[inline]
+    fn visit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType) {
+        <V as Visit>::visit_zts_non_empty_array_type(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_zts_try_expr(&mut self, node: &ZtsTryExpr) {
         <V as Visit>::visit_zts_try_expr(&mut **self, node)
     }
@@ -5384,6 +5396,11 @@ where
     #[inline]
     fn visit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl) {
         <V as Visit>::visit_zts_newtype_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType) {
+        <V as Visit>::visit_zts_non_empty_array_type(&mut **self, node)
     }
 
     #[inline]
@@ -7985,6 +8002,18 @@ where
     }
 
     #[inline]
+    fn visit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                Visit::visit_zts_non_empty_array_type(visitor, node)
+            }
+            swc_visit::Either::Right(visitor) => {
+                Visit::visit_zts_non_empty_array_type(visitor, node)
+            }
+        }
+    }
+
+    #[inline]
     fn visit_zts_try_expr(&mut self, node: &ZtsTryExpr) {
         match self {
             swc_visit::Either::Left(visitor) => Visit::visit_zts_try_expr(visitor, node),
@@ -10531,6 +10560,14 @@ where
     fn visit_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl) {
         if self.enabled {
             <V as Visit>::visit_zts_newtype_decl(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_non_empty_array_type(&mut self, node: &ZtsNonEmptyArrayType) {
+        if self.enabled {
+            <V as Visit>::visit_zts_non_empty_array_type(&mut self.visitor, node)
         } else {
         }
     }
@@ -15953,6 +15990,9 @@ impl<V: ?Sized + Visit> VisitWith<V> for TsType {
             TsType::TsImportType { 0: _field_0 } => {
                 <TsImportType as VisitWith<V>>::visit_with(_field_0, visitor);
             }
+            TsType::ZtsNonEmptyArray { 0: _field_0 } => {
+                <ZtsNonEmptyArrayType as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
             #[cfg(swc_ast_unknown)]
             _ => (),
         }
@@ -16827,6 +16867,25 @@ impl<V: ?Sized + Visit> VisitWith<V> for ZtsNewtypeDecl {
                 };
                 {
                     <Box<TsType> as VisitWith<V>>::visit_with(type_ann, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for ZtsNonEmptyArrayType {
+    #[doc = "Calls [Visit`::visit_zts_non_empty_array_type`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_non_empty_array_type(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            ZtsNonEmptyArrayType { span, elem_type } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <Box<TsType> as VisitWith<V>>::visit_with(elem_type, visitor)
                 };
             }
         }
@@ -21582,6 +21641,19 @@ pub trait VisitAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `ZtsNonEmptyArrayType`.\n\nBy default, this method calls \
+             [`ZtsNonEmptyArrayType::visit_children_with_ast_path`]. If you want to recurse, you \
+             need to call it manually."]
+    #[inline]
+    fn visit_zts_non_empty_array_type<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsNonEmptyArrayType,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <ZtsNonEmptyArrayType as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `ZtsTryExpr`.\n\nBy default, this method calls \
              [`ZtsTryExpr::visit_children_with_ast_path`]. If you want to recurse, you need to \
              call it manually."]
@@ -24358,6 +24430,15 @@ where
     }
 
     #[inline]
+    fn visit_zts_non_empty_array_type<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsNonEmptyArrayType,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_non_empty_array_type(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_zts_try_expr<'ast: 'r, 'r>(
         &mut self,
         node: &'ast ZtsTryExpr,
@@ -27123,6 +27204,15 @@ where
         __ast_path: &mut AstNodePath<'r>,
     ) {
         <V as VisitAstPath>::visit_zts_newtype_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_non_empty_array_type<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsNonEmptyArrayType,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_non_empty_array_type(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -32067,6 +32157,22 @@ where
     }
 
     #[inline]
+    fn visit_zts_non_empty_array_type<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsNonEmptyArrayType,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_non_empty_array_type(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_non_empty_array_type(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
     fn visit_zts_try_expr<'ast: 'r, 'r>(
         &mut self,
         node: &'ast ZtsTryExpr,
@@ -35820,6 +35926,18 @@ where
     ) {
         if self.enabled {
             <V as VisitAstPath>::visit_zts_newtype_decl(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_non_empty_array_type<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsNonEmptyArrayType,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_non_empty_array_type(&mut self.visitor, node, __ast_path)
         } else {
         }
     }
@@ -48936,6 +49054,17 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for TsType {
                     &mut *__ast_path,
                 );
             }
+            TsType::ZtsNonEmptyArray { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::TsType(
+                    self,
+                    self::fields::TsTypeField::ZtsNonEmptyArray,
+                ));
+                <ZtsNonEmptyArrayType as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
             #[cfg(swc_ast_unknown)]
             _ => (),
         }
@@ -50944,6 +51073,53 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsNewtypeDecl {
                     ));
                     <Box<TsType> as VisitWithAstPath<V>>::visit_with_ast_path(
                         type_ann,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsNonEmptyArrayType {
+    #[doc = "Calls [VisitAstPath`::visit_zts_non_empty_array_type`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_non_empty_array_type(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            ZtsNonEmptyArrayType { span, elem_type } => {
+                {
+                    let mut __ast_path =
+                        __ast_path.with_guard(AstParentNodeRef::ZtsNonEmptyArrayType(
+                            self,
+                            self::fields::ZtsNonEmptyArrayTypeField::Span,
+                        ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path =
+                        __ast_path.with_guard(AstParentNodeRef::ZtsNonEmptyArrayType(
+                            self,
+                            self::fields::ZtsNonEmptyArrayTypeField::ElemType,
+                        ));
+                    <Box<TsType> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        elem_type,
                         visitor,
                         &mut *__ast_path,
                     )
@@ -55095,6 +55271,13 @@ pub trait VisitMut {
     fn visit_mut_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl) {
         <ZtsNewtypeDecl as VisitMutWith<Self>>::visit_mut_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsNonEmptyArrayType`.\n\nBy default, this method calls \
+             [`ZtsNonEmptyArrayType::visit_mut_children_with`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_mut_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType) {
+        <ZtsNonEmptyArrayType as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
     #[doc = "Visit a node of type `ZtsTryExpr`.\n\nBy default, this method calls \
              [`ZtsTryExpr::visit_mut_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -56698,6 +56881,11 @@ where
     }
 
     #[inline]
+    fn visit_mut_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType) {
+        <V as VisitMut>::visit_mut_zts_non_empty_array_type(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_mut_zts_try_expr(&mut self, node: &mut ZtsTryExpr) {
         <V as VisitMut>::visit_mut_zts_try_expr(&mut **self, node)
     }
@@ -58292,6 +58480,11 @@ where
     #[inline]
     fn visit_mut_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl) {
         <V as VisitMut>::visit_mut_zts_newtype_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType) {
+        <V as VisitMut>::visit_mut_zts_non_empty_array_type(&mut **self, node)
     }
 
     #[inline]
@@ -61219,6 +61412,18 @@ where
     }
 
     #[inline]
+    fn visit_mut_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMut::visit_mut_zts_non_empty_array_type(visitor, node)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMut::visit_mut_zts_non_empty_array_type(visitor, node)
+            }
+        }
+    }
+
+    #[inline]
     fn visit_mut_zts_try_expr(&mut self, node: &mut ZtsTryExpr) {
         match self {
             swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_try_expr(visitor, node),
@@ -63765,6 +63970,14 @@ where
     fn visit_mut_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl) {
         if self.enabled {
             <V as VisitMut>::visit_mut_zts_newtype_decl(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_non_empty_array_type(&mut self, node: &mut ZtsNonEmptyArrayType) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_non_empty_array_type(&mut self.visitor, node)
         } else {
         }
     }
@@ -69249,6 +69462,9 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for TsType {
             TsType::TsImportType { 0: _field_0 } => {
                 <TsImportType as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
             }
+            TsType::ZtsNonEmptyArray { 0: _field_0 } => {
+                <ZtsNonEmptyArrayType as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
             #[cfg(swc_ast_unknown)]
             _ => (),
         }
@@ -70126,6 +70342,25 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsNewtypeDecl {
                 };
                 {
                     <Box<TsType> as VisitMutWith<V>>::visit_mut_with(type_ann, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsNonEmptyArrayType {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_non_empty_array_type`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_non_empty_array_type(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            ZtsNonEmptyArrayType { span, elem_type } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <Box<TsType> as VisitMutWith<V>>::visit_mut_with(elem_type, visitor)
                 };
             }
         }
@@ -74448,6 +74683,19 @@ pub trait VisitMutAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `ZtsNonEmptyArrayType`.\n\nBy default, this method calls \
+             [`ZtsNonEmptyArrayType::visit_mut_children_with_ast_path`]. If you want to recurse, \
+             you need to call it manually."]
+    #[inline]
+    fn visit_mut_zts_non_empty_array_type(
+        &mut self,
+        node: &mut ZtsNonEmptyArrayType,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <ZtsNonEmptyArrayType as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `ZtsTryExpr`.\n\nBy default, this method calls \
              [`ZtsTryExpr::visit_mut_children_with_ast_path`]. If you want to recurse, you need to \
              call it manually."]
@@ -76582,6 +76830,15 @@ where
     }
 
     #[inline]
+    fn visit_mut_zts_non_empty_array_type(
+        &mut self,
+        node: &mut ZtsNonEmptyArrayType,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_non_empty_array_type(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_mut_zts_try_expr(&mut self, node: &mut ZtsTryExpr, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_zts_try_expr(&mut **self, node, __ast_path)
     }
@@ -78703,6 +78960,15 @@ where
         __ast_path: &mut AstKindPath,
     ) {
         <V as VisitMutAstPath>::visit_mut_zts_newtype_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_non_empty_array_type(
+        &mut self,
+        node: &mut ZtsNonEmptyArrayType,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_non_empty_array_type(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -83039,6 +83305,22 @@ where
     }
 
     #[inline]
+    fn visit_mut_zts_non_empty_array_type(
+        &mut self,
+        node: &mut ZtsNonEmptyArrayType,
+        __ast_path: &mut AstKindPath,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_non_empty_array_type(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_non_empty_array_type(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
     fn visit_mut_zts_try_expr(&mut self, node: &mut ZtsTryExpr, __ast_path: &mut AstKindPath) {
         match self {
             swc_visit::Either::Left(visitor) => {
@@ -86384,6 +86666,22 @@ where
     ) {
         if self.enabled {
             <V as VisitMutAstPath>::visit_mut_zts_newtype_decl(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_non_empty_array_type(
+        &mut self,
+        node: &mut ZtsNonEmptyArrayType,
+        __ast_path: &mut AstKindPath,
+    ) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_non_empty_array_type(
+                &mut self.visitor,
+                node,
+                __ast_path,
+            )
         } else {
         }
     }
@@ -96848,6 +97146,16 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for TsType {
                     &mut *__ast_path,
                 );
             }
+            TsType::ZtsNonEmptyArray { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentKind::TsType(
+                    self::fields::TsTypeField::ZtsNonEmptyArray,
+                ));
+                <ZtsNonEmptyArrayType as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
             #[cfg(swc_ast_unknown)]
             _ => (),
         }
@@ -98434,6 +98742,43 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsNewtypeDecl {
                     ));
                     <Box<TsType> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
                         type_ann,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsNonEmptyArrayType {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_non_empty_array_type`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_non_empty_array_type(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            ZtsNonEmptyArrayType { span, elem_type } => {
+                {
+                    let mut __ast_path =
+                        __ast_path.with_guard(AstParentKind::ZtsNonEmptyArrayType(
+                            self::fields::ZtsNonEmptyArrayTypeField::Span,
+                        ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path =
+                        __ast_path.with_guard(AstParentKind::ZtsNonEmptyArrayType(
+                            self::fields::ZtsNonEmptyArrayTypeField::ElemType,
+                        ));
+                    <Box<TsType> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        elem_type,
                         visitor,
                         &mut *__ast_path,
                     )
@@ -102068,6 +102413,16 @@ pub trait Fold {
     fn fold_zts_newtype_decl(&mut self, node: ZtsNewtypeDecl) -> ZtsNewtypeDecl {
         <ZtsNewtypeDecl as FoldWith<Self>>::fold_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsNonEmptyArrayType`.\n\nBy default, this method calls \
+             [`ZtsNonEmptyArrayType::fold_children_with`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_zts_non_empty_array_type(
+        &mut self,
+        node: ZtsNonEmptyArrayType,
+    ) -> ZtsNonEmptyArrayType {
+        <ZtsNonEmptyArrayType as FoldWith<Self>>::fold_children_with(node, self)
+    }
     #[doc = "Visit a node of type `ZtsTryExpr`.\n\nBy default, this method calls \
              [`ZtsTryExpr::fold_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -103731,6 +104086,14 @@ where
     }
 
     #[inline]
+    fn fold_zts_non_empty_array_type(
+        &mut self,
+        node: ZtsNonEmptyArrayType,
+    ) -> ZtsNonEmptyArrayType {
+        <V as Fold>::fold_zts_non_empty_array_type(&mut **self, node)
+    }
+
+    #[inline]
     fn fold_zts_try_expr(&mut self, node: ZtsTryExpr) -> ZtsTryExpr {
         <V as Fold>::fold_zts_try_expr(&mut **self, node)
     }
@@ -105385,6 +105748,14 @@ where
     #[inline]
     fn fold_zts_newtype_decl(&mut self, node: ZtsNewtypeDecl) -> ZtsNewtypeDecl {
         <V as Fold>::fold_zts_newtype_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_non_empty_array_type(
+        &mut self,
+        node: ZtsNonEmptyArrayType,
+    ) -> ZtsNonEmptyArrayType {
+        <V as Fold>::fold_zts_non_empty_array_type(&mut **self, node)
     }
 
     #[inline]
@@ -108016,6 +108387,17 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Fold::fold_zts_newtype_decl(visitor, node),
             swc_visit::Either::Right(visitor) => Fold::fold_zts_newtype_decl(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_non_empty_array_type(
+        &mut self,
+        node: ZtsNonEmptyArrayType,
+    ) -> ZtsNonEmptyArrayType {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_non_empty_array_type(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_non_empty_array_type(visitor, node),
         }
     }
 
@@ -110941,6 +111323,18 @@ where
     fn fold_zts_newtype_decl(&mut self, node: ZtsNewtypeDecl) -> ZtsNewtypeDecl {
         if self.enabled {
             <V as Fold>::fold_zts_newtype_decl(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_non_empty_array_type(
+        &mut self,
+        node: ZtsNonEmptyArrayType,
+    ) -> ZtsNonEmptyArrayType {
+        if self.enabled {
+            <V as Fold>::fold_zts_non_empty_array_type(&mut self.visitor, node)
         } else {
             node
         }
@@ -116353,6 +116747,10 @@ impl<V: ?Sized + Fold> FoldWith<V> for TsType {
                 let _field_0 = <TsImportType as FoldWith<V>>::fold_with(_field_0, visitor);
                 TsType::TsImportType { 0: _field_0 }
             }
+            TsType::ZtsNonEmptyArray { 0: _field_0 } => {
+                let _field_0 = <ZtsNonEmptyArrayType as FoldWith<V>>::fold_with(_field_0, visitor);
+                TsType::ZtsNonEmptyArray { 0: _field_0 }
+            }
             #[cfg(swc_ast_unknown)]
             _ => self,
         }
@@ -117200,6 +117598,22 @@ impl<V: ?Sized + Fold> FoldWith<V> for ZtsNewtypeDecl {
                     ident,
                     type_ann,
                 }
+            }
+        }
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for ZtsNonEmptyArrayType {
+    #[doc = "Calls [Fold`::fold_zts_non_empty_array_type`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_non_empty_array_type(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            ZtsNonEmptyArrayType { span, elem_type } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let elem_type = { <Box<TsType> as FoldWith<V>>::fold_with(elem_type, visitor) };
+                ZtsNonEmptyArrayType { span, elem_type }
             }
         }
     }
@@ -121403,6 +121817,19 @@ pub trait FoldAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `ZtsNonEmptyArrayType`.\n\nBy default, this method calls \
+             [`ZtsNonEmptyArrayType::fold_children_with_ast_path`]. If you want to recurse, you \
+             need to call it manually."]
+    #[inline]
+    fn fold_zts_non_empty_array_type(
+        &mut self,
+        node: ZtsNonEmptyArrayType,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsNonEmptyArrayType {
+        <ZtsNonEmptyArrayType as FoldWithAstPath<Self>>::fold_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `ZtsTryExpr`.\n\nBy default, this method calls \
              [`ZtsTryExpr::fold_children_with_ast_path`]. If you want to recurse, you need to call \
              it manually."]
@@ -123793,6 +124220,15 @@ where
     }
 
     #[inline]
+    fn fold_zts_non_empty_array_type(
+        &mut self,
+        node: ZtsNonEmptyArrayType,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsNonEmptyArrayType {
+        <V as FoldAstPath>::fold_zts_non_empty_array_type(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn fold_zts_try_expr(&mut self, node: ZtsTryExpr, __ast_path: &mut AstKindPath) -> ZtsTryExpr {
         <V as FoldAstPath>::fold_zts_try_expr(&mut **self, node, __ast_path)
     }
@@ -126174,6 +126610,15 @@ where
         __ast_path: &mut AstKindPath,
     ) -> ZtsNewtypeDecl {
         <V as FoldAstPath>::fold_zts_newtype_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_non_empty_array_type(
+        &mut self,
+        node: ZtsNonEmptyArrayType,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsNonEmptyArrayType {
+        <V as FoldAstPath>::fold_zts_non_empty_array_type(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -130672,6 +131117,22 @@ where
     }
 
     #[inline]
+    fn fold_zts_non_empty_array_type(
+        &mut self,
+        node: ZtsNonEmptyArrayType,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsNonEmptyArrayType {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_non_empty_array_type(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_non_empty_array_type(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
     fn fold_zts_try_expr(&mut self, node: ZtsTryExpr, __ast_path: &mut AstKindPath) -> ZtsTryExpr {
         match self {
             swc_visit::Either::Left(visitor) => {
@@ -134344,6 +134805,19 @@ where
     ) -> ZtsNewtypeDecl {
         if self.enabled {
             <V as FoldAstPath>::fold_zts_newtype_decl(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_non_empty_array_type(
+        &mut self,
+        node: ZtsNonEmptyArrayType,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsNonEmptyArrayType {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_non_empty_array_type(&mut self.visitor, node, __ast_path)
         } else {
             node
         }
@@ -145630,6 +146104,17 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for TsType {
                 );
                 TsType::TsImportType { 0: _field_0 }
             }
+            TsType::ZtsNonEmptyArray { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentKind::TsType(
+                    self::fields::TsTypeField::ZtsNonEmptyArray,
+                ));
+                let _field_0 = <ZtsNonEmptyArrayType as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                TsType::ZtsNonEmptyArray { 0: _field_0 }
+            }
             #[cfg(swc_ast_unknown)]
             _ => self,
         }
@@ -147341,6 +147826,44 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsNewtypeDecl {
                     ident,
                     type_ann,
                 }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsNonEmptyArrayType {
+    #[doc = "Calls [FoldAstPath`::fold_zts_non_empty_array_type`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_non_empty_array_type(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            ZtsNonEmptyArrayType { span, elem_type } => {
+                let span = {
+                    let mut __ast_path =
+                        __ast_path.with_guard(AstParentKind::ZtsNonEmptyArrayType(
+                            self::fields::ZtsNonEmptyArrayTypeField::Span,
+                        ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let elem_type = {
+                    let mut __ast_path =
+                        __ast_path.with_guard(AstParentKind::ZtsNonEmptyArrayType(
+                            self::fields::ZtsNonEmptyArrayTypeField::ElemType,
+                        ));
+                    <Box<TsType> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        elem_type,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                ZtsNonEmptyArrayType { span, elem_type }
             }
         }
     }
@@ -152936,6 +153459,8 @@ pub mod fields {
         TsTypePredicate,
         #[doc = "Represents [`TsType::TsImportType`]"]
         TsImportType,
+        #[doc = "Represents [`TsType::ZtsNonEmptyArray`]"]
+        ZtsNonEmptyArray,
     }
     impl TsTypeAliasDeclField {
         pub(crate) fn set_index(&mut self, index: usize) {
@@ -153621,6 +154146,21 @@ pub mod fields {
         #[doc = "Represents [`ZtsNewtypeDecl::type_ann`]"]
         TypeAnn,
     }
+    impl ZtsNonEmptyArrayTypeField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum ZtsNonEmptyArrayTypeField {
+        #[doc = "Represents [`ZtsNonEmptyArrayType::span`]"]
+        Span,
+        #[doc = "Represents [`ZtsNonEmptyArrayType::elem_type`]"]
+        ElemType,
+    }
     impl ZtsTryExprField {
         pub(crate) fn set_index(&mut self, index: usize) {
             match self {
@@ -153911,6 +154451,7 @@ pub mod fields {
         ZtsImplDecl(ZtsImplDeclField),
         ZtsImplMethod(ZtsImplMethodField),
         ZtsNewtypeDecl(ZtsNewtypeDeclField),
+        ZtsNonEmptyArrayType(ZtsNonEmptyArrayTypeField),
         ZtsTryExpr(ZtsTryExprField),
         ZtsUnionDecl(ZtsUnionDeclField),
     }
@@ -154169,6 +154710,7 @@ pub mod fields {
                 Self::ZtsImplDecl(v) => v.set_index(index),
                 Self::ZtsImplMethod(v) => v.set_index(index),
                 Self::ZtsNewtypeDecl(v) => v.set_index(index),
+                Self::ZtsNonEmptyArrayType(v) => v.set_index(index),
                 Self::ZtsTryExpr(v) => v.set_index(index),
                 Self::ZtsUnionDecl(v) => v.set_index(index),
             }
@@ -154439,6 +154981,7 @@ pub mod fields {
         ZtsImplDecl(&'ast ZtsImplDecl, ZtsImplDeclField),
         ZtsImplMethod(&'ast ZtsImplMethod, ZtsImplMethodField),
         ZtsNewtypeDecl(&'ast ZtsNewtypeDecl, ZtsNewtypeDeclField),
+        ZtsNonEmptyArrayType(&'ast ZtsNonEmptyArrayType, ZtsNonEmptyArrayTypeField),
         ZtsTryExpr(&'ast ZtsTryExpr, ZtsTryExprField),
         ZtsUnionDecl(&'ast ZtsUnionDecl, ZtsUnionDeclField),
     }
@@ -154703,6 +155246,7 @@ pub mod fields {
                 Self::ZtsImplDecl(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsImplMethod(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsNewtypeDecl(_, __field_kind) => __field_kind.set_index(index),
+                Self::ZtsNonEmptyArrayType(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsTryExpr(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsUnionDecl(_, __field_kind) => __field_kind.set_index(index),
             }
@@ -155111,6 +155655,9 @@ pub mod fields {
                 Self::ZtsImplMethod(_, __field_kind) => AstParentKind::ZtsImplMethod(*__field_kind),
                 Self::ZtsNewtypeDecl(_, __field_kind) => {
                     AstParentKind::ZtsNewtypeDecl(*__field_kind)
+                }
+                Self::ZtsNonEmptyArrayType(_, __field_kind) => {
+                    AstParentKind::ZtsNonEmptyArrayType(*__field_kind)
                 }
                 Self::ZtsTryExpr(_, __field_kind) => AstParentKind::ZtsTryExpr(*__field_kind),
                 Self::ZtsUnionDecl(_, __field_kind) => AstParentKind::ZtsUnionDecl(*__field_kind),
@@ -156373,6 +156920,11 @@ impl<'ast> From<&'ast ZtsNewtypeDecl> for NodeRef<'ast> {
         NodeRef::ZtsNewtypeDecl(node)
     }
 }
+impl<'ast> From<&'ast ZtsNonEmptyArrayType> for NodeRef<'ast> {
+    fn from(node: &'ast ZtsNonEmptyArrayType) -> Self {
+        NodeRef::ZtsNonEmptyArrayType(node)
+    }
+}
 impl<'ast> From<&'ast ZtsTryExpr> for NodeRef<'ast> {
     fn from(node: &'ast ZtsTryExpr) -> Self {
         NodeRef::ZtsTryExpr(node)
@@ -156636,6 +157188,7 @@ pub enum NodeRef<'ast> {
     ZtsImplDecl(&'ast ZtsImplDecl),
     ZtsImplMethod(&'ast ZtsImplMethod),
     ZtsNewtypeDecl(&'ast ZtsNewtypeDecl),
+    ZtsNonEmptyArrayType(&'ast ZtsNonEmptyArrayType),
     ZtsTryExpr(&'ast ZtsTryExpr),
     ZtsUnionDecl(&'ast ZtsUnionDecl),
 }
@@ -158794,6 +159347,9 @@ impl<'ast> NodeRef<'ast> {
                     Box::new(::std::iter::once(NodeRef::TsTypePredicate(v0)))
                 }
                 TsType::TsImportType(v0) => Box::new(::std::iter::once(NodeRef::TsImportType(v0))),
+                TsType::ZtsNonEmptyArray(v0) => {
+                    Box::new(::std::iter::once(NodeRef::ZtsNonEmptyArrayType(v0)))
+                }
                 _ => Box::new(::std::iter::empty::<NodeRef<'ast>>()),
             },
             NodeRef::TsTypeAliasDecl(node) => {
@@ -159133,6 +159689,13 @@ impl<'ast> NodeRef<'ast> {
                         let item = &*node.type_ann;
                         ::std::iter::once(NodeRef::TsType(&item))
                     });
+                Box::new(iterator)
+            }
+            NodeRef::ZtsNonEmptyArrayType(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>().chain({
+                    let item = &*node.elem_type;
+                    ::std::iter::once(NodeRef::TsType(&item))
+                });
                 Box::new(iterator)
             }
             NodeRef::ZtsTryExpr(node) => {

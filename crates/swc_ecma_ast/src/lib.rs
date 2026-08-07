@@ -73,7 +73,7 @@ pub use self::{
         TsTupleElement, TsTupleType, TsType, TsTypeAliasDecl, TsTypeAnn, TsTypeAssertion,
         TsTypeElement, TsTypeLit, TsTypeOperator, TsTypeOperatorOp, TsTypeParam, TsTypeParamDecl,
         TsTypeParamInstantiation, TsTypePredicate, TsTypeQuery, TsTypeQueryExpr, TsTypeRef,
-        TsUnionOrIntersectionType, TsUnionType,
+        TsUnionOrIntersectionType, TsUnionType, ZtsNonEmptyArrayType,
     },
 };
 
