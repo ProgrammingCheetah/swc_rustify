@@ -571,12 +571,14 @@ impl<I: Tokens> Parser<I> {
                     self.record_exported_name(exported, ident.sym.clone(), ident.span);
                 }
             }
-            // ZtsImpl binds no name of its own — the factory const of the
-            // `for` type carries the methods (and its export status).
+            // ZtsImpl and ZtsConstrict bind no name of their own — the
+            // impl's factory const carries the methods; a constrict is
+            // pure erased assertion.
             Decl::TsInterface(..)
             | Decl::TsTypeAlias(..)
             | Decl::Using(..)
-            | Decl::ZtsImpl(..) => {}
+            | Decl::ZtsImpl(..)
+            | Decl::ZtsConstrict(..) => {}
             #[cfg(swc_ast_unknown)]
             _ => {}
         }

@@ -74,6 +74,9 @@ fn make_decl_declare(mut decl: Decl) -> Decl {
         Decl::ZtsImpl(..) => {
             unreachable!("ZtsImpl is not a valid declaration for `declare` keyword")
         }
+        Decl::ZtsConstrict(..) => {
+            unreachable!("ZtsConstrict is not a valid declaration for `declare` keyword")
+        }
         #[cfg(swc_ast_unknown)]
         _ => unreachable!(),
     }
@@ -3558,7 +3561,7 @@ impl<I: Tokens> Parser<I> {
     }
 
     /// `tsParseNonConditionalType`
-    fn parse_ts_non_conditional_type(&mut self) -> PResult<Box<TsType>> {
+    pub(super) fn parse_ts_non_conditional_type(&mut self) -> PResult<Box<TsType>> {
         trace_cur!(self, parse_ts_non_conditional_type);
 
         debug_assert!(self.input().syntax().typescript());
@@ -5223,6 +5226,20 @@ impl<I: Tokens> Parser<I> {
                         self.bump();
                     }
                     return self.parse_zts_impl_decl(start).map(Some);
+                }
+            }
+
+            "constrict" if self.input().syntax().zts() => {
+                // Same-line WORD commits (covers idents plus type-starting
+                // words like `keyof`/`typeof`/`readonly`); `constrict(x)`
+                // calls and `constrict` as an identifier stay vanilla.
+                if next
+                    || (!self.input().had_line_break_before_cur() && self.input().cur().is_word())
+                {
+                    if next {
+                        self.bump();
+                    }
+                    return self.parse_zts_constrict_decl(start).map(Some);
                 }
             }
 

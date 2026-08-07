@@ -2103,6 +2103,20 @@ pub trait Visit {
     fn visit_yield_expr(&mut self, node: &YieldExpr) {
         <YieldExpr as VisitWith<Self>>::visit_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsConstrictDecl`.\n\nBy default, this method calls \
+             [`ZtsConstrictDecl::visit_children_with`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl) {
+        <ZtsConstrictDecl as VisitWith<Self>>::visit_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsConstrictOp`.\n\nBy default, this method calls \
+             [`ZtsConstrictOp::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_zts_constrict_op(&mut self, node: &ZtsConstrictOp) {
+        <ZtsConstrictOp as VisitWith<Self>>::visit_children_with(node, self)
+    }
     #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
              [`ZtsEnumDecl::visit_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -3758,6 +3772,16 @@ where
     }
 
     #[inline]
+    fn visit_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl) {
+        <V as Visit>::visit_zts_constrict_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_constrict_op(&mut self, node: &ZtsConstrictOp) {
+        <V as Visit>::visit_zts_constrict_op(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_zts_enum_decl(&mut self, node: &ZtsEnumDecl) {
         <V as Visit>::visit_zts_enum_decl(&mut **self, node)
     }
@@ -5372,6 +5396,16 @@ where
     #[inline]
     fn visit_yield_expr(&mut self, node: &YieldExpr) {
         <V as Visit>::visit_yield_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl) {
+        <V as Visit>::visit_zts_constrict_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_zts_constrict_op(&mut self, node: &ZtsConstrictOp) {
+        <V as Visit>::visit_zts_constrict_op(&mut **self, node)
     }
 
     #[inline]
@@ -7953,6 +7987,22 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Visit::visit_yield_expr(visitor, node),
             swc_visit::Either::Right(visitor) => Visit::visit_yield_expr(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_constrict_decl(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_constrict_decl(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_zts_constrict_op(&mut self, node: &ZtsConstrictOp) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_zts_constrict_op(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_zts_constrict_op(visitor, node),
         }
     }
 
@@ -10544,6 +10594,22 @@ where
     }
 
     #[inline]
+    fn visit_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl) {
+        if self.enabled {
+            <V as Visit>::visit_zts_constrict_decl(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_constrict_op(&mut self, node: &ZtsConstrictOp) {
+        if self.enabled {
+            <V as Visit>::visit_zts_constrict_op(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
     fn visit_zts_enum_decl(&mut self, node: &ZtsEnumDecl) {
         if self.enabled {
             <V as Visit>::visit_zts_enum_decl(&mut self.visitor, node)
@@ -11669,6 +11735,9 @@ impl<V: ?Sized + Visit> VisitWith<V> for Decl {
             }
             Decl::ZtsImpl { 0: _field_0 } => {
                 <Box<ZtsImplDecl> as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
+            Decl::ZtsConstrict { 0: _field_0 } => {
+                <Box<ZtsConstrictDecl> as VisitWith<V>>::visit_with(_field_0, visitor);
             }
             #[cfg(swc_ast_unknown)]
             _ => (),
@@ -16746,6 +16815,52 @@ impl<V: ?Sized + Visit> VisitWith<V> for YieldExpr {
         }
     }
 }
+impl<V: ?Sized + Visit> VisitWith<V> for ZtsConstrictDecl {
+    #[doc = "Calls [Visit`::visit_zts_constrict_decl`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_constrict_decl(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            ZtsConstrictDecl {
+                span,
+                op,
+                left,
+                right,
+            } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <ZtsConstrictOp as VisitWith<V>>::visit_with(op, visitor)
+                };
+                {
+                    <Box<TsType> as VisitWith<V>>::visit_with(left, visitor)
+                };
+                {
+                    <Box<TsType> as VisitWith<V>>::visit_with(right, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for ZtsConstrictOp {
+    #[doc = "Calls [Visit`::visit_zts_constrict_op`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_zts_constrict_op(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            ZtsConstrictOp::Eq => {}
+            ZtsConstrictOp::NotEq => {}
+            ZtsConstrictOp::Extends => {}
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
 impl<V: ?Sized + Visit> VisitWith<V> for ZtsEnumDecl {
     #[doc = "Calls [Visit`::visit_zts_enum_decl`] with `self`."]
     fn visit_with(&self, visitor: &mut V) {
@@ -21651,6 +21766,32 @@ pub trait VisitAstPath {
     ) {
         <YieldExpr as VisitWithAstPath<Self>>::visit_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `ZtsConstrictDecl`.\n\nBy default, this method calls \
+             [`ZtsConstrictDecl::visit_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_zts_constrict_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsConstrictDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <ZtsConstrictDecl as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `ZtsConstrictOp`.\n\nBy default, this method calls \
+             [`ZtsConstrictOp::visit_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_zts_constrict_op<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsConstrictOp,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <ZtsConstrictOp as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
              [`ZtsEnumDecl::visit_children_with_ast_path`]. If you want to recurse, you need to \
              call it manually."]
@@ -24521,6 +24662,24 @@ where
     }
 
     #[inline]
+    fn visit_zts_constrict_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsConstrictDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_constrict_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_constrict_op<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsConstrictOp,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_constrict_op(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_zts_enum_decl<'ast: 'r, 'r>(
         &mut self,
         node: &'ast ZtsEnumDecl,
@@ -27322,6 +27481,24 @@ where
         __ast_path: &mut AstNodePath<'r>,
     ) {
         <V as VisitAstPath>::visit_yield_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_constrict_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsConstrictDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_constrict_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_zts_constrict_op<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsConstrictOp,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_constrict_op(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -32218,6 +32395,38 @@ where
     }
 
     #[inline]
+    fn visit_zts_constrict_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsConstrictDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_constrict_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_constrict_decl(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_zts_constrict_op<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsConstrictOp,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_zts_constrict_op(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_zts_constrict_op(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
     fn visit_zts_enum_decl<'ast: 'r, 'r>(
         &mut self,
         node: &'ast ZtsEnumDecl,
@@ -36088,6 +36297,30 @@ where
     }
 
     #[inline]
+    fn visit_zts_constrict_decl<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsConstrictDecl,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_constrict_decl(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_zts_constrict_op<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast ZtsConstrictOp,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_zts_constrict_op(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
     fn visit_zts_enum_decl<'ast: 'r, 'r>(
         &mut self,
         node: &'ast ZtsEnumDecl,
@@ -38620,6 +38853,17 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for Decl {
                     self::fields::DeclField::ZtsImpl,
                 ));
                 <Box<ZtsImplDecl> as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Decl::ZtsConstrict { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::Decl(
+                    self,
+                    self::fields::DeclField::ZtsConstrict,
+                ));
+                <Box<ZtsConstrictDecl> as VisitWithAstPath<V>>::visit_with_ast_path(
                     _field_0,
                     visitor,
                     &mut *__ast_path,
@@ -50889,6 +51133,104 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for YieldExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsConstrictDecl {
+    #[doc = "Calls [VisitAstPath`::visit_zts_constrict_decl`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_constrict_decl(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            ZtsConstrictDecl {
+                span,
+                op,
+                left,
+                right,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsConstrictDecl(
+                        self,
+                        self::fields::ZtsConstrictDeclField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsConstrictDecl(
+                        self,
+                        self::fields::ZtsConstrictDeclField::Op,
+                    ));
+                    <ZtsConstrictOp as VisitWithAstPath<V>>::visit_with_ast_path(
+                        op,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsConstrictDecl(
+                        self,
+                        self::fields::ZtsConstrictDeclField::Left,
+                    ));
+                    <Box<TsType> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        left,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsConstrictDecl(
+                        self,
+                        self::fields::ZtsConstrictDeclField::Right,
+                    ));
+                    <Box<TsType> as VisitWithAstPath<V>>::visit_with_ast_path(
+                        right,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsConstrictOp {
+    #[doc = "Calls [VisitAstPath`::visit_zts_constrict_op`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_zts_constrict_op(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            ZtsConstrictOp::Eq => {}
+            ZtsConstrictOp::NotEq => {}
+            ZtsConstrictOp::Extends => {}
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsEnumDecl {
     #[doc = "Calls [VisitAstPath`::visit_zts_enum_decl`] with `self`."]
     fn visit_with_ast_path<'ast: 'r, 'r>(
@@ -55665,6 +56007,20 @@ pub trait VisitMut {
     fn visit_mut_yield_expr(&mut self, node: &mut YieldExpr) {
         <YieldExpr as VisitMutWith<Self>>::visit_mut_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsConstrictDecl`.\n\nBy default, this method calls \
+             [`ZtsConstrictDecl::visit_mut_children_with`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_mut_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl) {
+        <ZtsConstrictDecl as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsConstrictOp`.\n\nBy default, this method calls \
+             [`ZtsConstrictOp::visit_mut_children_with`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_mut_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp) {
+        <ZtsConstrictOp as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
     #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
              [`ZtsEnumDecl::visit_mut_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -57320,6 +57676,16 @@ where
     }
 
     #[inline]
+    fn visit_mut_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl) {
+        <V as VisitMut>::visit_mut_zts_constrict_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp) {
+        <V as VisitMut>::visit_mut_zts_constrict_op(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl) {
         <V as VisitMut>::visit_mut_zts_enum_decl(&mut **self, node)
     }
@@ -58934,6 +59300,16 @@ where
     #[inline]
     fn visit_mut_yield_expr(&mut self, node: &mut YieldExpr) {
         <V as VisitMut>::visit_mut_yield_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl) {
+        <V as VisitMut>::visit_mut_zts_constrict_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp) {
+        <V as VisitMut>::visit_mut_zts_constrict_op(&mut **self, node)
     }
 
     #[inline]
@@ -61835,6 +62211,28 @@ where
     }
 
     #[inline]
+    fn visit_mut_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMut::visit_mut_zts_constrict_decl(visitor, node)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMut::visit_mut_zts_constrict_decl(visitor, node)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_constrict_op(visitor, node),
+            swc_visit::Either::Right(visitor) => {
+                VisitMut::visit_mut_zts_constrict_op(visitor, node)
+            }
+        }
+    }
+
+    #[inline]
     fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl) {
         match self {
             swc_visit::Either::Left(visitor) => VisitMut::visit_mut_zts_enum_decl(visitor, node),
@@ -64440,6 +64838,22 @@ where
     }
 
     #[inline]
+    fn visit_mut_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_constrict_decl(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_zts_constrict_op(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
     fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl) {
         if self.enabled {
             <V as VisitMut>::visit_mut_zts_enum_decl(&mut self.visitor, node)
@@ -65588,6 +66002,9 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for Decl {
             }
             Decl::ZtsImpl { 0: _field_0 } => {
                 <Box<ZtsImplDecl> as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
+            Decl::ZtsConstrict { 0: _field_0 } => {
+                <Box<ZtsConstrictDecl> as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
             }
             #[cfg(swc_ast_unknown)]
             _ => (),
@@ -70707,6 +71124,52 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for YieldExpr {
         }
     }
 }
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsConstrictDecl {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_constrict_decl`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_constrict_decl(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            ZtsConstrictDecl {
+                span,
+                op,
+                left,
+                right,
+            } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <ZtsConstrictOp as VisitMutWith<V>>::visit_mut_with(op, visitor)
+                };
+                {
+                    <Box<TsType> as VisitMutWith<V>>::visit_mut_with(left, visitor)
+                };
+                {
+                    <Box<TsType> as VisitMutWith<V>>::visit_mut_with(right, visitor)
+                };
+            }
+        }
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsConstrictOp {
+    #[doc = "Calls [VisitMut`::visit_mut_zts_constrict_op`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_zts_constrict_op(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            ZtsConstrictOp::Eq => {}
+            ZtsConstrictOp::NotEq => {}
+            ZtsConstrictOp::Extends => {}
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
 impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsEnumDecl {
     #[doc = "Calls [VisitMut`::visit_mut_zts_enum_decl`] with `self`."]
     fn visit_mut_with(&mut self, visitor: &mut V) {
@@ -75199,6 +75662,32 @@ pub trait VisitMutAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `ZtsConstrictDecl`.\n\nBy default, this method calls \
+             [`ZtsConstrictDecl::visit_mut_children_with_ast_path`]. If you want to recurse, you \
+             need to call it manually."]
+    #[inline]
+    fn visit_mut_zts_constrict_decl(
+        &mut self,
+        node: &mut ZtsConstrictDecl,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <ZtsConstrictDecl as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `ZtsConstrictOp`.\n\nBy default, this method calls \
+             [`ZtsConstrictOp::visit_mut_children_with_ast_path`]. If you want to recurse, you \
+             need to call it manually."]
+    #[inline]
+    fn visit_mut_zts_constrict_op(
+        &mut self,
+        node: &mut ZtsConstrictOp,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <ZtsConstrictOp as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
              [`ZtsEnumDecl::visit_mut_children_with_ast_path`]. If you want to recurse, you need \
              to call it manually."]
@@ -77429,6 +77918,24 @@ where
     }
 
     #[inline]
+    fn visit_mut_zts_constrict_decl(
+        &mut self,
+        node: &mut ZtsConstrictDecl,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_constrict_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_constrict_op(
+        &mut self,
+        node: &mut ZtsConstrictOp,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_constrict_op(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_zts_enum_decl(&mut **self, node, __ast_path)
     }
@@ -79582,6 +80089,24 @@ where
     #[inline]
     fn visit_mut_yield_expr(&mut self, node: &mut YieldExpr, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_yield_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_constrict_decl(
+        &mut self,
+        node: &mut ZtsConstrictDecl,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_constrict_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_zts_constrict_op(
+        &mut self,
+        node: &mut ZtsConstrictOp,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_zts_constrict_op(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -83866,6 +84391,38 @@ where
     }
 
     #[inline]
+    fn visit_mut_zts_constrict_decl(
+        &mut self,
+        node: &mut ZtsConstrictDecl,
+        __ast_path: &mut AstKindPath,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_constrict_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_constrict_decl(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_constrict_op(
+        &mut self,
+        node: &mut ZtsConstrictOp,
+        __ast_path: &mut AstKindPath,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_zts_constrict_op(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_zts_constrict_op(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
     fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, __ast_path: &mut AstKindPath) {
         match self {
             swc_visit::Either::Left(visitor) => {
@@ -87324,6 +87881,34 @@ where
     }
 
     #[inline]
+    fn visit_mut_zts_constrict_decl(
+        &mut self,
+        node: &mut ZtsConstrictDecl,
+        __ast_path: &mut AstKindPath,
+    ) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_constrict_decl(
+                &mut self.visitor,
+                node,
+                __ast_path,
+            )
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_zts_constrict_op(
+        &mut self,
+        node: &mut ZtsConstrictOp,
+        __ast_path: &mut AstKindPath,
+    ) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_zts_constrict_op(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
     fn visit_mut_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, __ast_path: &mut AstKindPath) {
         if self.enabled {
             <V as VisitMutAstPath>::visit_mut_zts_enum_decl(&mut self.visitor, node, __ast_path)
@@ -89365,6 +89950,15 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for Decl {
                 let mut __ast_path =
                     __ast_path.with_guard(AstParentKind::Decl(self::fields::DeclField::ZtsImpl));
                 <Box<ZtsImplDecl> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
+            Decl::ZtsConstrict { 0: _field_0 } => {
+                let mut __ast_path = __ast_path
+                    .with_guard(AstParentKind::Decl(self::fields::DeclField::ZtsConstrict));
+                <Box<ZtsConstrictDecl> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
                     _field_0,
                     visitor,
                     &mut *__ast_path,
@@ -99138,6 +99732,84 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for YieldExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsConstrictDecl {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_constrict_decl`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_constrict_decl(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            ZtsConstrictDecl {
+                span,
+                op,
+                left,
+                right,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsConstrictDecl(
+                        self::fields::ZtsConstrictDeclField::Span,
+                    ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsConstrictDecl(
+                        self::fields::ZtsConstrictDeclField::Op,
+                    ));
+                    <ZtsConstrictOp as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        op,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsConstrictDecl(
+                        self::fields::ZtsConstrictDeclField::Left,
+                    ));
+                    <Box<TsType> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        left,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsConstrictDecl(
+                        self::fields::ZtsConstrictDeclField::Right,
+                    ));
+                    <Box<TsType> as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        right,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsConstrictOp {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_constrict_op`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_zts_constrict_op(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            ZtsConstrictOp::Eq => {}
+            ZtsConstrictOp::NotEq => {}
+            ZtsConstrictOp::Extends => {}
+            #[cfg(swc_ast_unknown)]
+            _ => (),
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsEnumDecl {
     #[doc = "Calls [VisitMutAstPath`::visit_mut_zts_enum_decl`] with `self`."]
     fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
@@ -103252,6 +103924,20 @@ pub trait Fold {
     fn fold_yield_expr(&mut self, node: YieldExpr) -> YieldExpr {
         <YieldExpr as FoldWith<Self>>::fold_children_with(node, self)
     }
+    #[doc = "Visit a node of type `ZtsConstrictDecl`.\n\nBy default, this method calls \
+             [`ZtsConstrictDecl::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_constrict_decl(&mut self, node: ZtsConstrictDecl) -> ZtsConstrictDecl {
+        <ZtsConstrictDecl as FoldWith<Self>>::fold_children_with(node, self)
+    }
+    #[doc = "Visit a node of type `ZtsConstrictOp`.\n\nBy default, this method calls \
+             [`ZtsConstrictOp::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_zts_constrict_op(&mut self, node: ZtsConstrictOp) -> ZtsConstrictOp {
+        <ZtsConstrictOp as FoldWith<Self>>::fold_children_with(node, self)
+    }
     #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
              [`ZtsEnumDecl::fold_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -104970,6 +105656,16 @@ where
     }
 
     #[inline]
+    fn fold_zts_constrict_decl(&mut self, node: ZtsConstrictDecl) -> ZtsConstrictDecl {
+        <V as Fold>::fold_zts_constrict_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_constrict_op(&mut self, node: ZtsConstrictOp) -> ZtsConstrictOp {
+        <V as Fold>::fold_zts_constrict_op(&mut **self, node)
+    }
+
+    #[inline]
     fn fold_zts_enum_decl(&mut self, node: ZtsEnumDecl) -> ZtsEnumDecl {
         <V as Fold>::fold_zts_enum_decl(&mut **self, node)
     }
@@ -106647,6 +107343,16 @@ where
     #[inline]
     fn fold_yield_expr(&mut self, node: YieldExpr) -> YieldExpr {
         <V as Fold>::fold_yield_expr(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_constrict_decl(&mut self, node: ZtsConstrictDecl) -> ZtsConstrictDecl {
+        <V as Fold>::fold_zts_constrict_decl(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_zts_constrict_op(&mut self, node: ZtsConstrictOp) -> ZtsConstrictOp {
+        <V as Fold>::fold_zts_constrict_op(&mut **self, node)
     }
 
     #[inline]
@@ -109265,6 +109971,22 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Fold::fold_yield_expr(visitor, node),
             swc_visit::Either::Right(visitor) => Fold::fold_yield_expr(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_constrict_decl(&mut self, node: ZtsConstrictDecl) -> ZtsConstrictDecl {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_constrict_decl(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_constrict_decl(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_zts_constrict_op(&mut self, node: ZtsConstrictOp) -> ZtsConstrictOp {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_zts_constrict_op(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_zts_constrict_op(visitor, node),
         }
     }
 
@@ -112219,6 +112941,24 @@ where
     }
 
     #[inline]
+    fn fold_zts_constrict_decl(&mut self, node: ZtsConstrictDecl) -> ZtsConstrictDecl {
+        if self.enabled {
+            <V as Fold>::fold_zts_constrict_decl(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_constrict_op(&mut self, node: ZtsConstrictOp) -> ZtsConstrictOp {
+        if self.enabled {
+            <V as Fold>::fold_zts_constrict_op(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
     fn fold_zts_enum_decl(&mut self, node: ZtsEnumDecl) -> ZtsEnumDecl {
         if self.enabled {
             <V as Fold>::fold_zts_enum_decl(&mut self.visitor, node)
@@ -113353,6 +114093,10 @@ impl<V: ?Sized + Fold> FoldWith<V> for Decl {
             Decl::ZtsImpl { 0: _field_0 } => {
                 let _field_0 = <Box<ZtsImplDecl> as FoldWith<V>>::fold_with(_field_0, visitor);
                 Decl::ZtsImpl { 0: _field_0 }
+            }
+            Decl::ZtsConstrict { 0: _field_0 } => {
+                let _field_0 = <Box<ZtsConstrictDecl> as FoldWith<V>>::fold_with(_field_0, visitor);
+                Decl::ZtsConstrict { 0: _field_0 }
             }
             #[cfg(swc_ast_unknown)]
             _ => self,
@@ -118417,6 +119161,50 @@ impl<V: ?Sized + Fold> FoldWith<V> for YieldExpr {
         }
     }
 }
+impl<V: ?Sized + Fold> FoldWith<V> for ZtsConstrictDecl {
+    #[doc = "Calls [Fold`::fold_zts_constrict_decl`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_constrict_decl(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            ZtsConstrictDecl {
+                span,
+                op,
+                left,
+                right,
+            } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let op = { <ZtsConstrictOp as FoldWith<V>>::fold_with(op, visitor) };
+                let left = { <Box<TsType> as FoldWith<V>>::fold_with(left, visitor) };
+                let right = { <Box<TsType> as FoldWith<V>>::fold_with(right, visitor) };
+                ZtsConstrictDecl {
+                    span,
+                    op,
+                    left,
+                    right,
+                }
+            }
+        }
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for ZtsConstrictOp {
+    #[doc = "Calls [Fold`::fold_zts_constrict_op`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_zts_constrict_op(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            ZtsConstrictOp::Eq => ZtsConstrictOp::Eq,
+            ZtsConstrictOp::NotEq => ZtsConstrictOp::NotEq,
+            ZtsConstrictOp::Extends => ZtsConstrictOp::Extends,
+            #[cfg(swc_ast_unknown)]
+            _ => self,
+        }
+    }
+}
 impl<V: ?Sized + Fold> FoldWith<V> for ZtsEnumDecl {
     #[doc = "Calls [Fold`::fold_zts_enum_decl`] with `self`."]
     fn fold_with(self, visitor: &mut V) -> Self {
@@ -122769,6 +123557,32 @@ pub trait FoldAstPath {
     fn fold_yield_expr(&mut self, node: YieldExpr, __ast_path: &mut AstKindPath) -> YieldExpr {
         <YieldExpr as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `ZtsConstrictDecl`.\n\nBy default, this method calls \
+             [`ZtsConstrictDecl::fold_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn fold_zts_constrict_decl(
+        &mut self,
+        node: ZtsConstrictDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsConstrictDecl {
+        <ZtsConstrictDecl as FoldWithAstPath<Self>>::fold_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
+    #[doc = "Visit a node of type `ZtsConstrictOp`.\n\nBy default, this method calls \
+             [`ZtsConstrictOp::fold_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_zts_constrict_op(
+        &mut self,
+        node: ZtsConstrictOp,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsConstrictOp {
+        <ZtsConstrictOp as FoldWithAstPath<Self>>::fold_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `ZtsEnumDecl`.\n\nBy default, this method calls \
              [`ZtsEnumDecl::fold_children_with_ast_path`]. If you want to recurse, you need to \
              call it manually."]
@@ -125241,6 +126055,24 @@ where
     }
 
     #[inline]
+    fn fold_zts_constrict_decl(
+        &mut self,
+        node: ZtsConstrictDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsConstrictDecl {
+        <V as FoldAstPath>::fold_zts_constrict_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_constrict_op(
+        &mut self,
+        node: ZtsConstrictOp,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsConstrictOp {
+        <V as FoldAstPath>::fold_zts_constrict_op(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn fold_zts_enum_decl(
         &mut self,
         node: ZtsEnumDecl,
@@ -127654,6 +128486,24 @@ where
     #[inline]
     fn fold_yield_expr(&mut self, node: YieldExpr, __ast_path: &mut AstKindPath) -> YieldExpr {
         <V as FoldAstPath>::fold_yield_expr(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_constrict_decl(
+        &mut self,
+        node: ZtsConstrictDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsConstrictDecl {
+        <V as FoldAstPath>::fold_zts_constrict_decl(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_zts_constrict_op(
+        &mut self,
+        node: ZtsConstrictOp,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsConstrictOp {
+        <V as FoldAstPath>::fold_zts_constrict_op(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -132100,6 +132950,38 @@ where
     }
 
     #[inline]
+    fn fold_zts_constrict_decl(
+        &mut self,
+        node: ZtsConstrictDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsConstrictDecl {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_constrict_decl(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_constrict_decl(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_zts_constrict_op(
+        &mut self,
+        node: ZtsConstrictOp,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsConstrictOp {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_zts_constrict_op(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_zts_constrict_op(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
     fn fold_zts_enum_decl(
         &mut self,
         node: ZtsEnumDecl,
@@ -135874,6 +136756,32 @@ where
     }
 
     #[inline]
+    fn fold_zts_constrict_decl(
+        &mut self,
+        node: ZtsConstrictDecl,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsConstrictDecl {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_constrict_decl(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_zts_constrict_op(
+        &mut self,
+        node: ZtsConstrictOp,
+        __ast_path: &mut AstKindPath,
+    ) -> ZtsConstrictOp {
+        if self.enabled {
+            <V as FoldAstPath>::fold_zts_constrict_op(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
     fn fold_zts_enum_decl(
         &mut self,
         node: ZtsEnumDecl,
@@ -138095,6 +139003,16 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for Decl {
                     &mut *__ast_path,
                 );
                 Decl::ZtsImpl { 0: _field_0 }
+            }
+            Decl::ZtsConstrict { 0: _field_0 } => {
+                let mut __ast_path = __ast_path
+                    .with_guard(AstParentKind::Decl(self::fields::DeclField::ZtsConstrict));
+                let _field_0 = <Box<ZtsConstrictDecl> as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                Decl::ZtsConstrict { 0: _field_0 }
             }
             #[cfg(swc_ast_unknown)]
             _ => self,
@@ -148615,6 +149533,90 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for YieldExpr {
 }
 #[cfg(any(docsrs, feature = "path"))]
 #[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsConstrictDecl {
+    #[doc = "Calls [FoldAstPath`::fold_zts_constrict_decl`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_constrict_decl(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            ZtsConstrictDecl {
+                span,
+                op,
+                left,
+                right,
+            } => {
+                let span = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsConstrictDecl(
+                        self::fields::ZtsConstrictDeclField::Span,
+                    ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let op = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsConstrictDecl(
+                        self::fields::ZtsConstrictDeclField::Op,
+                    ));
+                    <ZtsConstrictOp as FoldWithAstPath<V>>::fold_with_ast_path(
+                        op,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let left = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsConstrictDecl(
+                        self::fields::ZtsConstrictDeclField::Left,
+                    ));
+                    <Box<TsType> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        left,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let right = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsConstrictDecl(
+                        self::fields::ZtsConstrictDeclField::Right,
+                    ));
+                    <Box<TsType> as FoldWithAstPath<V>>::fold_with_ast_path(
+                        right,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                ZtsConstrictDecl {
+                    span,
+                    op,
+                    left,
+                    right,
+                }
+            }
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsConstrictOp {
+    #[doc = "Calls [FoldAstPath`::fold_zts_constrict_op`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_zts_constrict_op(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            ZtsConstrictOp::Eq => ZtsConstrictOp::Eq,
+            ZtsConstrictOp::NotEq => ZtsConstrictOp::NotEq,
+            ZtsConstrictOp::Extends => ZtsConstrictOp::Extends,
+            #[cfg(swc_ast_unknown)]
+            _ => self,
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
 impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsEnumDecl {
     #[doc = "Calls [FoldAstPath`::fold_zts_enum_decl`] with `self`."]
     fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
@@ -151461,6 +152463,8 @@ pub mod fields {
         ZtsUnion,
         #[doc = "Represents [`Decl::ZtsImpl`]"]
         ZtsImpl,
+        #[doc = "Represents [`Decl::ZtsConstrict`]"]
+        ZtsConstrict,
     }
     impl DecoratorField {
         pub(crate) fn set_index(&mut self, index: usize) {
@@ -155342,6 +156346,41 @@ pub mod fields {
         #[doc = "Represents [`YieldExpr::delegate`]"]
         Delegate,
     }
+    impl ZtsConstrictDeclField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum ZtsConstrictDeclField {
+        #[doc = "Represents [`ZtsConstrictDecl::span`]"]
+        Span,
+        #[doc = "Represents [`ZtsConstrictDecl::op`]"]
+        Op,
+        #[doc = "Represents [`ZtsConstrictDecl::left`]"]
+        Left,
+        #[doc = "Represents [`ZtsConstrictDecl::right`]"]
+        Right,
+    }
+    impl ZtsConstrictOpField {
+        #[inline(always)]
+        pub(crate) fn set_index(&mut self, _: usize) {
+            swc_visit::wrong_ast_path();
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum ZtsConstrictOpField {
+        #[doc = "Represents [`ZtsConstrictOp::Eq`]"]
+        Eq,
+        #[doc = "Represents [`ZtsConstrictOp::NotEq`]"]
+        NotEq,
+        #[doc = "Represents [`ZtsConstrictOp::Extends`]"]
+        Extends,
+    }
     impl ZtsEnumDeclField {
         pub(crate) fn set_index(&mut self, index: usize) {
             match self {
@@ -155846,6 +156885,8 @@ pub mod fields {
         WhileStmt(WhileStmtField),
         WithStmt(WithStmtField),
         YieldExpr(YieldExprField),
+        ZtsConstrictDecl(ZtsConstrictDeclField),
+        ZtsConstrictOp(ZtsConstrictOpField),
         ZtsEnumDecl(ZtsEnumDeclField),
         ZtsEnumField(ZtsEnumFieldField),
         ZtsEnumVariant(ZtsEnumVariantField),
@@ -156107,6 +157148,8 @@ pub mod fields {
                 Self::WhileStmt(v) => v.set_index(index),
                 Self::WithStmt(v) => v.set_index(index),
                 Self::YieldExpr(v) => v.set_index(index),
+                Self::ZtsConstrictDecl(v) => v.set_index(index),
+                Self::ZtsConstrictOp(v) => v.set_index(index),
                 Self::ZtsEnumDecl(v) => v.set_index(index),
                 Self::ZtsEnumField(v) => v.set_index(index),
                 Self::ZtsEnumVariant(v) => v.set_index(index),
@@ -156380,6 +157423,8 @@ pub mod fields {
         WhileStmt(&'ast WhileStmt, WhileStmtField),
         WithStmt(&'ast WithStmt, WithStmtField),
         YieldExpr(&'ast YieldExpr, YieldExprField),
+        ZtsConstrictDecl(&'ast ZtsConstrictDecl, ZtsConstrictDeclField),
+        ZtsConstrictOp(&'ast ZtsConstrictOp, ZtsConstrictOpField),
         ZtsEnumDecl(&'ast ZtsEnumDecl, ZtsEnumDeclField),
         ZtsEnumField(&'ast ZtsEnumField, ZtsEnumFieldField),
         ZtsEnumVariant(&'ast ZtsEnumVariant, ZtsEnumVariantField),
@@ -156647,6 +157692,8 @@ pub mod fields {
                 Self::WhileStmt(_, __field_kind) => __field_kind.set_index(index),
                 Self::WithStmt(_, __field_kind) => __field_kind.set_index(index),
                 Self::YieldExpr(_, __field_kind) => __field_kind.set_index(index),
+                Self::ZtsConstrictDecl(_, __field_kind) => __field_kind.set_index(index),
+                Self::ZtsConstrictOp(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsEnumDecl(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsEnumField(_, __field_kind) => __field_kind.set_index(index),
                 Self::ZtsEnumVariant(_, __field_kind) => __field_kind.set_index(index),
@@ -157055,6 +158102,12 @@ pub mod fields {
                 Self::WhileStmt(_, __field_kind) => AstParentKind::WhileStmt(*__field_kind),
                 Self::WithStmt(_, __field_kind) => AstParentKind::WithStmt(*__field_kind),
                 Self::YieldExpr(_, __field_kind) => AstParentKind::YieldExpr(*__field_kind),
+                Self::ZtsConstrictDecl(_, __field_kind) => {
+                    AstParentKind::ZtsConstrictDecl(*__field_kind)
+                }
+                Self::ZtsConstrictOp(_, __field_kind) => {
+                    AstParentKind::ZtsConstrictOp(*__field_kind)
+                }
                 Self::ZtsEnumDecl(_, __field_kind) => AstParentKind::ZtsEnumDecl(*__field_kind),
                 Self::ZtsEnumField(_, __field_kind) => AstParentKind::ZtsEnumField(*__field_kind),
                 Self::ZtsEnumVariant(_, __field_kind) => {
@@ -158291,6 +159344,16 @@ impl<'ast> From<&'ast YieldExpr> for NodeRef<'ast> {
         NodeRef::YieldExpr(node)
     }
 }
+impl<'ast> From<&'ast ZtsConstrictDecl> for NodeRef<'ast> {
+    fn from(node: &'ast ZtsConstrictDecl) -> Self {
+        NodeRef::ZtsConstrictDecl(node)
+    }
+}
+impl<'ast> From<&'ast ZtsConstrictOp> for NodeRef<'ast> {
+    fn from(node: &'ast ZtsConstrictOp) -> Self {
+        NodeRef::ZtsConstrictOp(node)
+    }
+}
 impl<'ast> From<&'ast ZtsEnumDecl> for NodeRef<'ast> {
     fn from(node: &'ast ZtsEnumDecl) -> Self {
         NodeRef::ZtsEnumDecl(node)
@@ -158605,6 +159668,8 @@ pub enum NodeRef<'ast> {
     WhileStmt(&'ast WhileStmt),
     WithStmt(&'ast WithStmt),
     YieldExpr(&'ast YieldExpr),
+    ZtsConstrictDecl(&'ast ZtsConstrictDecl),
+    ZtsConstrictOp(&'ast ZtsConstrictOp),
     ZtsEnumDecl(&'ast ZtsEnumDecl),
     ZtsEnumField(&'ast ZtsEnumField),
     ZtsEnumVariant(&'ast ZtsEnumVariant),
@@ -159024,6 +160089,9 @@ impl<'ast> NodeRef<'ast> {
                 Decl::ZtsNewtype(v0) => Box::new(::std::iter::once(NodeRef::ZtsNewtypeDecl(v0))),
                 Decl::ZtsUnion(v0) => Box::new(::std::iter::once(NodeRef::ZtsUnionDecl(v0))),
                 Decl::ZtsImpl(v0) => Box::new(::std::iter::once(NodeRef::ZtsImplDecl(v0))),
+                Decl::ZtsConstrict(v0) => {
+                    Box::new(::std::iter::once(NodeRef::ZtsConstrictDecl(v0)))
+                }
                 _ => Box::new(::std::iter::empty::<NodeRef<'ast>>()),
             },
             NodeRef::Decorator(node) => {
@@ -161034,6 +162102,22 @@ impl<'ast> NodeRef<'ast> {
                     }));
                 Box::new(iterator)
             }
+            NodeRef::ZtsConstrictDecl(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>()
+                    .chain(::std::iter::once(NodeRef::ZtsConstrictOp(&node.op)))
+                    .chain({
+                        let item = &*node.left;
+                        ::std::iter::once(NodeRef::TsType(&item))
+                    })
+                    .chain({
+                        let item = &*node.right;
+                        ::std::iter::once(NodeRef::TsType(&item))
+                    });
+                Box::new(iterator)
+            }
+            NodeRef::ZtsConstrictOp(node) => match node {
+                _ => Box::new(::std::iter::empty::<NodeRef<'ast>>()),
+            },
             NodeRef::ZtsEnumDecl(node) => {
                 let iterator = ::std::iter::empty::<NodeRef<'ast>>()
                     .chain(::std::iter::once(NodeRef::Ident(&node.ident)))

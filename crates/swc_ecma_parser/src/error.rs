@@ -68,6 +68,10 @@ pub enum SyntaxError {
     ZtsUnionMember,
     /// zts: `declare impl`.
     ZtsDeclareImpl,
+    /// zts: `declare constrict`.
+    ZtsDeclareConstrict,
+    /// zts: a constrict without `==`/`!=`/`extends`.
+    ZtsConstrictOp,
     /// zts: an impl member that is not a method.
     ZtsImplMethodExpected,
     /// zts: v1 `fn` member syntax inside an impl block (removed 0.4.0).
@@ -719,6 +723,13 @@ impl SyntaxError {
             SyntaxError::ZtsDeclareImpl => "`declare impl` is not supported in zts; impls lower \
                                             into the type's factory const — declare that shape \
                                             instead"
+                .into(),
+            SyntaxError::ZtsDeclareConstrict => "`declare constrict` is meaningless: a constrict \
+                                                 is already erased (it lowers to a type-level \
+                                                 assertion)"
+                .into(),
+            SyntaxError::ZtsConstrictOp => "expected `==`, `!=`, or `extends` between the two \
+                                            types of a `constrict` assertion"
                 .into(),
             SyntaxError::ZtsImplMethodExpected => "expected a method: every member of a zts \
                                                    `impl` block is `name(self, ...): Type \

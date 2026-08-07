@@ -60,6 +60,12 @@ pub enum Decl {
     /// const, `satisfies` conformance appended) before codegen.
     #[tag("ZtsImplDeclaration")]
     ZtsImpl(Box<ZtsImplDecl>),
+
+    /// zts extension (Phase 7): `constrict A == B;` — an erased
+    /// type-level assertion. Must be lowered to a constraint-violating
+    /// type alias before codegen.
+    #[tag("ZtsConstrictDeclaration")]
+    ZtsConstrict(Box<ZtsConstrictDecl>),
 }
 
 boxed!(
@@ -424,6 +430,62 @@ impl Take for ZtsImplTraitRef {
     fn dummy() -> Self {
         Default::default()
     }
+}
+
+/// zts extension: `constrict A == B;` (Phase 7) — a compile-time claim
+/// about types, fully erased. Operators: `==` (mutual, Equal-trick),
+/// `!=`, `extends`.
+///
+/// Never reaches codegen — the zts compiler lowers it to a type alias
+/// whose generic constraint fails when the claim is false (TS2344 at
+/// the assert's own span).
+#[ast_node("ZtsConstrictDeclaration")]
+#[derive(Eq, Hash, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsConstrictDecl {
+    pub span: Span,
+
+    pub op: ZtsConstrictOp,
+
+    pub left: Box<TsType>,
+
+    pub right: Box<TsType>,
+}
+
+impl Take for ZtsConstrictDecl {
+    fn dummy() -> Self {
+        Self {
+            span: DUMMY_SP,
+            op: Default::default(),
+            left: Box::new(TsType::TsKeywordType(crate::TsKeywordType {
+                span: DUMMY_SP,
+                kind: crate::TsKeywordTypeKind::TsAnyKeyword,
+            })),
+            right: Box::new(TsType::TsKeywordType(crate::TsKeywordType {
+                span: DUMMY_SP,
+                kind: crate::TsKeywordTypeKind::TsAnyKeyword,
+            })),
+        }
+    }
+}
+
+#[derive(StringEnum, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+#[cfg_attr(
+    feature = "encoding-impl",
+    derive(::swc_common::Encode, ::swc_common::Decode)
+)]
+#[cfg_attr(swc_ast_unknown, non_exhaustive)]
+pub enum ZtsConstrictOp {
+    /// `==`
+    #[default]
+    Eq,
+    /// `!=`
+    NotEq,
+    /// `extends`
+    Extends,
 }
 
 impl Take for ZtsImplDecl {

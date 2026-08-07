@@ -394,6 +394,50 @@ impl<I: Tokens> Parser<I> {
         })
     }
 
+    /// `constrict A == B;` / `constrict A != B;` / `constrict A extends B;`
+    ///
+    /// (Phase 7, renamed from static_assert with the parens DROPPED — the
+    /// paren form `static_assert(a == b)` is legal TS, a call with a
+    /// comparison, and would steal meaning from valid programs.) Same
+    /// commit rule as `union`/`newtype`: the caller consumed `constrict`
+    /// with a same-line WORD following, so `constrict` stays a valid
+    /// identifier everywhere else (`const constrict = 1`, `constrict(x)`).
+    /// Both sides are TYPES; `==`/`!=` never appear inside a type, so the
+    /// type parser stops exactly at the operator.
+    pub(super) fn parse_zts_constrict_decl(&mut self, start: BytePos) -> PResult<Decl> {
+        if self.ctx().contains(Context::InDeclare) {
+            return Err(Error::new(self.span(start), SyntaxError::ZtsDeclareConstrict));
+        }
+
+        // NON-conditional on the left: a full type parse would read
+        // `A extends B` as the start of a conditional type (`A extends B
+        // ? X : Y`) and swallow our operator.
+        let left = self.in_type(|p| p.parse_ts_non_conditional_type())?;
+
+        let op = if self.input_mut().eat(Token::EqEq) {
+            ZtsConstrictOp::Eq
+        } else if self.input_mut().eat(Token::NotEq) {
+            ZtsConstrictOp::NotEq
+        } else if self.input_mut().eat(Token::Extends) {
+            ZtsConstrictOp::Extends
+        } else {
+            return Err(Error::new(
+                self.input().cur_span(),
+                SyntaxError::ZtsConstrictOp,
+            ));
+        };
+
+        let right = self.in_type(|p| p.parse_ts_type())?;
+        self.expect_general_semi()?;
+
+        Ok(Decl::ZtsConstrict(Box::new(ZtsConstrictDecl {
+            span: self.span(start),
+            op,
+            left,
+            right,
+        })))
+    }
+
     /// `Variant { field: Type, ... }` — braces required, fields optional.
     fn parse_zts_enum_variant(&mut self) -> PResult<ZtsEnumVariant> {
         let start = self.input().cur_pos();
@@ -1160,6 +1204,61 @@ mod tests {
         let w = &e.variants[1].fields[0];
         assert_eq!(w.name.sym, "mut");
         assert!(w.is_mut);
+    }
+
+    #[test]
+    fn constrict_decl_parses() {
+        for (src, op) in [
+            ("constrict UserId == string;", ZtsConstrictOp::Eq),
+            ("constrict A != B;", ZtsConstrictOp::NotEq),
+            ("constrict Api extends Base;", ZtsConstrictOp::Extends),
+        ] {
+            let module = test_parser(
+                Box::leak(src.to_string().into_boxed_str()),
+                zts(),
+                |p| p.parse_module(),
+            );
+            let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+            let c = decl.as_zts_constrict().unwrap();
+            assert_eq!(c.op, op, "{src}");
+        }
+        // Type-shaped operands: keyof commits (word rule) and unions parse.
+        let module = test_parser(
+            "constrict keyof Config == \"host\" | \"port\";",
+            zts(),
+            |p| p.parse_module(),
+        );
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        assert!(decl.is_zts_constrict());
+    }
+
+    #[test]
+    fn constrict_stays_an_identifier_elsewhere() {
+        for src in [
+            "const constrict = 1;",
+            "constrict = 5;",
+            "constrict(x);",
+            "constrict.foo;",
+            "constrict\nA == B;",
+        ] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let module = test_parser(src, zts(), |p| p.parse_module());
+            assert!(
+                !matches!(
+                    module.body[0].as_stmt(),
+                    Some(Stmt::Decl(Decl::ZtsConstrict(..)))
+                ),
+                "{src:?} must not parse as a constrict decl"
+            );
+        }
+    }
+
+    #[test]
+    fn constrict_missing_op_is_an_error() {
+        let (is_err, had) = parse_module_errs("constrict A B;");
+        assert!(is_err || had, "constrict without an operator must error");
+        let (is_err, had) = parse_module_errs("declare constrict A == B;");
+        assert!(is_err || had, "`declare constrict` must error");
     }
 
     #[test]

@@ -2579,6 +2579,22 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_yield_expr(&mut self, node: &YieldExpr, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsConstrictDecl` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsConstrictDecl` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsConstrictOp` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_constrict_op(&mut self, node: &ZtsConstrictOp, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsConstrictOp` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_constrict_op(&mut self, node: &ZtsConstrictOp, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `ZtsEnumDecl` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -6412,6 +6428,30 @@ where
     fn exit_yield_expr(&mut self, node: &YieldExpr, ctx: &mut C) {
         self.second.exit_yield_expr(node, ctx);
         self.first.exit_yield_expr(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl, ctx: &mut C) {
+        self.first.enter_zts_constrict_decl(node, ctx);
+        self.second.enter_zts_constrict_decl(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl, ctx: &mut C) {
+        self.second.exit_zts_constrict_decl(node, ctx);
+        self.first.exit_zts_constrict_decl(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_constrict_op(&mut self, node: &ZtsConstrictOp, ctx: &mut C) {
+        self.first.enter_zts_constrict_op(node, ctx);
+        self.second.enter_zts_constrict_op(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_constrict_op(&mut self, node: &ZtsConstrictOp, ctx: &mut C) {
+        self.second.exit_zts_constrict_op(node, ctx);
+        self.first.exit_zts_constrict_op(node, ctx);
     }
 
     #[inline]
@@ -11520,6 +11560,38 @@ where
     }
 
     #[inline]
+    fn enter_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_constrict_decl(node, ctx),
+            Self::Right(hook) => hook.enter_zts_constrict_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_constrict_decl(node, ctx),
+            Self::Right(hook) => hook.exit_zts_constrict_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_constrict_op(&mut self, node: &ZtsConstrictOp, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_constrict_op(node, ctx),
+            Self::Right(hook) => hook.enter_zts_constrict_op(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_constrict_op(&mut self, node: &ZtsConstrictOp, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_constrict_op(node, ctx),
+            Self::Right(hook) => hook.exit_zts_constrict_op(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_zts_enum_decl(&mut self, node: &ZtsEnumDecl, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_zts_enum_decl(node, ctx),
@@ -16088,6 +16160,34 @@ where
     }
 
     #[inline]
+    fn enter_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_constrict_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_constrict_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_constrict_op(&mut self, node: &ZtsConstrictOp, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_constrict_op(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_constrict_op(&mut self, node: &ZtsConstrictOp, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_constrict_op(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_zts_enum_decl(&mut self, node: &ZtsEnumDecl, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_zts_enum_decl(node, ctx);
@@ -18892,6 +18992,22 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.exit_yield_expr(node, &mut self.context);
     }
 
+    #[doc = "Visits a node of type `ZtsConstrictDecl` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_constrict_decl(&mut self, node: &ZtsConstrictDecl) {
+        self.hook.enter_zts_constrict_decl(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_constrict_decl(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsConstrictOp` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_constrict_op(&mut self, node: &ZtsConstrictOp) {
+        self.hook.enter_zts_constrict_op(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_constrict_op(node, &mut self.context);
+    }
+
     #[doc = "Visits a node of type `ZtsEnumDecl` using the hook's enter and exit methods."]
     #[inline]
     fn visit_zts_enum_decl(&mut self, node: &ZtsEnumDecl) {
@@ -21662,6 +21778,22 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_yield_expr(&mut self, node: &mut YieldExpr, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsConstrictDecl` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsConstrictDecl` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsConstrictOp` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsConstrictOp` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `ZtsEnumDecl` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -25531,6 +25663,30 @@ where
     fn exit_yield_expr(&mut self, node: &mut YieldExpr, ctx: &mut C) {
         self.second.exit_yield_expr(node, ctx);
         self.first.exit_yield_expr(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl, ctx: &mut C) {
+        self.first.enter_zts_constrict_decl(node, ctx);
+        self.second.enter_zts_constrict_decl(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl, ctx: &mut C) {
+        self.second.exit_zts_constrict_decl(node, ctx);
+        self.first.exit_zts_constrict_decl(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp, ctx: &mut C) {
+        self.first.enter_zts_constrict_op(node, ctx);
+        self.second.enter_zts_constrict_op(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp, ctx: &mut C) {
+        self.second.exit_zts_constrict_op(node, ctx);
+        self.first.exit_zts_constrict_op(node, ctx);
     }
 
     #[inline]
@@ -30675,6 +30831,38 @@ where
     }
 
     #[inline]
+    fn enter_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_constrict_decl(node, ctx),
+            Self::Right(hook) => hook.enter_zts_constrict_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_constrict_decl(node, ctx),
+            Self::Right(hook) => hook.exit_zts_constrict_decl(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_constrict_op(node, ctx),
+            Self::Right(hook) => hook.enter_zts_constrict_op(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_constrict_op(node, ctx),
+            Self::Right(hook) => hook.exit_zts_constrict_op(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_zts_enum_decl(node, ctx),
@@ -35279,6 +35467,34 @@ where
     }
 
     #[inline]
+    fn enter_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_constrict_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_constrict_decl(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_constrict_op(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_constrict_op(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_zts_enum_decl(&mut self, node: &mut ZtsEnumDecl, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_zts_enum_decl(node, ctx);
@@ -38081,6 +38297,22 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.enter_yield_expr(node, &mut self.context);
         node.visit_mut_children_with(self);
         self.hook.exit_yield_expr(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsConstrictDecl` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_constrict_decl(&mut self, node: &mut ZtsConstrictDecl) {
+        self.hook.enter_zts_constrict_decl(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_constrict_decl(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsConstrictOp` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_constrict_op(&mut self, node: &mut ZtsConstrictOp) {
+        self.hook.enter_zts_constrict_op(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_constrict_op(node, &mut self.context);
     }
 
     #[doc = "Visits a node of type `ZtsEnumDecl` using the hook's enter and exit methods."]
