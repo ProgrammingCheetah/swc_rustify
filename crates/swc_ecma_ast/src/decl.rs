@@ -9,7 +9,10 @@ use crate::{
     ident::{Ident, IdentName},
     lit::Str,
     pat::Pat,
-    typescript::{TsEnumDecl, TsInterfaceDecl, TsModuleDecl, TsType, TsTypeAliasDecl},
+    typescript::{
+        TsEnumDecl, TsInterfaceDecl, TsModuleDecl, TsType, TsTypeAliasDecl,
+        TsTypeParamInstantiation,
+    },
 };
 
 #[ast_node]
@@ -368,12 +371,16 @@ impl Take for ZtsNewtypeDecl {
     }
 }
 
-/// zts extension: `impl Display for Shape { fn fmt(self) -> string { ... } }`
+/// zts extension: `impl Display for Shape { fmt(self): string { ... } }`
 ///
 /// Never reaches codegen — the zts compiler merges the methods into the
 /// factory const of the type named after `for` (which must be declared in
-/// the same module) and appends a `satisfies Trait<Type>` conformance
-/// clause. The trait itself is a plain TS interface, not a zts node.
+/// the same module) and appends a `satisfies Trait<Type> & ...`
+/// conformance clause. The trait itself is a plain TS interface, not a
+/// zts node. Since Phase 7 (traits v2) the header takes a comma list of
+/// trait refs with optional type arguments —
+/// `impl From<string>, From<number> for Status` — each a separate
+/// satisfies obligation over ONE method set.
 #[ast_node("ZtsImplDeclaration")]
 #[derive(Eq, Hash, EqIgnoreSpan, Default)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
@@ -381,9 +388,9 @@ impl Take for ZtsNewtypeDecl {
 pub struct ZtsImplDecl {
     pub span: Span,
 
-    /// The trait being implemented (`Display`).
-    #[cfg_attr(feature = "serde-impl", serde(rename = "traitIdentifier"))]
-    pub trait_ident: Ident,
+    /// The traits being implemented (`Display`, `From<string>`, ...).
+    #[cfg_attr(feature = "serde-impl", serde(default))]
+    pub traits: Vec<ZtsImplTraitRef>,
 
     /// The type receiving the impl (`Shape`).
     #[cfg_attr(feature = "serde-impl", serde(rename = "forIdentifier"))]
@@ -391,6 +398,32 @@ pub struct ZtsImplDecl {
 
     #[cfg_attr(feature = "serde-impl", serde(default))]
     pub methods: Vec<ZtsImplMethod>,
+}
+
+/// One trait reference in a [ZtsImplDecl] header: `From<string>`. The
+/// type arguments (if any) are appended AFTER the Self type in the
+/// generated `satisfies` clause (`satisfies From<Status, string>`).
+#[ast_node("ZtsImplTraitRef")]
+#[derive(Eq, Hash, EqIgnoreSpan, Default)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsImplTraitRef {
+    pub span: Span,
+
+    pub ident: Ident,
+
+    #[cfg_attr(feature = "serde-impl", serde(default, rename = "typeArguments"))]
+    #[cfg_attr(
+        feature = "encoding-impl",
+        encoding(with = "cbor4ii::core::types::Maybe")
+    )]
+    pub type_args: Option<Box<TsTypeParamInstantiation>>,
+}
+
+impl Take for ZtsImplTraitRef {
+    fn dummy() -> Self {
+        Default::default()
+    }
 }
 
 impl Take for ZtsImplDecl {

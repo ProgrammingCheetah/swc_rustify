@@ -21,7 +21,8 @@ pub use self::{
     },
     decl::{
         ClassDecl, Decl, FnDecl, UsingDecl, VarDecl, VarDeclKind, VarDeclarator, ZtsEnumDecl,
-        ZtsEnumField, ZtsEnumVariant, ZtsImplDecl, ZtsImplMethod, ZtsNewtypeDecl, ZtsUnionDecl,
+        ZtsEnumField, ZtsEnumVariant, ZtsImplDecl, ZtsImplMethod, ZtsImplTraitRef, ZtsNewtypeDecl,
+        ZtsUnionDecl,
     },
     expr::*,
     function::{Function, Param, ParamOrTsParamProp},

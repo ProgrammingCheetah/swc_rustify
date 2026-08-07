@@ -2672,6 +2672,24 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_impl_methods(&mut self, node: &[ZtsImplMethod], ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsImplTraitRef` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_impl_trait_ref(&mut self, node: &ZtsImplTraitRef, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsImplTraitRef` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_impl_trait_ref(&mut self, node: &ZtsImplTraitRef, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Vec < ZtsImplTraitRef >` before visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_impl_trait_refs(&mut self, node: &[ZtsImplTraitRef], ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Vec < ZtsImplTraitRef >` after visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_impl_trait_refs(&mut self, node: &[ZtsImplTraitRef], ctx: &mut C) {}
     #[doc = "Called when entering a node of type `ZtsNewtypeDecl` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -6526,6 +6544,30 @@ where
     fn exit_zts_impl_methods(&mut self, node: &[ZtsImplMethod], ctx: &mut C) {
         self.second.exit_zts_impl_methods(node, ctx);
         self.first.exit_zts_impl_methods(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_impl_trait_ref(&mut self, node: &ZtsImplTraitRef, ctx: &mut C) {
+        self.first.enter_zts_impl_trait_ref(node, ctx);
+        self.second.enter_zts_impl_trait_ref(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_ref(&mut self, node: &ZtsImplTraitRef, ctx: &mut C) {
+        self.second.exit_zts_impl_trait_ref(node, ctx);
+        self.first.exit_zts_impl_trait_ref(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_impl_trait_refs(&mut self, node: &[ZtsImplTraitRef], ctx: &mut C) {
+        self.first.enter_zts_impl_trait_refs(node, ctx);
+        self.second.enter_zts_impl_trait_refs(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_refs(&mut self, node: &[ZtsImplTraitRef], ctx: &mut C) {
+        self.second.exit_zts_impl_trait_refs(node, ctx);
+        self.first.exit_zts_impl_trait_refs(node, ctx);
     }
 
     #[inline]
@@ -11654,6 +11696,38 @@ where
     }
 
     #[inline]
+    fn enter_zts_impl_trait_ref(&mut self, node: &ZtsImplTraitRef, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_impl_trait_ref(node, ctx),
+            Self::Right(hook) => hook.enter_zts_impl_trait_ref(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_ref(&mut self, node: &ZtsImplTraitRef, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_impl_trait_ref(node, ctx),
+            Self::Right(hook) => hook.exit_zts_impl_trait_ref(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_impl_trait_refs(&mut self, node: &[ZtsImplTraitRef], ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_impl_trait_refs(node, ctx),
+            Self::Right(hook) => hook.enter_zts_impl_trait_refs(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_refs(&mut self, node: &[ZtsImplTraitRef], ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_impl_trait_refs(node, ctx),
+            Self::Right(hook) => hook.exit_zts_impl_trait_refs(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_zts_newtype_decl(node, ctx),
@@ -16168,6 +16242,34 @@ where
     }
 
     #[inline]
+    fn enter_zts_impl_trait_ref(&mut self, node: &ZtsImplTraitRef, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_impl_trait_ref(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_ref(&mut self, node: &ZtsImplTraitRef, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_impl_trait_ref(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_impl_trait_refs(&mut self, node: &[ZtsImplTraitRef], ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_impl_trait_refs(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_refs(&mut self, node: &[ZtsImplTraitRef], ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_impl_trait_refs(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_zts_newtype_decl(&mut self, node: &ZtsNewtypeDecl, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_zts_newtype_decl(node, ctx);
@@ -18877,6 +18979,23 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.enter_zts_impl_methods(node, &mut self.context);
         node.visit_children_with(self);
         self.hook.exit_zts_impl_methods(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsImplTraitRef` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_zts_impl_trait_ref(&mut self, node: &ZtsImplTraitRef) {
+        self.hook.enter_zts_impl_trait_ref(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_impl_trait_ref(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `Vec < ZtsImplTraitRef >` using the hook's enter and exit \
+             methods."]
+    #[inline]
+    fn visit_zts_impl_trait_refs(&mut self, node: &[ZtsImplTraitRef]) {
+        self.hook.enter_zts_impl_trait_refs(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_zts_impl_trait_refs(node, &mut self.context);
     }
 
     #[doc = "Visits a node of type `ZtsNewtypeDecl` using the hook's enter and exit methods."]
@@ -21636,6 +21755,24 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_zts_impl_methods(&mut self, node: &mut Vec<ZtsImplMethod>, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `ZtsImplTraitRef` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_impl_trait_ref(&mut self, node: &mut ZtsImplTraitRef, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `ZtsImplTraitRef` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_impl_trait_ref(&mut self, node: &mut ZtsImplTraitRef, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `Vec < ZtsImplTraitRef >` before visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_zts_impl_trait_refs(&mut self, node: &mut Vec<ZtsImplTraitRef>, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `Vec < ZtsImplTraitRef >` after visiting its \
+             children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_zts_impl_trait_refs(&mut self, node: &mut Vec<ZtsImplTraitRef>, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `ZtsNewtypeDecl` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -25526,6 +25663,30 @@ where
     fn exit_zts_impl_methods(&mut self, node: &mut Vec<ZtsImplMethod>, ctx: &mut C) {
         self.second.exit_zts_impl_methods(node, ctx);
         self.first.exit_zts_impl_methods(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_impl_trait_ref(&mut self, node: &mut ZtsImplTraitRef, ctx: &mut C) {
+        self.first.enter_zts_impl_trait_ref(node, ctx);
+        self.second.enter_zts_impl_trait_ref(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_ref(&mut self, node: &mut ZtsImplTraitRef, ctx: &mut C) {
+        self.second.exit_zts_impl_trait_ref(node, ctx);
+        self.first.exit_zts_impl_trait_ref(node, ctx);
+    }
+
+    #[inline]
+    fn enter_zts_impl_trait_refs(&mut self, node: &mut Vec<ZtsImplTraitRef>, ctx: &mut C) {
+        self.first.enter_zts_impl_trait_refs(node, ctx);
+        self.second.enter_zts_impl_trait_refs(node, ctx);
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_refs(&mut self, node: &mut Vec<ZtsImplTraitRef>, ctx: &mut C) {
+        self.second.exit_zts_impl_trait_refs(node, ctx);
+        self.first.exit_zts_impl_trait_refs(node, ctx);
     }
 
     #[inline]
@@ -30690,6 +30851,38 @@ where
     }
 
     #[inline]
+    fn enter_zts_impl_trait_ref(&mut self, node: &mut ZtsImplTraitRef, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_impl_trait_ref(node, ctx),
+            Self::Right(hook) => hook.enter_zts_impl_trait_ref(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_ref(&mut self, node: &mut ZtsImplTraitRef, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_impl_trait_ref(node, ctx),
+            Self::Right(hook) => hook.exit_zts_impl_trait_ref(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_zts_impl_trait_refs(&mut self, node: &mut Vec<ZtsImplTraitRef>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_zts_impl_trait_refs(node, ctx),
+            Self::Right(hook) => hook.enter_zts_impl_trait_refs(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_refs(&mut self, node: &mut Vec<ZtsImplTraitRef>, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_zts_impl_trait_refs(node, ctx),
+            Self::Right(hook) => hook.exit_zts_impl_trait_refs(node, ctx),
+        }
+    }
+
+    #[inline]
     fn enter_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {
         match self {
             Self::Left(hook) => hook.enter_zts_newtype_decl(node, ctx),
@@ -35240,6 +35433,34 @@ where
     }
 
     #[inline]
+    fn enter_zts_impl_trait_ref(&mut self, node: &mut ZtsImplTraitRef, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_impl_trait_ref(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_ref(&mut self, node: &mut ZtsImplTraitRef, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_impl_trait_ref(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn enter_zts_impl_trait_refs(&mut self, node: &mut Vec<ZtsImplTraitRef>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_zts_impl_trait_refs(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_zts_impl_trait_refs(&mut self, node: &mut Vec<ZtsImplTraitRef>, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_zts_impl_trait_refs(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_zts_newtype_decl(&mut self, node: &mut ZtsNewtypeDecl, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_zts_newtype_decl(node, ctx);
@@ -37949,6 +38170,23 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.enter_zts_impl_methods(node, &mut self.context);
         node.visit_mut_children_with(self);
         self.hook.exit_zts_impl_methods(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `ZtsImplTraitRef` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_zts_impl_trait_ref(&mut self, node: &mut ZtsImplTraitRef) {
+        self.hook.enter_zts_impl_trait_ref(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_impl_trait_ref(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `Vec < ZtsImplTraitRef >` using the hook's enter and exit \
+             methods."]
+    #[inline]
+    fn visit_mut_zts_impl_trait_refs(&mut self, node: &mut Vec<ZtsImplTraitRef>) {
+        self.hook.enter_zts_impl_trait_refs(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_zts_impl_trait_refs(node, &mut self.context);
     }
 
     #[doc = "Visits a node of type `ZtsNewtypeDecl` using the hook's enter and exit methods."]

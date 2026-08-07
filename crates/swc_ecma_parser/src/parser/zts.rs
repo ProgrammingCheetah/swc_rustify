@@ -287,8 +287,32 @@ impl<I: Tokens> Parser<I> {
             return Err(Error::new(self.span(start), SyntaxError::ZtsDeclareImpl));
         }
 
-        let trait_ident = self.parse_ident_name()?;
-        let trait_ident = Ident::new_no_ctxt(trait_ident.sym, trait_ident.span);
+        // Traits v2 (Phase 7): a comma list of trait refs with optional
+        // type args — `impl From<string>, From<number> for Status`. Each
+        // becomes its own satisfies obligation over ONE method set.
+        let mut traits = Vec::new();
+        loop {
+            let ref_start = self.input().cur_pos();
+            let ident = self.parse_ident_name()?;
+            let ident = Ident::new_no_ctxt(ident.sym, ident.span);
+            let type_args = if self.input().is(Token::Lt) {
+                let args = self.parse_ts_type_args()?;
+                // parse_ts_type_args leaves the `>` unconsumed (JSX
+                // re-scanning concerns); consume it here.
+                self.bump();
+                Some(args)
+            } else {
+                None
+            };
+            traits.push(ZtsImplTraitRef {
+                span: self.span(ref_start),
+                ident,
+                type_args,
+            });
+            if !self.input_mut().eat(Token::Comma) {
+                break;
+            }
+        }
 
         expect!(self, Token::For);
 
@@ -308,7 +332,7 @@ impl<I: Tokens> Parser<I> {
 
         Ok(Decl::ZtsImpl(Box::new(ZtsImplDecl {
             span: self.span(start),
-            trait_ident,
+            traits,
             for_ident,
             methods,
         })))
@@ -341,19 +365,20 @@ impl<I: Tokens> Parser<I> {
             /* is_generator */ false,
         )?;
 
-        // First parameter must be a bare `self` receiver: the zts lowering
-        // owns its type annotation (the `for` type).
-        let self_ok = matches!(
-            function.params.first().map(|p| &p.pat),
-            Some(Pat::Ident(b)) if b.id.sym == "self" && b.type_ann.is_none()
-        );
-        if !self_ok {
-            let span = function
-                .params
-                .first()
-                .map(|p| p.span)
-                .unwrap_or_else(|| self.span(start));
-            return Err(Error::new(span, SyntaxError::ZtsImplSelfExpected));
+        // Traits v2: `self` is OPTIONAL — a method with a leading bare
+        // `self` is a receiver method (the lowering annotates it with the
+        // `for` type); without one it is an associated function
+        // (`Status.from(...)`) whose params are all user-annotated. What
+        // stays an error: ANNOTATED self (`self: Shape`) — the lowering
+        // owns that annotation — and `self` in a non-first position.
+        for (i, p) in function.params.iter().enumerate() {
+            let Pat::Ident(b) = &p.pat else { continue };
+            if b.id.sym != "self" {
+                continue;
+            }
+            if i > 0 || b.type_ann.is_some() {
+                return Err(Error::new(p.span, SyntaxError::ZtsImplSelfExpected));
+            }
         }
         if function.body.is_none() {
             return Err(Error::new(
@@ -1146,7 +1171,9 @@ mod tests {
         );
         let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
         let i = decl.as_zts_impl().unwrap();
-        assert_eq!(i.trait_ident.sym, "Display");
+        assert_eq!(i.traits.len(), 1);
+        assert_eq!(i.traits[0].ident.sym, "Display");
+        assert!(i.traits[0].type_args.is_none());
         assert_eq!(i.for_ident.sym, "Shape");
         assert_eq!(i.methods.len(), 1);
         let m = &i.methods[0];
@@ -1154,6 +1181,46 @@ mod tests {
         assert_eq!(m.function.params.len(), 1);
         assert!(m.function.return_type.is_some());
         assert!(m.function.body.is_some());
+    }
+
+    #[test]
+    fn impl_trait_type_args_and_comma_list_parse() {
+        // Traits v2: type args + comma-header multi-instantiation, and an
+        // associated function (no self).
+        let module = test_parser(
+            "impl From<string>, From<number> for Status { from(value: string | number): Status { return value as unknown as Status; } }",
+            zts(),
+            |p| p.parse_module(),
+        );
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let i = decl.as_zts_impl().unwrap();
+        assert_eq!(i.traits.len(), 2);
+        assert_eq!(i.traits[0].ident.sym, "From");
+        assert_eq!(i.traits[0].type_args.as_ref().unwrap().params.len(), 1);
+        assert_eq!(i.traits[1].type_args.as_ref().unwrap().params.len(), 1);
+        // Associated function: no self, params user-annotated.
+        assert_eq!(i.methods[0].function.params.len(), 1);
+    }
+
+    #[test]
+    fn impl_self_rules_v2() {
+        // Bare-self receiver still fine; annotated self and non-first
+        // self stay errors; NO self (associated fn) is now fine.
+        let ok = test_parser(
+            "impl D for S { f(): number { return 1; } g(self): number { return 2; } }",
+            zts(),
+            |p| p.parse_module(),
+        );
+        let decl = ok.body[0].as_stmt().unwrap().as_decl().unwrap();
+        assert_eq!(decl.as_zts_impl().unwrap().methods.len(), 2);
+        for src in [
+            "impl D for S { f(self: S): number { return 1; } }",
+            "impl D for S { f(x: number, self): number { return x; } }",
+        ] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let (is_err, had) = parse_module_errs(src);
+            assert!(is_err || had, "{src:?} must error (self rules)");
+        }
     }
 
     #[test]
@@ -1208,16 +1275,12 @@ mod tests {
     }
 
     #[test]
-    fn impl_without_self_is_an_error() {
-        for src in [
-            "impl D for S { f(): number { return 1; } }",
-            "impl D for S { f(x: number): number { return x; } }",
-            "impl D for S { f(self: S): number { return 1; } }",
-        ] {
-            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
-            let (is_err, had) = parse_module_errs(src);
-            assert!(is_err || had, "{src:?} must error (bare `self` first)");
-        }
+    fn impl_annotated_self_is_an_error() {
+        // Traits v2 made self OPTIONAL (associated functions); what stays
+        // an error is annotating it — the lowering owns that annotation.
+        let (is_err, had) =
+            parse_module_errs("impl D for S { f(self: S): number { return 1; } }");
+        assert!(is_err || had, "annotated self must error");
     }
 
     #[test]
