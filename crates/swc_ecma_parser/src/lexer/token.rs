@@ -882,6 +882,16 @@ pub struct TokenAndSpan {
     pub span: Span,
 }
 
+// zts: downstream tooling (dprint-swc-ext's zts fork) needs Spanned for
+// the compact token type; the trait and type are both foreign there, so
+// the impl must live here.
+impl swc_common::Spanned for TokenAndSpan {
+    #[inline(always)]
+    fn span(&self) -> Span {
+        self.span
+    }
+}
+
 impl TokenAndSpan {
     #[inline(always)]
     pub fn new(token: Token, span: Span, had_line_break: bool) -> Self {

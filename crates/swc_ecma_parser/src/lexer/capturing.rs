@@ -137,6 +137,15 @@ impl<I: Tokens> Tokens for Capturing<I> {
         self.inner.end_pos()
     }
 
+    // zts: Tokens::start_pos has a BytePos(0) default; NOT forwarding it
+    // makes any parse that consumes no token (empty / whitespace-only /
+    // comments-only file) report span (0,0) — below the file start —
+    // instead of (start_pos, start_pos). swc_ecma_lexer's Capturing
+    // forwards it; this one must too.
+    fn start_pos(&self) -> swc_common::BytePos {
+        self.inner.start_pos()
+    }
+
     fn take_errors(&mut self) -> Vec<Error> {
         self.inner.take_errors()
     }
