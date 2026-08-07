@@ -315,7 +315,10 @@ impl Take for ZtsEnumVariant {
     }
 }
 
-/// One payload field of a [ZtsEnumVariant]: `radius: number`.
+/// One payload field of a [ZtsEnumVariant]: `radius: number`, or
+/// `mut count: number` — fields are readonly in the lowered tagged union
+/// unless marked `mut` (Phase 7). `mut` is contextual: a field literally
+/// named `mut` keeps working.
 #[ast_node("ZtsEnumField")]
 #[derive(Eq, Hash, EqIgnoreSpan)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
@@ -327,6 +330,10 @@ pub struct ZtsEnumField {
 
     #[cfg_attr(feature = "serde-impl", serde(rename = "typeAnnotation"))]
     pub type_ann: Box<TsType>,
+
+    /// `mut` modifier: the lowered field is NOT readonly.
+    #[cfg_attr(feature = "serde-impl", serde(default, rename = "isMut"))]
+    pub is_mut: bool,
 }
 
 /// zts extension: `newtype AccountId = string;`

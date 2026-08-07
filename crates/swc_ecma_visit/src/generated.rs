@@ -16642,6 +16642,7 @@ impl<V: ?Sized + Visit> VisitWith<V> for ZtsEnumField {
                 span,
                 name,
                 type_ann,
+                is_mut,
             } => {
                 {
                     <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
@@ -50491,6 +50492,7 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for ZtsEnumField {
                 span,
                 name,
                 type_ann,
+                is_mut,
             } => {
                 {
                     let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::ZtsEnumField(
@@ -69939,6 +69941,7 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for ZtsEnumField {
                 span,
                 name,
                 type_ann,
+                is_mut,
             } => {
                 {
                     <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
@@ -98066,6 +98069,7 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for ZtsEnumField {
                 span,
                 name,
                 type_ann,
+                is_mut,
             } => {
                 {
                     let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumField(
@@ -117024,6 +117028,7 @@ impl<V: ?Sized + Fold> FoldWith<V> for ZtsEnumField {
                 span,
                 name,
                 type_ann,
+                is_mut,
             } => {
                 let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
                 let name = { <IdentName as FoldWith<V>>::fold_with(name, visitor) };
@@ -117032,6 +117037,7 @@ impl<V: ?Sized + Fold> FoldWith<V> for ZtsEnumField {
                     span,
                     name,
                     type_ann,
+                    is_mut,
                 }
             }
         }
@@ -146934,6 +146940,7 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsEnumField {
                 span,
                 name,
                 type_ann,
+                is_mut,
             } => {
                 let span = {
                     let mut __ast_path = __ast_path.with_guard(AstParentKind::ZtsEnumField(
@@ -146969,6 +146976,7 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for ZtsEnumField {
                     span,
                     name,
                     type_ann,
+                    is_mut,
                 }
             }
         }
@@ -153478,6 +153486,8 @@ pub mod fields {
         Name,
         #[doc = "Represents [`ZtsEnumField::type_ann`]"]
         TypeAnn,
+        #[doc = "Represents [`ZtsEnumField::is_mut`]"]
+        IsMut,
     }
     impl ZtsEnumVariantField {
         pub(crate) fn set_index(&mut self, index: usize) {

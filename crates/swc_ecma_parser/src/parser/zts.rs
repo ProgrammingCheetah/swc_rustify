@@ -413,10 +413,18 @@ impl<I: Tokens> Parser<I> {
         })
     }
 
-    /// `field: Type`
+    /// `field: Type` / `mut field: Type` (Phase 7: fields lower readonly
+    /// unless marked `mut`). `mut` is contextual — when a `:` follows
+    /// directly, `mut` IS the field name (`mut: number` keeps working,
+    /// and `mut mut: number` is a mutable field named `mut`).
     fn parse_zts_enum_field(&mut self) -> PResult<ZtsEnumField> {
         let start = self.input().cur_pos();
-        let name = self.parse_ident_name()?;
+        let mut name = self.parse_ident_name()?;
+        let mut is_mut = false;
+        if name.sym == "mut" && !self.input().is(Token::Colon) {
+            is_mut = true;
+            name = self.parse_ident_name()?;
+        }
         expect!(self, Token::Colon);
         let type_ann = self.in_type(|p| p.parse_ts_type())?;
 
@@ -424,6 +432,7 @@ impl<I: Tokens> Parser<I> {
             span: self.span(start),
             name,
             type_ann,
+            is_mut,
         })
     }
 
@@ -1058,6 +1067,41 @@ mod tests {
                 "{src:?} must not parse as a union decl"
             );
         }
+    }
+
+    #[test]
+    fn mut_enum_field_parses() {
+        let module = test_parser(
+            "enum Counter { Cell { mut count: number, label: string } }",
+            zts(),
+            |p| p.parse_module(),
+        );
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let e = decl.as_zts_enum().unwrap();
+        let fields = &e.variants[0].fields;
+        assert_eq!(fields.len(), 2);
+        assert!(fields[0].is_mut);
+        assert_eq!(fields[0].name.sym, "count");
+        assert!(!fields[1].is_mut);
+    }
+
+    #[test]
+    fn field_named_mut_still_parses() {
+        // `mut: number` — the word is the FIELD; `mut mut: number` — a
+        // mutable field named mut.
+        let module = test_parser(
+            "enum E { V { mut: number }, W { mut mut: number } }",
+            zts(),
+            |p| p.parse_module(),
+        );
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let e = decl.as_zts_enum().unwrap();
+        let v = &e.variants[0].fields[0];
+        assert_eq!(v.name.sym, "mut");
+        assert!(!v.is_mut);
+        let w = &e.variants[1].fields[0];
+        assert_eq!(w.name.sym, "mut");
+        assert!(w.is_mut);
     }
 
     #[test]
