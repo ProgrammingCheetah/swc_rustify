@@ -783,6 +783,13 @@ pub trait Visit {
     fn visit_match_pat(&mut self, node: &MatchPat) {
         <MatchPat as VisitWith<Self>>::visit_children_with(node, self)
     }
+    #[doc = "Visit a node of type `MatchRangePat`.\n\nBy default, this method calls \
+             [`MatchRangePat::visit_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn visit_match_range_pat(&mut self, node: &MatchRangePat) {
+        <MatchRangePat as VisitWith<Self>>::visit_children_with(node, self)
+    }
     #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
              [`MatchVariantPat::visit_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -2814,6 +2821,11 @@ where
     }
 
     #[inline]
+    fn visit_match_range_pat(&mut self, node: &MatchRangePat) {
+        <V as Visit>::visit_match_range_pat(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_match_variant_pat(&mut self, node: &MatchVariantPat) {
         <V as Visit>::visit_match_variant_pat(&mut **self, node)
     }
@@ -4438,6 +4450,11 @@ where
     #[inline]
     fn visit_match_pat(&mut self, node: &MatchPat) {
         <V as Visit>::visit_match_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_match_range_pat(&mut self, node: &MatchRangePat) {
+        <V as Visit>::visit_match_range_pat(&mut **self, node)
     }
 
     #[inline]
@@ -6420,6 +6437,14 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Visit::visit_match_pat(visitor, node),
             swc_visit::Either::Right(visitor) => Visit::visit_match_pat(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_match_range_pat(&mut self, node: &MatchRangePat) {
+        match self {
+            swc_visit::Either::Left(visitor) => Visit::visit_match_range_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => Visit::visit_match_range_pat(visitor, node),
         }
     }
 
@@ -9058,6 +9083,14 @@ where
     fn visit_match_pat(&mut self, node: &MatchPat) {
         if self.enabled {
             <V as Visit>::visit_match_pat(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_match_range_pat(&mut self, node: &MatchRangePat) {
+        if self.enabled {
+            <V as Visit>::visit_match_range_pat(&mut self.visitor, node)
         } else {
         }
     }
@@ -13329,8 +13362,39 @@ impl<V: ?Sized + Visit> VisitWith<V> for MatchPat {
             MatchPat::Wildcard { 0: _field_0 } => {
                 <MatchWildcardPat as VisitWith<V>>::visit_with(_field_0, visitor);
             }
+            MatchPat::Range { 0: _field_0 } => {
+                <MatchRangePat as VisitWith<V>>::visit_with(_field_0, visitor);
+            }
             #[cfg(swc_ast_unknown)]
             _ => (),
+        }
+    }
+}
+impl<V: ?Sized + Visit> VisitWith<V> for MatchRangePat {
+    #[doc = "Calls [Visit`::visit_match_range_pat`] with `self`."]
+    fn visit_with(&self, visitor: &mut V) {
+        <V as Visit>::visit_match_range_pat(visitor, self)
+    }
+
+    fn visit_children_with(&self, visitor: &mut V) {
+        match self {
+            MatchRangePat {
+                span,
+                lo,
+                lo_neg,
+                hi,
+                hi_neg,
+            } => {
+                {
+                    <swc_common::Span as VisitWith<V>>::visit_with(span, visitor)
+                };
+                {
+                    <Number as VisitWith<V>>::visit_with(lo, visitor)
+                };
+                {
+                    <Number as VisitWith<V>>::visit_with(hi, visitor)
+                };
+            }
         }
     }
 }
@@ -19472,6 +19536,19 @@ pub trait VisitAstPath {
     ) {
         <MatchPat as VisitWithAstPath<Self>>::visit_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `MatchRangePat`.\n\nBy default, this method calls \
+             [`MatchRangePat::visit_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn visit_match_range_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchRangePat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <MatchRangePat as VisitWithAstPath<Self>>::visit_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
              [`MatchVariantPat::visit_children_with_ast_path`]. If you want to recurse, you need \
              to call it manually."]
@@ -23007,6 +23084,15 @@ where
     }
 
     #[inline]
+    fn visit_match_range_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchRangePat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_range_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_match_variant_pat<'ast: 'r, 'r>(
         &mut self,
         node: &'ast MatchVariantPat,
@@ -25826,6 +25912,15 @@ where
         __ast_path: &mut AstNodePath<'r>,
     ) {
         <V as VisitAstPath>::visit_match_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_match_range_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchRangePat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_range_pat(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -29422,6 +29517,22 @@ where
             }
             swc_visit::Either::Right(visitor) => {
                 VisitAstPath::visit_match_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_match_range_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchRangePat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitAstPath::visit_match_range_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitAstPath::visit_match_range_pat(visitor, node, __ast_path)
             }
         }
     }
@@ -34040,6 +34151,18 @@ where
     ) {
         if self.enabled {
             <V as VisitAstPath>::visit_match_pat(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_match_range_pat<'ast: 'r, 'r>(
+        &mut self,
+        node: &'ast MatchRangePat,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        if self.enabled {
+            <V as VisitAstPath>::visit_match_range_pat(&mut self.visitor, node, __ast_path)
         } else {
         }
     }
@@ -42799,8 +42922,81 @@ impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for MatchPat {
                     &mut *__ast_path,
                 );
             }
+            MatchPat::Range { 0: _field_0 } => {
+                let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchPat(
+                    self,
+                    self::fields::MatchPatField::Range,
+                ));
+                <MatchRangePat as VisitWithAstPath<V>>::visit_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
             #[cfg(swc_ast_unknown)]
             _ => (),
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitAstPath> VisitWithAstPath<V> for MatchRangePat {
+    #[doc = "Calls [VisitAstPath`::visit_match_range_pat`] with `self`."]
+    fn visit_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        <V as VisitAstPath>::visit_match_range_pat(visitor, self, __ast_path)
+    }
+
+    fn visit_children_with_ast_path<'ast: 'r, 'r>(
+        &'ast self,
+        visitor: &mut V,
+        __ast_path: &mut AstNodePath<'r>,
+    ) {
+        match self {
+            MatchRangePat {
+                span,
+                lo,
+                lo_neg,
+                hi,
+                hi_neg,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchRangePat(
+                        self,
+                        self::fields::MatchRangePatField::Span,
+                    ));
+                    <swc_common::Span as VisitWithAstPath<V>>::visit_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchRangePat(
+                        self,
+                        self::fields::MatchRangePatField::Lo,
+                    ));
+                    <Number as VisitWithAstPath<V>>::visit_with_ast_path(
+                        lo,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentNodeRef::MatchRangePat(
+                        self,
+                        self::fields::MatchRangePatField::Hi,
+                    ));
+                    <Number as VisitWithAstPath<V>>::visit_with_ast_path(
+                        hi,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
         }
     }
 }
@@ -54669,6 +54865,13 @@ pub trait VisitMut {
     fn visit_mut_match_pat(&mut self, node: &mut MatchPat) {
         <MatchPat as VisitMutWith<Self>>::visit_mut_children_with(node, self)
     }
+    #[doc = "Visit a node of type `MatchRangePat`.\n\nBy default, this method calls \
+             [`MatchRangePat::visit_mut_children_with`]. If you want to recurse, you need to call \
+             it manually."]
+    #[inline]
+    fn visit_mut_match_range_pat(&mut self, node: &mut MatchRangePat) {
+        <MatchRangePat as VisitMutWith<Self>>::visit_mut_children_with(node, self)
+    }
     #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
              [`MatchVariantPat::visit_mut_children_with`]. If you want to recurse, you need to \
              call it manually."]
@@ -56718,6 +56921,11 @@ where
     }
 
     #[inline]
+    fn visit_mut_match_range_pat(&mut self, node: &mut MatchRangePat) {
+        <V as VisitMut>::visit_mut_match_range_pat(&mut **self, node)
+    }
+
+    #[inline]
     fn visit_mut_match_variant_pat(&mut self, node: &mut MatchVariantPat) {
         <V as VisitMut>::visit_mut_match_variant_pat(&mut **self, node)
     }
@@ -58342,6 +58550,11 @@ where
     #[inline]
     fn visit_mut_match_pat(&mut self, node: &mut MatchPat) {
         <V as VisitMut>::visit_mut_match_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn visit_mut_match_range_pat(&mut self, node: &mut MatchRangePat) {
+        <V as VisitMut>::visit_mut_match_range_pat(&mut **self, node)
     }
 
     #[inline]
@@ -60418,6 +60631,14 @@ where
         match self {
             swc_visit::Either::Left(visitor) => VisitMut::visit_mut_match_pat(visitor, node),
             swc_visit::Either::Right(visitor) => VisitMut::visit_mut_match_pat(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_range_pat(&mut self, node: &mut MatchRangePat) {
+        match self {
+            swc_visit::Either::Left(visitor) => VisitMut::visit_mut_match_range_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => VisitMut::visit_mut_match_range_pat(visitor, node),
         }
     }
 
@@ -63302,6 +63523,14 @@ where
     fn visit_mut_match_pat(&mut self, node: &mut MatchPat) {
         if self.enabled {
             <V as VisitMut>::visit_mut_match_pat(&mut self.visitor, node)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_range_pat(&mut self, node: &mut MatchRangePat) {
+        if self.enabled {
+            <V as VisitMut>::visit_mut_match_range_pat(&mut self.visitor, node)
         } else {
         }
     }
@@ -67602,8 +67831,39 @@ impl<V: ?Sized + VisitMut> VisitMutWith<V> for MatchPat {
             MatchPat::Wildcard { 0: _field_0 } => {
                 <MatchWildcardPat as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
             }
+            MatchPat::Range { 0: _field_0 } => {
+                <MatchRangePat as VisitMutWith<V>>::visit_mut_with(_field_0, visitor);
+            }
             #[cfg(swc_ast_unknown)]
             _ => (),
+        }
+    }
+}
+impl<V: ?Sized + VisitMut> VisitMutWith<V> for MatchRangePat {
+    #[doc = "Calls [VisitMut`::visit_mut_match_range_pat`] with `self`."]
+    fn visit_mut_with(&mut self, visitor: &mut V) {
+        <V as VisitMut>::visit_mut_match_range_pat(visitor, self)
+    }
+
+    fn visit_mut_children_with(&mut self, visitor: &mut V) {
+        match self {
+            MatchRangePat {
+                span,
+                lo,
+                lo_neg,
+                hi,
+                hi_neg,
+            } => {
+                {
+                    <swc_common::Span as VisitMutWith<V>>::visit_mut_with(span, visitor)
+                };
+                {
+                    <Number as VisitMutWith<V>>::visit_mut_with(lo, visitor)
+                };
+                {
+                    <Number as VisitMutWith<V>>::visit_mut_with(hi, visitor)
+                };
+            }
         }
     }
 }
@@ -73592,6 +73852,19 @@ pub trait VisitMutAstPath {
             node, self, __ast_path,
         )
     }
+    #[doc = "Visit a node of type `MatchRangePat`.\n\nBy default, this method calls \
+             [`MatchRangePat::visit_mut_children_with_ast_path`]. If you want to recurse, you need \
+             to call it manually."]
+    #[inline]
+    fn visit_mut_match_range_pat(
+        &mut self,
+        node: &mut MatchRangePat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <MatchRangePat as VisitMutWithAstPath<Self>>::visit_mut_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
              [`MatchVariantPat::visit_mut_children_with_ast_path`]. If you want to recurse, you \
              need to call it manually."]
@@ -76595,6 +76868,15 @@ where
     }
 
     #[inline]
+    fn visit_mut_match_range_pat(
+        &mut self,
+        node: &mut MatchRangePat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_match_range_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn visit_mut_match_variant_pat(
         &mut self,
         node: &mut MatchVariantPat,
@@ -78766,6 +79048,15 @@ where
     #[inline]
     fn visit_mut_match_pat(&mut self, node: &mut MatchPat, __ast_path: &mut AstKindPath) {
         <V as VisitMutAstPath>::visit_mut_match_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn visit_mut_match_range_pat(
+        &mut self,
+        node: &mut MatchRangePat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        <V as VisitMutAstPath>::visit_mut_match_range_pat(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -81730,6 +82021,22 @@ where
             }
             swc_visit::Either::Right(visitor) => {
                 VisitMutAstPath::visit_mut_match_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_range_pat(
+        &mut self,
+        node: &mut MatchRangePat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                VisitMutAstPath::visit_mut_match_range_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                VisitMutAstPath::visit_mut_match_range_pat(visitor, node, __ast_path)
             }
         }
     }
@@ -85796,6 +86103,18 @@ where
     fn visit_mut_match_pat(&mut self, node: &mut MatchPat, __ast_path: &mut AstKindPath) {
         if self.enabled {
             <V as VisitMutAstPath>::visit_mut_match_pat(&mut self.visitor, node, __ast_path)
+        } else {
+        }
+    }
+
+    #[inline]
+    fn visit_mut_match_range_pat(
+        &mut self,
+        node: &mut MatchRangePat,
+        __ast_path: &mut AstKindPath,
+    ) {
+        if self.enabled {
+            <V as VisitMutAstPath>::visit_mut_match_range_pat(&mut self.visitor, node, __ast_path)
         } else {
         }
     }
@@ -93100,8 +93419,68 @@ impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for MatchPat {
                     &mut *__ast_path,
                 );
             }
+            MatchPat::Range { 0: _field_0 } => {
+                let mut __ast_path = __ast_path
+                    .with_guard(AstParentKind::MatchPat(self::fields::MatchPatField::Range));
+                <MatchRangePat as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+            }
             #[cfg(swc_ast_unknown)]
             _ => (),
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + VisitMutAstPath> VisitMutWithAstPath<V> for MatchRangePat {
+    #[doc = "Calls [VisitMutAstPath`::visit_mut_match_range_pat`] with `self`."]
+    fn visit_mut_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        <V as VisitMutAstPath>::visit_mut_match_range_pat(visitor, self, __ast_path)
+    }
+
+    fn visit_mut_children_with_ast_path(&mut self, visitor: &mut V, __ast_path: &mut AstKindPath) {
+        match self {
+            MatchRangePat {
+                span,
+                lo,
+                lo_neg,
+                hi,
+                hi_neg,
+            } => {
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchRangePat(
+                        self::fields::MatchRangePatField::Span,
+                    ));
+                    <swc_common::Span as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchRangePat(
+                        self::fields::MatchRangePatField::Lo,
+                    ));
+                    <Number as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        lo,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchRangePat(
+                        self::fields::MatchRangePatField::Hi,
+                    ));
+                    <Number as VisitMutWithAstPath<V>>::visit_mut_with_ast_path(
+                        hi,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+            }
         }
     }
 }
@@ -102564,6 +102943,13 @@ pub trait Fold {
     fn fold_match_pat(&mut self, node: MatchPat) -> MatchPat {
         <MatchPat as FoldWith<Self>>::fold_children_with(node, self)
     }
+    #[doc = "Visit a node of type `MatchRangePat`.\n\nBy default, this method calls \
+             [`MatchRangePat::fold_children_with`]. If you want to recurse, you need to call it \
+             manually."]
+    #[inline]
+    fn fold_match_range_pat(&mut self, node: MatchRangePat) -> MatchRangePat {
+        <MatchRangePat as FoldWith<Self>>::fold_children_with(node, self)
+    }
     #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
              [`MatchVariantPat::fold_children_with`]. If you want to recurse, you need to call it \
              manually."]
@@ -104650,6 +105036,11 @@ where
     }
 
     #[inline]
+    fn fold_match_range_pat(&mut self, node: MatchRangePat) -> MatchRangePat {
+        <V as Fold>::fold_match_range_pat(&mut **self, node)
+    }
+
+    #[inline]
     fn fold_match_variant_pat(&mut self, node: MatchVariantPat) -> MatchVariantPat {
         <V as Fold>::fold_match_variant_pat(&mut **self, node)
     }
@@ -106337,6 +106728,11 @@ where
     #[inline]
     fn fold_match_pat(&mut self, node: MatchPat) -> MatchPat {
         <V as Fold>::fold_match_pat(&mut **self, node)
+    }
+
+    #[inline]
+    fn fold_match_range_pat(&mut self, node: MatchRangePat) -> MatchRangePat {
+        <V as Fold>::fold_match_range_pat(&mut **self, node)
     }
 
     #[inline]
@@ -108370,6 +108766,14 @@ where
         match self {
             swc_visit::Either::Left(visitor) => Fold::fold_match_pat(visitor, node),
             swc_visit::Either::Right(visitor) => Fold::fold_match_pat(visitor, node),
+        }
+    }
+
+    #[inline]
+    fn fold_match_range_pat(&mut self, node: MatchRangePat) -> MatchRangePat {
+        match self {
+            swc_visit::Either::Left(visitor) => Fold::fold_match_range_pat(visitor, node),
+            swc_visit::Either::Right(visitor) => Fold::fold_match_range_pat(visitor, node),
         }
     }
 
@@ -111165,6 +111569,15 @@ where
     fn fold_match_pat(&mut self, node: MatchPat) -> MatchPat {
         if self.enabled {
             <V as Fold>::fold_match_pat(&mut self.visitor, node)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_match_range_pat(&mut self, node: MatchRangePat) -> MatchRangePat {
+        if self.enabled {
+            <V as Fold>::fold_match_range_pat(&mut self.visitor, node)
         } else {
             node
         }
@@ -115675,8 +116088,41 @@ impl<V: ?Sized + Fold> FoldWith<V> for MatchPat {
                 let _field_0 = <MatchWildcardPat as FoldWith<V>>::fold_with(_field_0, visitor);
                 MatchPat::Wildcard { 0: _field_0 }
             }
+            MatchPat::Range { 0: _field_0 } => {
+                let _field_0 = <MatchRangePat as FoldWith<V>>::fold_with(_field_0, visitor);
+                MatchPat::Range { 0: _field_0 }
+            }
             #[cfg(swc_ast_unknown)]
             _ => self,
+        }
+    }
+}
+impl<V: ?Sized + Fold> FoldWith<V> for MatchRangePat {
+    #[doc = "Calls [Fold`::fold_match_range_pat`] with `self`."]
+    fn fold_with(self, visitor: &mut V) -> Self {
+        <V as Fold>::fold_match_range_pat(visitor, self)
+    }
+
+    fn fold_children_with(self, visitor: &mut V) -> Self {
+        match self {
+            MatchRangePat {
+                span,
+                lo,
+                lo_neg,
+                hi,
+                hi_neg,
+            } => {
+                let span = { <swc_common::Span as FoldWith<V>>::fold_with(span, visitor) };
+                let lo = { <Number as FoldWith<V>>::fold_with(lo, visitor) };
+                let hi = { <Number as FoldWith<V>>::fold_with(hi, visitor) };
+                MatchRangePat {
+                    span,
+                    lo,
+                    lo_neg,
+                    hi,
+                    hi_neg,
+                }
+            }
         }
     }
 }
@@ -121503,6 +121949,19 @@ pub trait FoldAstPath {
     fn fold_match_pat(&mut self, node: MatchPat, __ast_path: &mut AstKindPath) -> MatchPat {
         <MatchPat as FoldWithAstPath<Self>>::fold_children_with_ast_path(node, self, __ast_path)
     }
+    #[doc = "Visit a node of type `MatchRangePat`.\n\nBy default, this method calls \
+             [`MatchRangePat::fold_children_with_ast_path`]. If you want to recurse, you need to \
+             call it manually."]
+    #[inline]
+    fn fold_match_range_pat(
+        &mut self,
+        node: MatchRangePat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchRangePat {
+        <MatchRangePat as FoldWithAstPath<Self>>::fold_children_with_ast_path(
+            node, self, __ast_path,
+        )
+    }
     #[doc = "Visit a node of type `MatchVariantPat`.\n\nBy default, this method calls \
              [`MatchVariantPat::fold_children_with_ast_path`]. If you want to recurse, you need to \
              call it manually."]
@@ -124588,6 +125047,15 @@ where
     }
 
     #[inline]
+    fn fold_match_range_pat(
+        &mut self,
+        node: MatchRangePat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchRangePat {
+        <V as FoldAstPath>::fold_match_range_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
     fn fold_match_variant_pat(
         &mut self,
         node: MatchVariantPat,
@@ -127019,6 +127487,15 @@ where
     #[inline]
     fn fold_match_pat(&mut self, node: MatchPat, __ast_path: &mut AstKindPath) -> MatchPat {
         <V as FoldAstPath>::fold_match_pat(&mut **self, node, __ast_path)
+    }
+
+    #[inline]
+    fn fold_match_range_pat(
+        &mut self,
+        node: MatchRangePat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchRangePat {
+        <V as FoldAstPath>::fold_match_range_pat(&mut **self, node, __ast_path)
     }
 
     #[inline]
@@ -130203,6 +130680,22 @@ where
             }
             swc_visit::Either::Right(visitor) => {
                 FoldAstPath::fold_match_pat(visitor, node, __ast_path)
+            }
+        }
+    }
+
+    #[inline]
+    fn fold_match_range_pat(
+        &mut self,
+        node: MatchRangePat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchRangePat {
+        match self {
+            swc_visit::Either::Left(visitor) => {
+                FoldAstPath::fold_match_range_pat(visitor, node, __ast_path)
+            }
+            swc_visit::Either::Right(visitor) => {
+                FoldAstPath::fold_match_range_pat(visitor, node, __ast_path)
             }
         }
     }
@@ -134503,6 +134996,19 @@ where
     fn fold_match_pat(&mut self, node: MatchPat, __ast_path: &mut AstKindPath) -> MatchPat {
         if self.enabled {
             <V as FoldAstPath>::fold_match_pat(&mut self.visitor, node, __ast_path)
+        } else {
+            node
+        }
+    }
+
+    #[inline]
+    fn fold_match_range_pat(
+        &mut self,
+        node: MatchRangePat,
+        __ast_path: &mut AstKindPath,
+    ) -> MatchRangePat {
+        if self.enabled {
+            <V as FoldAstPath>::fold_match_range_pat(&mut self.visitor, node, __ast_path)
         } else {
             node
         }
@@ -142378,8 +142884,76 @@ impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for MatchPat {
                 );
                 MatchPat::Wildcard { 0: _field_0 }
             }
+            MatchPat::Range { 0: _field_0 } => {
+                let mut __ast_path = __ast_path
+                    .with_guard(AstParentKind::MatchPat(self::fields::MatchPatField::Range));
+                let _field_0 = <MatchRangePat as FoldWithAstPath<V>>::fold_with_ast_path(
+                    _field_0,
+                    visitor,
+                    &mut *__ast_path,
+                );
+                MatchPat::Range { 0: _field_0 }
+            }
             #[cfg(swc_ast_unknown)]
             _ => self,
+        }
+    }
+}
+#[cfg(any(docsrs, feature = "path"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "path")))]
+impl<V: ?Sized + FoldAstPath> FoldWithAstPath<V> for MatchRangePat {
+    #[doc = "Calls [FoldAstPath`::fold_match_range_pat`] with `self`."]
+    fn fold_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        <V as FoldAstPath>::fold_match_range_pat(visitor, self, __ast_path)
+    }
+
+    fn fold_children_with_ast_path(self, visitor: &mut V, __ast_path: &mut AstKindPath) -> Self {
+        match self {
+            MatchRangePat {
+                span,
+                lo,
+                lo_neg,
+                hi,
+                hi_neg,
+            } => {
+                let span = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchRangePat(
+                        self::fields::MatchRangePatField::Span,
+                    ));
+                    <swc_common::Span as FoldWithAstPath<V>>::fold_with_ast_path(
+                        span,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let lo = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchRangePat(
+                        self::fields::MatchRangePatField::Lo,
+                    ));
+                    <Number as FoldWithAstPath<V>>::fold_with_ast_path(
+                        lo,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                let hi = {
+                    let mut __ast_path = __ast_path.with_guard(AstParentKind::MatchRangePat(
+                        self::fields::MatchRangePatField::Hi,
+                    ));
+                    <Number as FoldWithAstPath<V>>::fold_with_ast_path(
+                        hi,
+                        visitor,
+                        &mut *__ast_path,
+                    )
+                };
+                MatchRangePat {
+                    span,
+                    lo,
+                    lo_neg,
+                    hi,
+                    hi_neg,
+                }
+            }
         }
     }
 }
@@ -153656,6 +154230,29 @@ pub mod fields {
         Lit,
         #[doc = "Represents [`MatchPat::Wildcard`]"]
         Wildcard,
+        #[doc = "Represents [`MatchPat::Range`]"]
+        Range,
+    }
+    impl MatchRangePatField {
+        pub(crate) fn set_index(&mut self, index: usize) {
+            match self {
+                _ => swc_visit::wrong_ast_path(),
+            }
+        }
+    }
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+    #[cfg_attr(feature = "serde-impl", derive(serde::Serialize, serde::Deserialize))]
+    pub enum MatchRangePatField {
+        #[doc = "Represents [`MatchRangePat::span`]"]
+        Span,
+        #[doc = "Represents [`MatchRangePat::lo`]"]
+        Lo,
+        #[doc = "Represents [`MatchRangePat::lo_neg`]"]
+        LoNeg,
+        #[doc = "Represents [`MatchRangePat::hi`]"]
+        Hi,
+        #[doc = "Represents [`MatchRangePat::hi_neg`]"]
+        HiNeg,
     }
     impl MatchVariantPatField {
         pub(crate) fn set_index(&mut self, index: usize) {
@@ -156744,6 +157341,7 @@ pub mod fields {
         MatchExpr(MatchExprField),
         MatchLitPat(MatchLitPatField),
         MatchPat(MatchPatField),
+        MatchRangePat(MatchRangePatField),
         MatchVariantPat(MatchVariantPatField),
         MatchWildcardPat(MatchWildcardPatField),
         MemberExpr(MemberExprField),
@@ -157007,6 +157605,7 @@ pub mod fields {
                 Self::MatchExpr(v) => v.set_index(index),
                 Self::MatchLitPat(v) => v.set_index(index),
                 Self::MatchPat(v) => v.set_index(index),
+                Self::MatchRangePat(v) => v.set_index(index),
                 Self::MatchVariantPat(v) => v.set_index(index),
                 Self::MatchWildcardPat(v) => v.set_index(index),
                 Self::MemberExpr(v) => v.set_index(index),
@@ -157273,6 +157872,7 @@ pub mod fields {
         MatchExpr(&'ast MatchExpr, MatchExprField),
         MatchLitPat(&'ast MatchLitPat, MatchLitPatField),
         MatchPat(&'ast MatchPat, MatchPatField),
+        MatchRangePat(&'ast MatchRangePat, MatchRangePatField),
         MatchVariantPat(&'ast MatchVariantPat, MatchVariantPatField),
         MatchWildcardPat(&'ast MatchWildcardPat, MatchWildcardPatField),
         MemberExpr(&'ast MemberExpr, MemberExprField),
@@ -157551,6 +158151,7 @@ pub mod fields {
                 Self::MatchExpr(_, __field_kind) => __field_kind.set_index(index),
                 Self::MatchLitPat(_, __field_kind) => __field_kind.set_index(index),
                 Self::MatchPat(_, __field_kind) => __field_kind.set_index(index),
+                Self::MatchRangePat(_, __field_kind) => __field_kind.set_index(index),
                 Self::MatchVariantPat(_, __field_kind) => __field_kind.set_index(index),
                 Self::MatchWildcardPat(_, __field_kind) => __field_kind.set_index(index),
                 Self::MemberExpr(_, __field_kind) => __field_kind.set_index(index),
@@ -157867,6 +158468,7 @@ pub mod fields {
                 Self::MatchExpr(_, __field_kind) => AstParentKind::MatchExpr(*__field_kind),
                 Self::MatchLitPat(_, __field_kind) => AstParentKind::MatchLitPat(*__field_kind),
                 Self::MatchPat(_, __field_kind) => AstParentKind::MatchPat(*__field_kind),
+                Self::MatchRangePat(_, __field_kind) => AstParentKind::MatchRangePat(*__field_kind),
                 Self::MatchVariantPat(_, __field_kind) => {
                     AstParentKind::MatchVariantPat(*__field_kind)
                 }
@@ -158637,6 +159239,11 @@ impl<'ast> From<&'ast MatchLitPat> for NodeRef<'ast> {
 impl<'ast> From<&'ast MatchPat> for NodeRef<'ast> {
     fn from(node: &'ast MatchPat) -> Self {
         NodeRef::MatchPat(node)
+    }
+}
+impl<'ast> From<&'ast MatchRangePat> for NodeRef<'ast> {
+    fn from(node: &'ast MatchRangePat) -> Self {
+        NodeRef::MatchRangePat(node)
     }
 }
 impl<'ast> From<&'ast MatchVariantPat> for NodeRef<'ast> {
@@ -159527,6 +160134,7 @@ pub enum NodeRef<'ast> {
     MatchExpr(&'ast MatchExpr),
     MatchLitPat(&'ast MatchLitPat),
     MatchPat(&'ast MatchPat),
+    MatchRangePat(&'ast MatchRangePat),
     MatchVariantPat(&'ast MatchVariantPat),
     MatchWildcardPat(&'ast MatchWildcardPat),
     MemberExpr(&'ast MemberExpr),
@@ -160709,8 +161317,15 @@ impl<'ast> NodeRef<'ast> {
                 MatchPat::Wildcard(v0) => {
                     Box::new(::std::iter::once(NodeRef::MatchWildcardPat(v0)))
                 }
+                MatchPat::Range(v0) => Box::new(::std::iter::once(NodeRef::MatchRangePat(v0))),
                 _ => Box::new(::std::iter::empty::<NodeRef<'ast>>()),
             },
+            NodeRef::MatchRangePat(node) => {
+                let iterator = ::std::iter::empty::<NodeRef<'ast>>()
+                    .chain(::std::iter::once(NodeRef::Number(&node.lo)))
+                    .chain(::std::iter::once(NodeRef::Number(&node.hi)));
+                Box::new(iterator)
+            }
             NodeRef::MatchVariantPat(node) => {
                 let iterator = ::std::iter::empty::<NodeRef<'ast>>()
                     .chain(::std::iter::once(NodeRef::Ident(&node.name)))

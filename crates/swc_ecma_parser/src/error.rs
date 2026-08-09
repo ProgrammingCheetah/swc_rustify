@@ -78,6 +78,12 @@ pub enum SyntaxError {
     ZtsImplFnRemoved,
     /// zts: an impl method whose first parameter is not `self`.
     ZtsImplSelfExpected,
+    /// zts: a `lo..=hi` range bound that is not a number literal.
+    ZtsRangeBound,
+    /// zts: a bigint bound on a `lo..=hi` range pattern.
+    ZtsRangeBigInt,
+    /// zts: `lo..hi` — the exclusive range form, which zts does not have.
+    ZtsRangeExclusive,
 
     DeclNotAllowed,
 
@@ -732,16 +738,26 @@ impl SyntaxError {
                                             types of a `constrict` assertion"
                 .into(),
             SyntaxError::ZtsImplMethodExpected => "expected a method: every member of a zts \
-                                                   `impl` block is `name(self, ...): Type \
-                                                   { ... }`"
+                                                   `impl` block is `name(self, ...): Type { ... }`"
                 .into(),
             SyntaxError::ZtsImplFnRemoved => "`fn` was removed in zts 0.4.0: impl members are \
-                                              TS-style methods — write `name(self, ...): Type \
-                                              { ... }` (drop the `fn`)"
+                                              TS-style methods — write `name(self, ...): Type { \
+                                              ... }` (drop the `fn`)"
                 .into(),
-            SyntaxError::ZtsImplSelfExpected => "the first parameter of a zts impl method must \
-                                                 be `self` (it receives the value the trait is \
+            SyntaxError::ZtsImplSelfExpected => "the first parameter of a zts impl method must be \
+                                                 `self` (it receives the value the trait is \
                                                  implemented for)"
+                .into(),
+            SyntaxError::ZtsRangeBound => "the bounds of a zts range pattern must be number \
+                                           literals — `400..=499`, `-1..=1`"
+                .into(),
+            SyntaxError::ZtsRangeBigInt => "bigint bounds are not supported in zts range patterns \
+                                            in v1; use number literals (`400..=499`) or separate \
+                                            bigint arms"
+                .into(),
+            SyntaxError::ZtsRangeExclusive => "zts has no exclusive range pattern: write \
+                                               `lo..=hi` (inclusive). `..` cannot be a range \
+                                               operator without breaking `4..toString()`"
                 .into(),
             SyntaxError::TS1114 => "Duplicate label".into(),
             SyntaxError::TS1115 => "A 'continue' statement can only jump to a label of an \

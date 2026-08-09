@@ -1141,6 +1141,10 @@ pub enum MatchPat {
     /// `_` — matches anything; disables the keystone.
     #[tag("MatchWildcardPattern")]
     Wildcard(MatchWildcardPat),
+    /// `400..=499` — an inclusive integer range (zts 0.5.0). APPENDED, not
+    /// inserted: variant ordinals are the encoding.
+    #[tag("MatchRangePattern")]
+    Range(MatchRangePat),
 }
 
 /// `Variant { bindings }`
@@ -1175,6 +1179,39 @@ pub struct MatchLitPat {
     /// `-42 => ...` — the minus is part of the pattern, not the literal.
     #[cfg_attr(feature = "serde-impl", serde(default))]
     pub neg: bool,
+}
+
+/// `lo..=hi` — an INCLUSIVE integer range arm (zts 0.5.0).
+///
+/// Only the inclusive form exists. An exclusive `..` would steal
+/// `4..toString()` — valid TS whose first dot belongs to the number — so
+/// the superset promise rules it out permanently.
+///
+/// The bounds are stored as they were written (`neg` separate from the
+/// literal, exactly like [MatchLitPat]) so the formatter can round-trip
+/// `-1..=1` without re-deriving the sign, and so the zts semantic pass can
+/// tell an integer literal from an exponent form by the literal's `raw`.
+/// Everything else — bounds must be integers, `lo <= hi`, the width cap —
+/// is the zts semantic pass's job, not the grammar's.
+#[ast_node("MatchRangePattern")]
+#[derive(Eq, Hash, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct MatchRangePat {
+    pub span: Span,
+
+    /// The lower bound literal (unsigned; see `lo_neg`).
+    pub lo: Number,
+
+    /// `-1..=1` — the minus is part of the pattern, not the literal.
+    #[cfg_attr(feature = "serde-impl", serde(default))]
+    pub lo_neg: bool,
+
+    /// The upper bound literal (unsigned; see `hi_neg`).
+    pub hi: Number,
+
+    #[cfg_attr(feature = "serde-impl", serde(default))]
+    pub hi_neg: bool,
 }
 
 /// `_`

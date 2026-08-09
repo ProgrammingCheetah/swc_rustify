@@ -406,7 +406,10 @@ impl<I: Tokens> Parser<I> {
     /// type parser stops exactly at the operator.
     pub(super) fn parse_zts_constrict_decl(&mut self, start: BytePos) -> PResult<Decl> {
         if self.ctx().contains(Context::InDeclare) {
-            return Err(Error::new(self.span(start), SyntaxError::ZtsDeclareConstrict));
+            return Err(Error::new(
+                self.span(start),
+                SyntaxError::ZtsDeclareConstrict,
+            ));
         }
 
         // NON-conditional on the left: a full type parse would read
@@ -554,28 +557,45 @@ impl<I: Tokens> Parser<I> {
             syntax_error!(self, self.input().cur_span(), SyntaxError::ZtsUndefinedArm);
         }
 
-        // Literal patterns.
+        // Literal patterns, and the `lo..=hi` range pattern that starts the
+        // same way. Everything here is on the COMMITTED path (the match
+        // header already succeeded), so a malformed range is a hard error
+        // with a real span — never a silent fall back to a call expression.
         if matches!(
             cur,
-            Token::Str | Token::Num | Token::BigInt | Token::True | Token::False | Token::Null
+            Token::Str
+                | Token::Num
+                | Token::BigInt
+                | Token::True
+                | Token::False
+                | Token::Null
+                | Token::Minus
         ) {
-            let lit = self.parse_lit()?;
-            return Ok(MatchPat::Lit(MatchLitPat {
-                span: self.span(start),
-                lit,
-                neg: false,
-            }));
-        }
-        if cur == Token::Minus {
-            self.bump();
-            if !matches!(self.input().cur(), Token::Num | Token::BigInt) {
+            let neg = self.input_mut().eat(Token::Minus);
+            if neg && !matches!(self.input().cur(), Token::Num | Token::BigInt) {
                 syntax_error!(self, self.span(start), SyntaxError::TS1109);
             }
             let lit = self.parse_lit()?;
+
+            // `lo..=hi` — INCLUSIVE only. There is no exclusive form: `..`
+            // would steal `4..toString()`, whose first dot belongs to the
+            // number (see the lexer's read_number gate).
+            if self.input().is(Token::DotDotEq) {
+                return self.parse_zts_match_range_pattern(start, lit, neg);
+            }
+
+            // `400..499` fuses into `Num(400.)` + `Num(0.499)` in the
+            // lexer, so a number literal directly followed by another one
+            // is always the exclusive form someone expected to work. Give
+            // it the real diagnostic instead of "Expected '=>'".
+            if matches!(lit, Lit::Num(..)) && self.input().is(Token::Num) {
+                syntax_error!(self, self.span(start), SyntaxError::ZtsRangeExclusive);
+            }
+
             return Ok(MatchPat::Lit(MatchLitPat {
                 span: self.span(start),
                 lit,
-                neg: true,
+                neg,
             }));
         }
 
@@ -591,6 +611,49 @@ impl<I: Tokens> Parser<I> {
             span: self.span(start),
             name,
             binding,
+        }))
+    }
+
+    /// `lo..=hi` — the tail of a range pattern; `lo` is already parsed and
+    /// the cursor sits on `..=`.
+    ///
+    /// The grammar checks only what it can see: both bounds are number
+    /// literals, optionally negated. Whether they are INTEGERS, whether
+    /// `lo <= hi`, and the width cap are semantic rules with better spans
+    /// and better messages, so they live in the zts semantic pass.
+    fn parse_zts_match_range_pattern(
+        &mut self,
+        start: BytePos,
+        lo_lit: Lit,
+        lo_neg: bool,
+    ) -> PResult<MatchPat> {
+        let lo = match lo_lit {
+            Lit::Num(n) => n,
+            Lit::BigInt(b) => syntax_error!(self, b.span, SyntaxError::ZtsRangeBigInt),
+            _ => syntax_error!(self, self.span(start), SyntaxError::ZtsRangeBound),
+        };
+        self.assert_and_bump(Token::DotDotEq);
+
+        let hi_start = self.input().cur_pos();
+        let hi_neg = self.input_mut().eat(Token::Minus);
+        let hi = match self.input().cur() {
+            Token::Num => match self.parse_lit()? {
+                Lit::Num(n) => n,
+                _ => unreachable!("Token::Num parses to Lit::Num"),
+            },
+            Token::BigInt => {
+                syntax_error!(self, self.input().cur_span(), SyntaxError::ZtsRangeBigInt)
+            }
+            _ if hi_neg => syntax_error!(self, self.span(hi_start), SyntaxError::ZtsRangeBound),
+            _ => syntax_error!(self, self.input().cur_span(), SyntaxError::ZtsRangeBound),
+        };
+
+        Ok(MatchPat::Range(MatchRangePat {
+            span: self.span(start),
+            lo,
+            lo_neg,
+            hi,
+            hi_neg,
         }))
     }
 
@@ -832,6 +895,121 @@ mod tests {
         let neg = m.arms[2].pattern.as_lit().unwrap();
         assert!(neg.neg);
         assert!(m.arms[5].pattern.is_wildcard());
+    }
+
+    #[test]
+    fn range_arms_parse() {
+        // Plain, spaced, negative-on-both-sides, and the degenerate
+        // single-value range (`lo == hi` is legal).
+        let e = parse_expr(
+            "match (c) { 400..=499 => 1, 200 ..= 299 => 2, -3..=-1 => 3, 7..=7 => 4, _ => 0 }",
+        );
+        let m = e.expect_match_expr();
+        assert_eq!(m.arms.len(), 5);
+
+        let r0 = m.arms[0].pattern.as_range().unwrap();
+        assert_eq!(r0.lo.value, 400.0);
+        assert_eq!(r0.hi.value, 499.0);
+        assert!(!r0.lo_neg && !r0.hi_neg);
+
+        // Spaced form goes through read_token_dot, not read_number.
+        let r1 = m.arms[1].pattern.as_range().unwrap();
+        assert_eq!(r1.lo.value, 200.0);
+        assert_eq!(r1.hi.value, 299.0);
+
+        let r2 = m.arms[2].pattern.as_range().unwrap();
+        assert!(r2.lo_neg && r2.hi_neg);
+        assert_eq!(r2.lo.value, 3.0);
+        assert_eq!(r2.hi.value, 1.0);
+
+        let r3 = m.arms[3].pattern.as_range().unwrap();
+        assert_eq!(r3.lo.value, 7.0);
+        assert_eq!(r3.hi.value, 7.0);
+
+        assert!(m.arms[4].pattern.is_wildcard());
+    }
+
+    #[test]
+    fn range_arm_mixed_with_literal_arms_parses() {
+        // Mode consistency (range arms are literal-mode) is the semantic
+        // pass's job; the grammar just has to build both node kinds.
+        let e = parse_expr("match (c) { 404 => 1, 400..=499 => 2 }");
+        let m = e.expect_match_expr();
+        assert!(m.arms[0].pattern.is_lit());
+        assert!(m.arms[1].pattern.is_range());
+    }
+
+    #[test]
+    fn range_float_bounds_parse_and_defer_to_semantic() {
+        // "bounds must be INTEGERS" is a semantic rule (better message,
+        // original span); the grammar accepts any number literal, and the
+        // float must survive into the AST for that check to see it.
+        let e = parse_expr("match (c) { 1.5..=2 => 1 }");
+        let m = e.expect_match_expr();
+        let r = m.arms[0].pattern.as_range().unwrap();
+        assert_eq!(r.lo.value, 1.5);
+        assert_eq!(r.hi.value, 2.0);
+    }
+
+    #[test]
+    fn range_errors_are_hard_errors() {
+        // Arm parsing is past the speculation commit point, so every one of
+        // these is a real diagnostic — never a silent fall back to a call
+        // expression.
+        for src in [
+            // missing upper bound
+            "const a = match (c) { 400..= => 1 };",
+            // non-numeric upper bound
+            "const a = match (c) { 400..=\"x\" => 1 };",
+            // string lower bound
+            "const a = match (c) { \"a\"..=\"z\" => 1 };",
+            // bigint bounds (v1: dedicated diagnostic)
+            "const a = match (c) { 1n..=9n => 1 };",
+            "const a = match (c) { 1..=9n => 1 };",
+            // the exclusive form zts does not have
+            "const a = match (c) { 400..499 => 1 };",
+            // `..` alone
+            "const a = match (c) { 400.. => 1 };",
+        ] {
+            let (is_err, had_errs) = test_parser(src, zts(), |p| {
+                let res = p.parse_module();
+                let errs = p.take_errors();
+                Ok((res.is_err(), !errs.is_empty()))
+            });
+            assert!(is_err || had_errs, "must be a hard error: {src}");
+        }
+    }
+
+    #[test]
+    fn number_property_access_survives_the_range_token() {
+        // THE regression: `4..toString()` is valid TS — the first dot
+        // belongs to the number. The `..=` lexing gate must be exactly two
+        // bytes wide or this breaks.
+        let e = parse_expr("4..toString()");
+        let call = e.as_call().unwrap();
+        let member = call.callee.as_expr().unwrap().as_member().unwrap();
+        assert_eq!(member.obj.as_lit().unwrap().as_num().unwrap().value, 4.0);
+        assert_eq!(member.prop.as_ident().unwrap().sym, "toString");
+
+        // ... and inside a match arm body, where the range token lives.
+        let e = parse_expr("match (c) { 1 => 4..toString() }");
+        assert!(e.expect_match_expr().arms[0].body.is_call());
+    }
+
+    #[test]
+    fn range_token_does_not_exist_without_the_zts_flag() {
+        // Vanilla TS lexing must be bit-identical: `..=` is not a token
+        // there, so this is a syntax error, not a range.
+        let ts = Syntax::Typescript(TsSyntax {
+            zts: false,
+            ..Default::default()
+        });
+        let (is_err, had_errs) = test_parser("const a = [1..=2];", ts, |p| {
+            let res = p.parse_module();
+            let errs = p.take_errors();
+            Ok((res.is_err(), !errs.is_empty()))
+        });
+        assert!(is_err || had_errs, "`..=` must not lex outside zts");
     }
 
     #[test]
@@ -1131,7 +1309,8 @@ mod tests {
     #[test]
     fn non_empty_array_type_parses() {
         let module = test_parser(
-            "declare const xs: number[+]; declare const deep: string[+][]; declare const ro: readonly boolean[+];",
+            "declare const xs: number[+]; declare const deep: string[+][]; declare const ro: \
+             readonly boolean[+];",
             zts(),
             |p| p.parse_module(),
         );
@@ -1157,10 +1336,7 @@ mod tests {
         let TsType::TsArrayType(outer) = &*ann.type_ann else {
             panic!("expected array of non-empty");
         };
-        assert!(matches!(
-            &*outer.elem_type,
-            TsType::ZtsNonEmptyArray(..)
-        ));
+        assert!(matches!(&*outer.elem_type, TsType::ZtsNonEmptyArray(..)));
     }
 
     #[test]
@@ -1213,11 +1389,9 @@ mod tests {
             ("constrict A != B;", ZtsConstrictOp::NotEq),
             ("constrict Api extends Base;", ZtsConstrictOp::Extends),
         ] {
-            let module = test_parser(
-                Box::leak(src.to_string().into_boxed_str()),
-                zts(),
-                |p| p.parse_module(),
-            );
+            let module = test_parser(Box::leak(src.to_string().into_boxed_str()), zts(), |p| {
+                p.parse_module()
+            });
             let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
             let c = decl.as_zts_constrict().unwrap();
             assert_eq!(c.op, op, "{src}");
@@ -1287,7 +1461,8 @@ mod tests {
         // Traits v2: type args + comma-header multi-instantiation, and an
         // associated function (no self).
         let module = test_parser(
-            "impl From<string>, From<number> for Status { from(value: string | number): Status { return value as unknown as Status; } }",
+            "impl From<string>, From<number> for Status { from(value: string | number): Status { \
+             return value as unknown as Status; } }",
             zts(),
             |p| p.parse_module(),
         );
@@ -1325,7 +1500,8 @@ mod tests {
     #[test]
     fn impl_decl_multi_method_and_params_parse() {
         let module = test_parser(
-            "impl Ops for Shape {\n  area(self): number { return 1; }\n  scaled(self, k: number): number { return k; }\n}",
+            "impl Ops for Shape {\n  area(self): number { return 1; }\n  scaled(self, k: number): \
+             number { return k; }\n}",
             zts(),
             |p| p.parse_module(),
         );
@@ -1377,14 +1553,16 @@ mod tests {
     fn impl_annotated_self_is_an_error() {
         // Traits v2 made self OPTIONAL (associated functions); what stays
         // an error is annotating it — the lowering owns that annotation.
-        let (is_err, had) =
-            parse_module_errs("impl D for S { f(self: S): number { return 1; } }");
+        let (is_err, had) = parse_module_errs("impl D for S { f(self: S): number { return 1; } }");
         assert!(is_err || had, "annotated self must error");
     }
 
     #[test]
     fn impl_non_method_member_is_an_error() {
-        for src in ["impl D for S { x: number }", "impl D for S { const x = 1; }"] {
+        for src in [
+            "impl D for S { x: number }",
+            "impl D for S { const x = 1; }",
+        ] {
             let src: &'static str = Box::leak(src.to_string().into_boxed_str());
             let (is_err, had) = parse_module_errs(src);
             assert!(is_err || had, "{src:?} must error (methods only)");
@@ -1394,9 +1572,11 @@ mod tests {
     #[test]
     fn impl_fn_member_gets_migration_error() {
         // v1 (0.3.x) syntax: dedicated diagnostic, not a generic one.
-        let (is_err, had) =
-            parse_module_errs("impl D for S { fn f(self): number { return 1; } }");
-        assert!(is_err || had, "v1 `fn` member must error with migration hint");
+        let (is_err, had) = parse_module_errs("impl D for S { fn f(self): number { return 1; } }");
+        assert!(
+            is_err || had,
+            "v1 `fn` member must error with migration hint"
+        );
     }
 
     #[test]

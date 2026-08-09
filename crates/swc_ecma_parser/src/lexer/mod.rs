@@ -1193,7 +1193,15 @@ impl<'a> Lexer<'a> {
         has_underscore |= lazy_integer.has_underscore;
         // At this point, number cannot be an octal literal.
 
-        let has_dot = self.cur() == Some(b'.');
+        // zts: `400..=499` must lex as `400` `..=` `499`, so the number may
+        // NOT swallow the first dot. The gate is deliberately the narrowest
+        // possible — exactly the two bytes `.=` after this dot — because
+        // `4..toString()` is valid TS whose first dot IS part of the number
+        // (there is a regression test for it) and must keep working.
+        let zts_range_follows = self.syntax().zts()
+            && self.input().peek() == Some(b'.')
+            && self.input().peek_ahead() == Some(b'=');
+        let has_dot = self.cur() == Some(b'.') && !zts_range_follows;
         //  `0.a`, `08.a`, `102.a` are invalid.
         //
         // `.1.a`, `.1e-4.a` are valid,
@@ -2105,9 +2113,19 @@ impl<'a> Lexer<'a> {
 
         self.bump(1); // 1st `.`
 
-        if next == b'.' && self.input().peek() == Some(b'.') {
-            self.bump(2); // 2nd and 3rd `.`
-            return Ok(Token::DotDotDot);
+        if next == b'.' {
+            if self.input().peek() == Some(b'.') {
+                self.bump(2); // 2nd and 3rd `.`
+                return Ok(Token::DotDotDot);
+            }
+            // zts `..=` (inclusive range pattern). Gated on the zts flag so
+            // vanilla TS lexing is bit-identical. This branch also covers the
+            // SPACED form (`400 ..= 499`), where read_number never sees the
+            // dots at all.
+            if self.syntax().zts() && self.input().peek() == Some(b'=') {
+                self.bump(2); // 2nd `.` and `=`
+                return Ok(Token::DotDotEq);
+            }
         }
 
         Ok(Token::Dot)

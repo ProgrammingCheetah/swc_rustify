@@ -89,6 +89,28 @@ pub enum Token {
     Arrow,
     /// `...`
     DotDotDot,
+    /// `..=` — zts inclusive range pattern (`400..=499 =>`). Lexed only
+    /// under the zts syntax flag; vanilla TS lexing is bit-identical
+    /// without it.
+    ///
+    /// POSITION IS LOAD-BEARING. `Token` is `#[repr(u8)]` and several hot
+    /// classifiers below are ORDINAL RANGE checks over these variants, so
+    /// "compile errors are the checklist" does NOT hold for a new token —
+    /// inserting inside a range would silently reclassify it. This slot
+    /// (immediately after `DotDotDot`, immediately before the compound
+    /// operators) sits OUTSIDE every ordinal range while leaving all of
+    /// them contiguous:
+    ///   - `is_keyword`                    Await..=Module        (unaffected)
+    ///   - `is_known_ident`                Abstract..=Target     (unaffected)
+    ///   - `is_bin_op`                     EqEq..=NullishCoalescing,
+    ///     Plus..=Ampersand      (unaffected)
+    ///   - `needs_unary_expr_prefix_parse` Bang..=Minus, PlusPlus..=MinusMinus
+    ///     (shifts by one, stays contiguous, excludes DotDotEq)
+    ///   - `is_assign_op`                  PlusEq..=NullishEq    (shifts by
+    ///     one, stays contiguous)
+    /// `before_expr` and `starts_expr` are `match`-based with `_`
+    /// fallthroughs, so both are registered EXPLICITLY below.
+    DotDotEq,
 
     // Compound operators
     /// `++`
@@ -615,6 +637,11 @@ impl Token {
             | Self::Delete
             | Self::Arrow
             | Self::DotDotDot
+            // zts `..=`: an operand (the upper bound) always follows, so the
+            // lexer must stay in "expect expression" state. Registered
+            // explicitly — this arm has a `_` fallthrough, so a missing
+            // registration would compile fine and misbehave.
+            | Self::DotDotEq
             | Self::Bang
             | Self::LParen
             | Self::LBrace
@@ -672,6 +699,10 @@ impl Token {
                 | Self::False
                 | Self::BackQuote
         ) || self.is_known_ident()
+        // zts `..=` is deliberately NOT here: it can never START an
+        // expression, only join two range bounds. Recorded explicitly
+        // because this arm has a `_` fallthrough (an omission would be
+        // indistinguishable from an oversight).
     }
 
     #[inline(always)]
@@ -734,6 +765,7 @@ impl Display for Token {
             Token::BackQuote => "`",
             Token::Arrow => "=>",
             Token::DotDotDot => "...",
+            Token::DotDotEq => "..=",
             Token::PlusPlus => "++",
             Token::MinusMinus => "--",
             Token::PlusEq => "+=",

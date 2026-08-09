@@ -936,6 +936,14 @@ pub trait VisitHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_match_pat(&mut self, node: &MatchPat, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchRangePat` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_range_pat(&mut self, node: &MatchRangePat, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchRangePat` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_range_pat(&mut self, node: &MatchRangePat, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `MatchVariantPat` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -4116,6 +4124,18 @@ where
     fn exit_match_pat(&mut self, node: &MatchPat, ctx: &mut C) {
         self.second.exit_match_pat(node, ctx);
         self.first.exit_match_pat(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_range_pat(&mut self, node: &MatchRangePat, ctx: &mut C) {
+        self.first.enter_match_range_pat(node, ctx);
+        self.second.enter_match_range_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_range_pat(&mut self, node: &MatchRangePat, ctx: &mut C) {
+        self.second.exit_match_range_pat(node, ctx);
+        self.first.exit_match_range_pat(node, ctx);
     }
 
     #[inline]
@@ -8480,6 +8500,22 @@ where
         match self {
             Self::Left(hook) => hook.exit_match_pat(node, ctx),
             Self::Right(hook) => hook.exit_match_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_range_pat(&mut self, node: &MatchRangePat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_range_pat(node, ctx),
+            Self::Right(hook) => hook.enter_match_range_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_range_pat(&mut self, node: &MatchRangePat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_range_pat(node, ctx),
+            Self::Right(hook) => hook.exit_match_range_pat(node, ctx),
         }
     }
 
@@ -13466,6 +13502,20 @@ where
     }
 
     #[inline]
+    fn enter_match_range_pat(&mut self, node: &MatchRangePat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_range_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_range_pat(&mut self, node: &MatchRangePat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_range_pat(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_match_variant_pat(&mut self, node: &MatchVariantPat, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_match_variant_pat(node, ctx);
@@ -17375,6 +17425,14 @@ impl<H: VisitHook<C>, C> Visit for VisitWithHook<H, C> {
         self.hook.exit_match_pat(node, &mut self.context);
     }
 
+    #[doc = "Visits a node of type `MatchRangePat` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_match_range_pat(&mut self, node: &MatchRangePat) {
+        self.hook.enter_match_range_pat(node, &mut self.context);
+        node.visit_children_with(self);
+        self.hook.exit_match_range_pat(node, &mut self.context);
+    }
+
     #[doc = "Visits a node of type `MatchVariantPat` using the hook's enter and exit methods."]
     #[inline]
     fn visit_match_variant_pat(&mut self, node: &MatchVariantPat) {
@@ -20099,6 +20157,14 @@ pub trait VisitMutHook<C> {
     #[inline]
     #[allow(unused_variables)]
     fn exit_match_pat(&mut self, node: &mut MatchPat, ctx: &mut C) {}
+    #[doc = "Called when entering a node of type `MatchRangePat` before visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn enter_match_range_pat(&mut self, node: &mut MatchRangePat, ctx: &mut C) {}
+    #[doc = "Called when exiting a node of type `MatchRangePat` after visiting its children."]
+    #[inline]
+    #[allow(unused_variables)]
+    fn exit_match_range_pat(&mut self, node: &mut MatchRangePat, ctx: &mut C) {}
     #[doc = "Called when entering a node of type `MatchVariantPat` before visiting its children."]
     #[inline]
     #[allow(unused_variables)]
@@ -23323,6 +23389,18 @@ where
     fn exit_match_pat(&mut self, node: &mut MatchPat, ctx: &mut C) {
         self.second.exit_match_pat(node, ctx);
         self.first.exit_match_pat(node, ctx);
+    }
+
+    #[inline]
+    fn enter_match_range_pat(&mut self, node: &mut MatchRangePat, ctx: &mut C) {
+        self.first.enter_match_range_pat(node, ctx);
+        self.second.enter_match_range_pat(node, ctx);
+    }
+
+    #[inline]
+    fn exit_match_range_pat(&mut self, node: &mut MatchRangePat, ctx: &mut C) {
+        self.second.exit_match_range_pat(node, ctx);
+        self.first.exit_match_range_pat(node, ctx);
     }
 
     #[inline]
@@ -27723,6 +27801,22 @@ where
         match self {
             Self::Left(hook) => hook.exit_match_pat(node, ctx),
             Self::Right(hook) => hook.exit_match_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn enter_match_range_pat(&mut self, node: &mut MatchRangePat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.enter_match_range_pat(node, ctx),
+            Self::Right(hook) => hook.enter_match_range_pat(node, ctx),
+        }
+    }
+
+    #[inline]
+    fn exit_match_range_pat(&mut self, node: &mut MatchRangePat, ctx: &mut C) {
+        match self {
+            Self::Left(hook) => hook.exit_match_range_pat(node, ctx),
+            Self::Right(hook) => hook.exit_match_range_pat(node, ctx),
         }
     }
 
@@ -32745,6 +32839,20 @@ where
     }
 
     #[inline]
+    fn enter_match_range_pat(&mut self, node: &mut MatchRangePat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.enter_match_range_pat(node, ctx);
+        }
+    }
+
+    #[inline]
+    fn exit_match_range_pat(&mut self, node: &mut MatchRangePat, ctx: &mut C) {
+        if let Some(hook) = self {
+            hook.exit_match_range_pat(node, ctx);
+        }
+    }
+
+    #[inline]
     fn enter_match_variant_pat(&mut self, node: &mut MatchVariantPat, ctx: &mut C) {
         if let Some(hook) = self {
             hook.enter_match_variant_pat(node, ctx);
@@ -36680,6 +36788,14 @@ impl<H: VisitMutHook<C>, C> VisitMut for VisitMutWithHook<H, C> {
         self.hook.enter_match_pat(node, &mut self.context);
         node.visit_mut_children_with(self);
         self.hook.exit_match_pat(node, &mut self.context);
+    }
+
+    #[doc = "Visits a node of type `MatchRangePat` using the hook's enter and exit methods."]
+    #[inline]
+    fn visit_mut_match_range_pat(&mut self, node: &mut MatchRangePat) {
+        self.hook.enter_match_range_pat(node, &mut self.context);
+        node.visit_mut_children_with(self);
+        self.hook.exit_match_range_pat(node, &mut self.context);
     }
 
     #[doc = "Visits a node of type `MatchVariantPat` using the hook's enter and exit methods."]
