@@ -606,10 +606,18 @@ impl<I: Tokens> Parser<I> {
 
             // `400..499` fuses into `Num(400.)` + `Num(0.499)` in the
             // lexer, so a number literal directly followed by another one
-            // is always the exclusive form someone expected to work. Give
-            // it the real diagnostic instead of "Expected '=>'".
-            if matches!(lit, Lit::Num(..)) && self.input().is(Token::Num) {
-                syntax_error!(self, self.span(start), SyntaxError::ZtsRangeExclusive);
+            // is the exclusive form someone expected to work. Give it the
+            // real diagnostic instead of "Expected '=>'".
+            //
+            // ADJACENCY IS REQUIRED: the two tokens must touch in the
+            // source (`400..499`, no gap). Separated numbers (`400 499`,
+            // `400\n499`) are some other mistake entirely, and claiming
+            // they are a range would send the author down the wrong path —
+            // they fall through to the plain "Expected '=>'".
+            if let Lit::Num(n) = &lit {
+                if self.input().is(Token::Num) && self.input().cur_span().lo == n.span.hi {
+                    syntax_error!(self, self.span(start), SyntaxError::ZtsRangeExclusive);
+                }
             }
 
             return Ok(MatchPat::Lit(MatchLitPat {
@@ -997,6 +1005,26 @@ mod tests {
                 Ok((res.is_err(), !errs.is_empty()))
             });
             assert!(is_err || had_errs, "must be a hard error: {src}");
+        }
+    }
+
+    #[test]
+    fn exclusive_range_diagnostic_needs_source_adjacency() {
+        // `400..499` fuses into two number tokens that TOUCH — that is the
+        // exclusive form, and it gets the dedicated message.
+        let (is_err, had) = parse_module_errs("const a = match (c) { 400..499 => 1 };");
+        assert!(is_err || had);
+
+        // Separated numbers are a different mistake; claiming they are a
+        // range would misdirect. They must still error, just not as a
+        // range (the parser falls through to "Expected '=>'").
+        for src in [
+            "const a = match (c) { 400 499 => 1 };",
+            "const a = match (c) { 400\n499 => 1 };",
+        ] {
+            let src: &'static str = Box::leak(src.to_string().into_boxed_str());
+            let (is_err, had) = parse_module_errs(src);
+            assert!(is_err || had, "{src:?} must still be an error");
         }
     }
 
