@@ -771,6 +771,22 @@ mod tests {
         })
     }
 
+    /// Parses a module and returns the MESSAGE of every diagnostic (hard
+    /// or recoverable), so a test can assert which one fired rather than
+    /// only that something did.
+    fn parse_module_error_msgs(src: &'static str) -> Vec<String> {
+        test_parser(src, zts(), |p| {
+            let mut msgs = Vec::new();
+            if let Err(e) = p.parse_module() {
+                msgs.push(e.kind().msg().to_string());
+            }
+            for e in p.take_errors() {
+                msgs.push(e.kind().msg().to_string());
+            }
+            Ok(msgs)
+        })
+    }
+
     #[test]
     fn if_expr_basic() {
         let e = parse_expr("if (b === 0) { 3 } else { 4 }");
@@ -1010,21 +1026,39 @@ mod tests {
 
     #[test]
     fn exclusive_range_diagnostic_needs_source_adjacency() {
+        // Assert the SPECIFIC diagnostic both ways: "it errored" is true
+        // with or without the adjacency check, so it cannot detect a
+        // regression here. (Verified by momentary revert: dropping the
+        // adjacency condition makes the `400 499` case report the
+        // exclusive-range message and this test fail.)
+
         // `400..499` fuses into two number tokens that TOUCH — that is the
         // exclusive form, and it gets the dedicated message.
-        let (is_err, had) = parse_module_errs("const a = match (c) { 400..499 => 1 };");
-        assert!(is_err || had);
+        let msgs = parse_module_error_msgs("const a = match (c) { 400..499 => 1 };");
+        assert!(
+            msgs.iter()
+                .any(|m| m.contains("no exclusive range pattern")),
+            "adjacent numbers must get the exclusive-range diagnostic, got {msgs:?}"
+        );
 
         // Separated numbers are a different mistake; claiming they are a
-        // range would misdirect. They must still error, just not as a
-        // range (the parser falls through to "Expected '=>'").
+        // range would misdirect. They must error as the generic
+        // "Expected \'=>\'", never as a range.
         for src in [
             "const a = match (c) { 400 499 => 1 };",
             "const a = match (c) { 400\n499 => 1 };",
         ] {
             let src: &'static str = Box::leak(src.to_string().into_boxed_str());
-            let (is_err, had) = parse_module_errs(src);
-            assert!(is_err || had, "{src:?} must still be an error");
+            let msgs = parse_module_error_msgs(src);
+            assert!(!msgs.is_empty(), "{src:?} must still be an error");
+            assert!(
+                msgs.iter().all(|m| !m.contains("exclusive range")),
+                "{src:?} must NOT be reported as a range, got {msgs:?}"
+            );
+            assert!(
+                msgs.iter().any(|m| m.contains("Expected \'=>\'")),
+                "{src:?} must get the generic arrow diagnostic, got {msgs:?}"
+            );
         }
     }
 
