@@ -229,11 +229,18 @@ impl<I: Tokens> Parser<I> {
         })))
     }
 
-    /// `union Level = 'info' | 'warn';`
+    /// `union Level = 'info' | 'warn';`, `union Status = 200 | 404;`
     ///
     /// Same commit rule as `newtype`: the caller (parse_ts_decl) consumed
     /// the `union` word with a same-line identifier following. Members are
-    /// string literals only in v1; a leading `|` is allowed, Rust-style.
+    /// string OR number literals (0.5.0; a member set may mix the two —
+    /// the lowering picks the guard's parameter type from it), with an
+    /// optional `-` on a number. A leading `|` is allowed, Rust-style.
+    ///
+    /// bigint members get their own diagnostic rather than the generic
+    /// "not a union member": `1n` is a plausible thing to try, and the
+    /// reason it is out (the `values` tuple and the guard would have to
+    /// carry a third primitive) is worth saying.
     pub(super) fn parse_zts_union_decl(&mut self, start: BytePos) -> PResult<Decl> {
         if self.ctx().contains(Context::InDeclare) {
             return Err(Error::new(self.span(start), SyntaxError::ZtsDeclareUnion));
@@ -246,19 +253,32 @@ impl<I: Tokens> Parser<I> {
         // Optional leading `|`.
         let _ = self.input_mut().eat(Token::Pipe);
 
-        let mut members: Vec<Str> = Vec::new();
+        let mut members: Vec<ZtsUnionMember> = Vec::new();
         loop {
-            if !self.input().is(Token::Str) {
-                return Err(Error::new(
-                    self.input().cur_span(),
-                    SyntaxError::ZtsUnionMember,
-                ));
+            let member_start = self.input().cur_pos();
+            let neg = self.input_mut().eat(Token::Minus);
+            match self.input().cur() {
+                Token::Num => {}
+                Token::Str if !neg => {}
+                Token::BigInt => {
+                    return Err(Error::new(
+                        self.input().cur_span(),
+                        SyntaxError::ZtsUnionBigIntMember,
+                    ));
+                }
+                _ => {
+                    return Err(Error::new(
+                        self.input().cur_span(),
+                        SyntaxError::ZtsUnionMember,
+                    ));
+                }
             }
             let lit = self.parse_lit()?;
-            let Lit::Str(s) = lit else {
-                unreachable!("Token::Str parses to Lit::Str")
-            };
-            members.push(s);
+            members.push(ZtsUnionMember {
+                span: self.span(member_start),
+                lit,
+                neg,
+            });
             if !self.input_mut().eat(Token::Pipe) {
                 break;
             }
@@ -1266,12 +1286,43 @@ mod tests {
         let u = decl.as_zts_union().unwrap();
         assert_eq!(u.ident.sym, "Level");
         assert_eq!(u.members.len(), 3);
-        assert_eq!(u.members[0].value, "info");
+        assert_eq!(u.members[0].lit.as_str().unwrap().value, "info");
+        assert!(!u.members[0].neg);
 
         // Leading pipe, Rust-style.
         let module = test_parser("union L = | 'a' | 'b';", zts(), |p| p.parse_module());
         let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
         assert_eq!(decl.as_zts_union().unwrap().members.len(), 2);
+    }
+
+    #[test]
+    fn numeric_and_mixed_union_members_parse() {
+        // All-numeric (0.5.0): the shape range patterns need in order to
+        // have a closed vocabulary to be exhaustive over.
+        let module = test_parser("union HttpStatus = 200 | 404 | 500;", zts(), |p| {
+            p.parse_module()
+        });
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let u = decl.as_zts_union().unwrap();
+        assert_eq!(u.members.len(), 3);
+        assert_eq!(u.members[0].lit.as_num().unwrap().value, 200.0);
+        assert!(!u.members[1].neg);
+
+        // Negative members: the sign rides on the MEMBER, not the literal,
+        // so the formatter prints it back verbatim.
+        let module = test_parser("union Offset = -1 | 0 | 1;", zts(), |p| p.parse_module());
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let u = decl.as_zts_union().unwrap();
+        assert!(u.members[0].neg);
+        assert_eq!(u.members[0].lit.as_num().unwrap().value, 1.0);
+        assert!(!u.members[2].neg);
+
+        // Mixed string/number in one vocabulary.
+        let module = test_parser("union Ans = 42 | 'unknown';", zts(), |p| p.parse_module());
+        let decl = module.body[0].as_stmt().unwrap().as_decl().unwrap();
+        let u = decl.as_zts_union().unwrap();
+        assert!(u.members[0].lit.is_num());
+        assert!(u.members[1].lit.is_str());
     }
 
     #[test]
@@ -1600,16 +1651,22 @@ mod tests {
     }
 
     #[test]
-    fn union_non_string_member_is_an_error() {
+    fn union_non_literal_member_is_an_error() {
         for src in [
-            "union L = 1 | 2;",
-            "union L = 'a' | 2;",
             "union L = 'a' | true;",
             "union L = string;",
+            "union L = 'a' | null;",
+            // bigint members get their own diagnostic, but still error
+            "union L = 1n | 2n;",
+            // a `-` may only precede a NUMBER
+            "union L = -'a';",
         ] {
             let src: &'static str = Box::leak(src.to_string().into_boxed_str());
             let (is_err, had) = parse_module_errs(src);
-            assert!(is_err || had, "{src:?} must error (string literals only)");
+            assert!(
+                is_err || had,
+                "{src:?} must error (string and number literals only)"
+            );
         }
     }
 

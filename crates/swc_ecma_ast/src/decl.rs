@@ -7,7 +7,7 @@ use crate::{
     expr::Expr,
     function::Function,
     ident::{Ident, IdentName},
-    lit::Str,
+    lit::{Lit, Null},
     pat::Pat,
     typescript::{
         TsEnumDecl, TsInterfaceDecl, TsModuleDecl, TsType, TsTypeAliasDecl,
@@ -517,10 +517,10 @@ impl Take for ZtsImplMethod {
     }
 }
 
-/// zts extension: `union Level = 'a' | 'b';`
+/// zts extension: `union Level = 'a' | 'b';`, `union Status = 200 | 404;`
 ///
-/// Never reaches codegen — the zts compiler lowers it to a string-literal
-/// union type alias plus a `{ values, has }` const of the same name.
+/// Never reaches codegen — the zts compiler lowers it to a literal union
+/// type alias plus a `{ values, has }` const of the same name.
 #[ast_node("ZtsUnionDeclaration")]
 #[derive(Eq, Hash, EqIgnoreSpan, Default)]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
@@ -532,11 +532,39 @@ pub struct ZtsUnionDecl {
     pub ident: Ident,
 
     #[cfg_attr(feature = "serde-impl", serde(default))]
-    pub members: Vec<Str>,
+    pub members: Vec<ZtsUnionMember>,
 }
 
 impl Take for ZtsUnionDecl {
     fn dummy() -> Self {
         Default::default()
+    }
+}
+
+/// One member of a zts `union` — a string or number literal, with the sign
+/// kept OUT of the literal (0.5.0), exactly like [MatchLitPat]: the
+/// formatter prints `-1` from the `neg` flag, so a negative member round-
+/// trips without the printer re-deriving the sign from a value.
+#[ast_node("ZtsUnionMember")]
+#[derive(Eq, Hash, EqIgnoreSpan)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
+#[cfg_attr(feature = "shrink-to-fit", derive(shrink_to_fit::ShrinkToFit))]
+pub struct ZtsUnionMember {
+    pub span: Span,
+
+    pub lit: Lit,
+
+    /// `union Offset = -1 | 0 | 1;`
+    #[cfg_attr(feature = "serde-impl", serde(default))]
+    pub neg: bool,
+}
+
+impl Take for ZtsUnionMember {
+    fn dummy() -> Self {
+        ZtsUnionMember {
+            span: DUMMY_SP,
+            lit: Lit::Null(Null { span: DUMMY_SP }),
+            neg: false,
+        }
     }
 }

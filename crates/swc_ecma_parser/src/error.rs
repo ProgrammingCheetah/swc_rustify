@@ -64,7 +64,7 @@ pub enum SyntaxError {
     ZtsUndefinedArm,
     /// zts: `declare union`.
     ZtsDeclareUnion,
-    /// zts: a union member that is not a string literal.
+    /// zts: a union member that is not a string or number literal.
     ZtsUnionMember,
     /// zts: `declare impl`.
     ZtsDeclareImpl,
@@ -84,6 +84,8 @@ pub enum SyntaxError {
     ZtsRangeBigInt,
     /// zts: `lo..hi` — the exclusive range form, which zts does not have.
     ZtsRangeExclusive,
+    /// zts: a bigint `union` member.
+    ZtsUnionBigIntMember,
 
     DeclNotAllowed,
 
@@ -723,8 +725,14 @@ impl SyntaxError {
                                              lowered shape instead (a literal-union type alias + \
                                              a values/has object)"
                 .into(),
-            SyntaxError::ZtsUnionMember => "zts `union` members must be string literals in v1 \
-                                            (`union Level = 'info' | 'warn';`)"
+            SyntaxError::ZtsUnionMember => "zts `union` members must be string or number literals \
+                                            (`union Level = 'info' | 'warn';`, `union Status = \
+                                            200 | 404;`)"
+                .into(),
+            SyntaxError::ZtsUnionBigIntMember => "bigint `union` members are not supported: the \
+                                                  `values` tuple and the `has` guard carry \
+                                                  strings and numbers only. Use a number member, \
+                                                  or a plain type alias for a bigint vocabulary."
                 .into(),
             SyntaxError::ZtsDeclareImpl => "`declare impl` is not supported in zts; impls lower \
                                             into the type's factory const — declare that shape \
